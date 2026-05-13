@@ -3,6 +3,47 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
+import Confetti from "@/app/components/Confetti";
+
+function playNote(ctx: AudioContext, freq: number, start: number, dur: number, vol = 0.25) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, ctx.currentTime + start);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+  osc.start(ctx.currentTime + start);
+  osc.stop(ctx.currentTime + start + dur + 0.05);
+}
+
+function playCelebrationSound(type: "chapter" | "book" | "section" | "tanakh") {
+  try {
+    const ctx = new AudioContext();
+    if (type === "chapter") {
+      playNote(ctx, 523.25, 0,    0.25);
+      playNote(ctx, 659.25, 0.18, 0.3);
+    } else if (type === "book") {
+      playNote(ctx, 523.25, 0,    0.25);
+      playNote(ctx, 659.25, 0.15, 0.25);
+      playNote(ctx, 783.99, 0.3,  0.4);
+    } else if (type === "section") {
+      playNote(ctx, 523.25, 0,    0.2);
+      playNote(ctx, 659.25, 0.15, 0.2);
+      playNote(ctx, 783.99, 0.3,  0.2);
+      playNote(ctx, 1046.5, 0.48, 0.55, 0.3);
+    } else {
+      playNote(ctx, 523.25, 0,    0.2);
+      playNote(ctx, 659.25, 0.12, 0.2);
+      playNote(ctx, 783.99, 0.24, 0.2);
+      playNote(ctx, 1046.5, 0.36, 0.2);
+      playNote(ctx, 1318.5, 0.5,  0.7, 0.3);
+      playNote(ctx, 1046.5, 0.5,  0.7, 0.15);
+      playNote(ctx, 783.99, 0.5,  0.7, 0.1);
+    }
+  } catch { /* AudioContext not available */ }
+}
 
 const SECTIONS = ["תורה", "נביאים", "כתובים"] as const;
 
@@ -125,15 +166,19 @@ export default function TanakhPage() {
       setCompletedChapters((prev) => new Set([...prev, selectedChapter]));
       if (data.tanakhJustCompleted) {
         setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+        playCelebrationSound("tanakh");
         setCelebration({ type: "tanakh", count: data.completedBooksCount });
       } else if (data.sectionJustCompleted) {
         setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+        playCelebrationSound("section");
         setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount });
       } else if (data.bookJustCompleted) {
         setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+        playCelebrationSound("book");
         setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
       } else {
         const newCompleted = new Set([...completedChapters, selectedChapter]);
+        playCelebrationSound("chapter");
         setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
       }
     }
@@ -154,15 +199,19 @@ export default function TanakhPage() {
 
     if (data.tanakhJustCompleted) {
       setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+      playCelebrationSound("tanakh");
       setCelebration({ type: "tanakh", count: data.completedBooksCount });
     } else if (data.sectionJustCompleted) {
       setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+      playCelebrationSound("section");
       setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount });
     } else if (data.bookJustCompleted) {
       setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+      playCelebrationSound("book");
       setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
     } else {
       const newCompleted = new Set([...completedChapters, selectedChapter]);
+      playCelebrationSound("chapter");
       setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
     }
   }
@@ -225,10 +274,11 @@ export default function TanakhPage() {
       {/* Celebration modal */}
       {celebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center">
+          <div className="relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-modal-enter overflow-hidden">
+            <Confetti type={celebration.type} />
             {celebration.type === "tanakh" ? (
               <>
-                <div className="text-6xl mb-4">🎉</div>
+                <div className="text-6xl mb-4 animate-emoji-tada inline-block">🎉</div>
                 <h2 className="text-2xl font-bold text-stone-800 mb-3">כל הכבוד!</h2>
                 <p className="text-stone-700 font-semibold text-lg mb-2">סיימת את כל התנ״ך!</p>
                 <p className="text-stone-500 text-sm italic mb-6">
@@ -251,7 +301,7 @@ export default function TanakhPage() {
               </>
             ) : celebration.type === "section" ? (
               <>
-                <div className="text-5xl mb-4">🌟</div>
+                <div className="text-5xl mb-4 animate-emoji-spin inline-block">🌟</div>
                 <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
                 <p className="text-stone-600 mb-2">
                   סיימת את <span className="font-bold text-amber-700">{celebration.sectionName}</span>!
@@ -268,7 +318,7 @@ export default function TanakhPage() {
               </>
             ) : celebration.type === "book" ? (
               <>
-                <div className="text-5xl mb-4">🏆</div>
+                <div className="text-5xl mb-4 animate-emoji-bounce inline-block">🏆</div>
                 <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
                 <p className="text-stone-600 mb-2">
                   סיימת את ספר {celebration.bookName}!<br />
@@ -284,7 +334,7 @@ export default function TanakhPage() {
               </>
             ) : (
               <>
-                <div className="text-5xl mb-4">⭐</div>
+                <div className="text-5xl mb-4 animate-emoji-pulse-glow inline-block">⭐</div>
                 <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
                 <p className="text-stone-600 mb-2">
                   סיימת את פרק {toHebrewNumeral(celebration.chapterNum!)} ב{celebration.bookName}!<br />
