@@ -132,12 +132,17 @@ export default function TanakhPage() {
     });
   }
 
-  function handleRandom() {
+  function handleRandomTanakh() {
     const book = randomBook();
     const chapter = randomChapter(book);
     setSelectedBook(book);
     setSelectedChapter(chapter);
     setActiveSection(book.section);
+  }
+
+  function handleRandomInBook() {
+    const chapter = randomChapter(selectedBook);
+    setSelectedChapter(chapter);
   }
 
   function selectBook(book: typeof TANAKH_BOOKS[0]) {
@@ -199,12 +204,20 @@ export default function TanakhPage() {
               <a href="/login" className="text-amber-600 text-sm hover:underline">התחבר לשמירת התקדמות</a>
             )}
           </div>
-          <button
-            onClick={handleRandom}
-            className="bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
-          >
-            פרק אקראי
-          </button>
+          <div className="flex flex-col gap-1 items-end">
+            <button
+              onClick={handleRandomTanakh}
+              className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+            >
+              אקראי מכל התנ״ך
+            </button>
+            <button
+              onClick={handleRandomInBook}
+              className="bg-stone-600 hover:bg-stone-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+            >
+              אקראי מ{selectedBook.he}
+            </button>
+          </div>
         </div>
 
         {/* Selector */}
