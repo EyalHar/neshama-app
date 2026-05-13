@@ -461,7 +461,7 @@ export default function TanakhPage() {
                   } ${session ? "cursor-pointer" : "cursor-default"}`}
                 >
                   <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
-                    {i + 1}
+                    {toHebrewNumeral(i + 1)}
                   </span>
                   <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
                     {verse}
