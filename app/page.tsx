@@ -10,6 +10,14 @@ const FEATURES = [
     labelColor: "text-stone-700",
   },
   {
+    href: "/quiz",
+    title: "בחן את עצמך",
+    description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",
+    icon: "🎯",
+    color: "from-indigo-50 to-blue-50 border-indigo-200 hover:border-indigo-400",
+    labelColor: "text-indigo-700",
+  },
+  {
     href: "/neshama",
     title: "נשמה",
     description: "שתף מה עובר עליך וקבל פסוקים מהתנ״ך שמדברים ישירות לליבך",
@@ -50,18 +58,16 @@ export default function HomePage() {
             </Link>
           ))}
 
-          {/* Placeholder cards */}
-          {[1].map((i) => (
-            <div key={i} className="border-2 border-dashed border-stone-200 rounded-2xl p-7 opacity-50">
-              <div className="flex items-start gap-4">
-                <span className="text-4xl">✨</span>
-                <div>
-                  <h2 className="text-xl font-bold text-stone-400 mb-1">בקרוב...</h2>
-                  <p className="text-stone-400">עוד כלי חדש בדרך</p>
-                </div>
+          {/* Placeholder */}
+          <div className="border-2 border-dashed border-stone-200 rounded-2xl p-7 opacity-40">
+            <div className="flex items-start gap-4">
+              <span className="text-4xl">✨</span>
+              <div>
+                <h2 className="text-xl font-bold text-stone-400 mb-1">בקרוב...</h2>
+                <p className="text-stone-400">עוד כלי חדש בדרך</p>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { useState } from "react";
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
+  { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },
 ];
 
