@@ -6,8 +6,8 @@ import { useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
-  { href: "/neshama", label: "נשמה", icon: "🕊" },
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
+  { href: "/neshama", label: "נשמה", icon: "🕊" },
 ];
 
 export default function Sidebar() {

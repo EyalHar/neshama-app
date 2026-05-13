@@ -2,9 +2,17 @@ import Link from "next/link";
 
 const FEATURES = [
   {
+    href: "/tanakh",
+    title: "קריאת תנ״ך",
+    description: "קרא את התנ״ך פרק אחרי פרק, סמן פסוקים שקראת ועקוב אחר ההתקדמות שלך",
+    icon: "📖",
+    color: "from-stone-50 to-green-50 border-stone-200 hover:border-green-400",
+    labelColor: "text-stone-700",
+  },
+  {
     href: "/neshama",
     title: "נשמה",
-    description: "שתף מה עובר עליך וקבל פסוקים מהתנ\"ך שמדברים ישירות לליבך",
+    description: "שתף מה עובר עליך וקבל פסוקים מהתנ״ך שמדברים ישירות לליבך",
     icon: "🕊",
     color: "from-amber-50 to-orange-50 border-amber-200 hover:border-amber-400",
     labelColor: "text-amber-700",
@@ -43,7 +51,7 @@ export default function HomePage() {
           ))}
 
           {/* Placeholder cards */}
-          {[1, 2].map((i) => (
+          {[1].map((i) => (
             <div key={i} className="border-2 border-dashed border-stone-200 rounded-2xl p-7 opacity-50">
               <div className="flex items-start gap-4">
                 <span className="text-4xl">✨</span>
