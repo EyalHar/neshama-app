@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
     const session = await auth();
     let readVerses: number[] = [];
     let completedChapters: number[] = [];
+    let partialChapters: number[] = [];
     let completedBooks: string[] = [];
+    let partialBooks: string[] = [];
 
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({ where: { email: session.user.email } });
@@ -37,20 +39,41 @@ export async function GET(request: NextRequest) {
           select: { chapter: true },
         });
         completedChapters = completed.map((c) => c.chapter);
+        const completedChaptersSet = new Set(completedChapters);
 
-        // Completed books
+        // Partial chapters — chapters in this book with ≥1 read verse but not complete
+        const partialRows = await prisma.readVerse.groupBy({
+          by: ["chapter"],
+          where: { userId: user.id, book },
+        });
+        partialChapters = partialRows
+          .map((r) => r.chapter)
+          .filter((ch) => !completedChaptersSet.has(ch));
+
+        // Completed & partial books
         const allCompleted = await prisma.completedChapter.findMany({
           where: { userId: user.id },
           select: { book: true, chapter: true },
         });
+        // Books with any read verse (for partial detection)
+        const booksWithActivity = await prisma.readVerse.groupBy({
+          by: ["book"],
+          where: { userId: user.id },
+        });
+        const activeBooksSet = new Set(booksWithActivity.map((r) => r.book));
+
         for (const b of TANAKH_BOOKS) {
-          const count = allCompleted.filter((c) => c.book === b.id).length;
-          if (count >= b.chapters) completedBooks.push(b.id);
+          const completedCount = allCompleted.filter((c) => c.book === b.id).length;
+          if (completedCount >= b.chapters) {
+            completedBooks.push(b.id);
+          } else if (completedCount > 0 || activeBooksSet.has(b.id)) {
+            partialBooks.push(b.id);
+          }
         }
       }
     }
 
-    return NextResponse.json({ verses, readVerses, completedChapters, completedBooks });
+    return NextResponse.json({ verses, readVerses, completedChapters, partialChapters, completedBooks, partialBooks });
   } catch {
     return NextResponse.json({ error: "Failed to fetch chapter" }, { status: 500 });
   }

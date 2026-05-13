@@ -40,7 +40,9 @@ export default function TanakhPage() {
   const [verses, setVerses] = useState<string[]>([]);
   const [readVerses, setReadVerses] = useState<Set<number>>(new Set());
   const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
+  const [partialChapters, setPartialChapters] = useState<Set<number>>(new Set());
   const [completedBooks, setCompletedBooks] = useState<Set<string>>(new Set());
+  const [partialBooks, setPartialBooks] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
@@ -55,7 +57,9 @@ export default function TanakhPage() {
       setVerses(data.verses ?? []);
       setReadVerses(new Set(data.readVerses ?? []));
       setCompletedChapters(new Set(data.completedChapters ?? []));
+      setPartialChapters(new Set(data.partialChapters ?? []));
       setCompletedBooks(new Set(data.completedBooks ?? []));
+      setPartialBooks(new Set(data.partialBooks ?? []));
     } finally {
       setLoading(false);
     }
@@ -72,7 +76,10 @@ export default function TanakhPage() {
     const wasRead = newSet.has(verseNum);
     if (wasRead) newSet.delete(verseNum); else newSet.add(verseNum);
     setReadVerses(newSet);
-    if (!wasRead) setCompletedChapters((prev) => { const s = new Set(prev); s.delete(selectedChapter); return s; });
+    if (!wasRead) {
+      setCompletedChapters((prev) => { const s = new Set(prev); s.delete(selectedChapter); return s; });
+      setPartialChapters((prev) => new Set([...prev, selectedChapter]));
+    }
 
     const res = await fetch("/api/tanakh", {
       method: "POST",
@@ -225,6 +232,7 @@ export default function TanakhPage() {
           <div className="flex gap-2 flex-wrap mb-4">
             {booksInSection.map((book) => {
               const isComplete = completedBooks.has(book.id);
+              const isPartial = !isComplete && partialBooks.has(book.id);
               const isSelected = selectedBook.id === book.id;
               return (
                 <button
@@ -235,11 +243,14 @@ export default function TanakhPage() {
                       ? "bg-amber-100 text-amber-800 font-medium ring-2 ring-amber-400"
                       : isComplete
                       ? "bg-green-100 text-green-700 font-medium"
+                      : isPartial
+                      ? "bg-orange-100 text-orange-700 font-medium"
                       : "text-stone-600 hover:bg-stone-100"
                   }`}
                 >
                   {book.he}
                   {isComplete && <span className="mr-1">✓</span>}
+                  {isPartial && <span className="mr-1">◑</span>}
                 </button>
               );
             })}
@@ -251,6 +262,7 @@ export default function TanakhPage() {
             <div className="flex gap-1 flex-wrap">
               {Array.from({ length: selectedBook.chapters }, (_, i) => i + 1).map((ch) => {
                 const isComplete = completedChapters.has(ch);
+                const isPartial = !isComplete && partialChapters.has(ch);
                 const isSelected = selectedChapter === ch;
                 return (
                   <button
@@ -261,6 +273,8 @@ export default function TanakhPage() {
                         ? "bg-amber-700 text-white font-medium"
                         : isComplete
                         ? "bg-green-100 text-green-700 font-medium"
+                        : isPartial
+                        ? "bg-orange-100 text-orange-700 font-medium"
                         : "text-stone-600 hover:bg-stone-100"
                     }`}
                   >
