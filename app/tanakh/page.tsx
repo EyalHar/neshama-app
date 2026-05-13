@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { TANAKH_BOOKS, randomBook, randomChapter } from "@/lib/tanakh";
+import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
 
 const SECTIONS = ["תורה", "נביאים", "כתובים"] as const;
 
@@ -287,7 +287,7 @@ export default function TanakhPage() {
                 <div className="text-5xl mb-4">⭐</div>
                 <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
                 <p className="text-stone-600 mb-2">
-                  סיימת את פרק {celebration.chapterNum} ב{celebration.bookName}!<br />
+                  סיימת את פרק {toHebrewNumeral(celebration.chapterNum!)} ב{celebration.bookName}!<br />
                   <span className="font-semibold text-amber-700">{celebration.count} פרקים הושלמו עד כה</span>
                 </p>
                 <p className="text-stone-500 text-sm italic mb-6">{randomItem(CHAPTER_ENCOURAGEMENTS)}</p>
@@ -300,7 +300,7 @@ export default function TanakhPage() {
                       }}
                       className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
                     >
-                      לפרק הבא שלא נקרא ({celebration.nextUnreadChapter})
+                      לפרק הבא שלא נקרא ({toHebrewNumeral(celebration.nextUnreadChapter!)})
                     </button>
                   )}
                   <button
@@ -407,7 +407,7 @@ export default function TanakhPage() {
                   <button
                     key={ch}
                     onClick={() => setSelectedChapter(ch)}
-                    className={`w-8 h-8 rounded-lg text-sm transition-colors ${
+                    className={`min-w-8 h-8 px-1.5 rounded-lg text-sm transition-colors ${
                       isSelected
                         ? "bg-amber-700 text-white font-medium"
                         : isComplete
@@ -417,7 +417,7 @@ export default function TanakhPage() {
                         : "text-stone-600 hover:bg-stone-100"
                     }`}
                   >
-                    {ch}
+                    {toHebrewNumeral(ch)}
                   </button>
                 );
               })}
@@ -429,7 +429,7 @@ export default function TanakhPage() {
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-stone-700">
-              {selectedBook.he} פרק {selectedChapter}
+              {selectedBook.he} פרק {toHebrewNumeral(selectedChapter)}
             </h2>
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
             {!isBookComplete && isChapterComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הפרק הושלם</span>}
