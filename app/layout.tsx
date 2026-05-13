@@ -11,7 +11,7 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "התנ״ך שבקרבי",
-  description: "חיבור אישי לדברי הקודש",
+  description: "חיבור אישי לכתבי הקודש",
 };
 
 export default function RootLayout({
