@@ -413,21 +413,7 @@ export default function TanakhPage() {
           </div>
 
           {session && totalVerses > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-stone-400">{readCount}/{totalVerses}</span>
-              <button
-                onClick={markChapterComplete}
-                className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-              >
-                סיימתי את הפרק
-              </button>
-              <button
-                onClick={clearChapter}
-                className="border border-stone-300 hover:bg-stone-100 text-stone-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-              >
-                נקה
-              </button>
-            </div>
+            <span className="text-sm text-stone-400">{readCount}/{totalVerses}</span>
           )}
         </div>
 
@@ -461,6 +447,23 @@ export default function TanakhPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {session && verses.length > 0 && (
+          <div className="flex gap-3 mt-6 pt-6 border-t border-stone-200">
+            <button
+              onClick={markChapterComplete}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition-colors"
+            >
+              סיימתי את הפרק
+            </button>
+            <button
+              onClick={clearChapter}
+              className="border border-stone-300 hover:bg-stone-100 text-stone-600 font-medium px-5 py-3 rounded-xl transition-colors"
+            >
+              נקה
+            </button>
           </div>
         )}
 
