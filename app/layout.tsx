@@ -21,9 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col md:flex-row bg-stone-50">
+      <body className="h-full flex flex-col md:flex-row bg-stone-50 overflow-hidden">
         <SessionWrapper>
-          <main className="flex-1 min-h-screen">{children}</main>
+          <main className="flex-1 h-full overflow-y-auto">{children}</main>
           <Sidebar />
         </SessionWrapper>
       </body>
