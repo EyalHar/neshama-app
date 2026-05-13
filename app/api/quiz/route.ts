@@ -119,6 +119,13 @@ async function generateQuiz() {
     const groqData = JSON.parse(groqText);
     const missingWord: string = groqData.missing_word;
 
+    const wrongOptions: string[] = (groqData.wrong_options ?? []).filter(
+      (o: unknown) => typeof o === "string" && o.trim().length > 0
+    );
+    if (wrongOptions.length < 3) {
+      throw new Error(`Only ${wrongOptions.length} wrong options returned`);
+    }
+
     // Step 3: Find the raw token (with niqqud) that corresponds to the clean word Groq returned
     const rawToken = findRawToken(textRaw, textClean, missingWord);
     if (!rawToken) {
@@ -130,7 +137,7 @@ async function generateQuiz() {
 
     // Step 4: Shuffle options — correct answer displayed without niqqud (like the wrong options)
     const actualMissingWordClean = stripDiacritics(actualMissingWord);
-    const options = [actualMissingWordClean, ...groqData.wrong_options];
+    const options = [actualMissingWordClean, ...wrongOptions];
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [options[i], options[j]] = [options[j], options[i]];
