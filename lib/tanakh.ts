@@ -58,6 +58,29 @@ export function randomChapter(book: TanakhBook): number {
   return Math.floor(Math.random() * book.chapters) + 1;
 }
 
+export type Section = "תורה" | "נביאים" | "כתובים";
+
+// Given a set of completed (bookId, chapter) pairs, return which section just completed (if any)
+export function checkSectionCompletion(
+  completedEntries: { book: string; chapter: number }[],
+  section: Section
+): boolean {
+  const booksInSection = TANAKH_BOOKS.filter((b) => b.section === section);
+  return booksInSection.every((b) => {
+    const completedForBook = completedEntries.filter((e) => e.book === b.id).length;
+    return completedForBook >= b.chapters;
+  });
+}
+
+export function checkTanakhCompletion(
+  completedEntries: { book: string; chapter: number }[]
+): boolean {
+  return TANAKH_BOOKS.every((b) => {
+    const count = completedEntries.filter((e) => e.book === b.id).length;
+    return count >= b.chapters;
+  });
+}
+
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, "")

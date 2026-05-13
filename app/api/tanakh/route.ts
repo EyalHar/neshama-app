@@ -1,7 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { fetchChapter, TANAKH_BOOKS } from "@/lib/tanakh";
+import { fetchChapter, TANAKH_BOOKS, checkSectionCompletion, checkTanakhCompletion, type Section } from "@/lib/tanakh";
+
+async function getCompletionEvents(
+  userId: string,
+  bookId: string
+): Promise<{ bookJustCompleted: boolean; sectionJustCompleted: Section | null; tanakhJustCompleted: boolean; completedBooksCount: number; completedChaptersTotal: number }> {
+  const allCompleted = await prisma.completedChapter.findMany({
+    where: { userId },
+    select: { book: true, chapter: true },
+  });
+
+  const completedChaptersTotal = allCompleted.length;
+
+  const completedBooksSet = new Set<string>();
+  for (const b of TANAKH_BOOKS) {
+    if (allCompleted.filter((c) => c.book === b.id).length >= b.chapters)
+      completedBooksSet.add(b.id);
+  }
+  const completedBooksCount = completedBooksSet.size;
+  const bookJustCompleted = completedBooksSet.has(bookId);
+
+  let sectionJustCompleted: Section | null = null;
+  let tanakhJustCompleted = false;
+
+  if (bookJustCompleted) {
+    const bookData = TANAKH_BOOKS.find((b) => b.id === bookId);
+    if (bookData) {
+      const section = bookData.section as Section;
+      if (checkTanakhCompletion(allCompleted)) {
+        tanakhJustCompleted = true;
+      } else if (checkSectionCompletion(allCompleted, section)) {
+        sectionJustCompleted = section;
+      }
+    }
+  }
+
+  return { bookJustCompleted, sectionJustCompleted, tanakhJustCompleted, completedBooksCount, completedChaptersTotal };
+}
 
 // GET /api/tanakh?book=Genesis&chapter=1
 export async function GET(request: NextRequest) {
@@ -106,16 +143,15 @@ export async function POST(request: NextRequest) {
     isRead = true;
   }
 
-  // Check if chapter just became complete
   let chapterJustCompleted = false;
-  let completedChaptersTotal = 0;
   let bookJustCompleted = false;
+  let sectionJustCompleted: Section | null = null;
+  let tanakhJustCompleted = false;
+  let completedChaptersTotal = 0;
   let completedBooksCount = 0;
 
   if (isRead && totalVerses) {
-    const readCount = await prisma.readVerse.count({
-      where: { userId: user.id, book, chapter },
-    });
+    const readCount = await prisma.readVerse.count({ where: { userId: user.id, book, chapter } });
     if (readCount >= totalVerses) {
       chapterJustCompleted = true;
       await prisma.completedChapter.upsert({
@@ -123,27 +159,8 @@ export async function POST(request: NextRequest) {
         create: { userId: user.id, book, chapter },
         update: {},
       });
-
-      completedChaptersTotal = await prisma.completedChapter.count({ where: { userId: user.id } });
-
-      // Check book completion
-      const bookData = TANAKH_BOOKS.find((b) => b.id === book);
-      if (bookData) {
-        const chaptersCompleted = await prisma.completedChapter.count({ where: { userId: user.id, book } });
-        if (chaptersCompleted >= bookData.chapters) {
-          bookJustCompleted = true;
-          const allCompleted = await prisma.completedChapter.findMany({
-            where: { userId: user.id },
-            select: { book: true, chapter: true },
-          });
-          const completedBooksSet = new Set<string>();
-          for (const b of TANAKH_BOOKS) {
-            const count = allCompleted.filter((c) => c.book === b.id).length;
-            if (count >= b.chapters) completedBooksSet.add(b.id);
-          }
-          completedBooksCount = completedBooksSet.size;
-        }
-      }
+      const events = await getCompletionEvents(user.id, book);
+      ({ bookJustCompleted, sectionJustCompleted, tanakhJustCompleted, completedBooksCount, completedChaptersTotal } = events);
     }
   }
 
@@ -152,6 +169,8 @@ export async function POST(request: NextRequest) {
     chapterJustCompleted,
     completedChaptersTotal,
     bookJustCompleted,
+    sectionJustCompleted,
+    tanakhJustCompleted,
     completedBooksCount,
   });
 }

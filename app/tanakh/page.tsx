@@ -21,14 +21,21 @@ const BOOK_ENCOURAGEMENTS = [
   "יישר כח ענק! לא כולם מגיעים לכאן — אתה כן.",
 ];
 
+const SECTION_ENCOURAGEMENTS: Record<string, string> = {
+  "תורה": "סיימת את חמישה חומשי תורה! זה לא פחות מיוצא דופן. ״תורת ה׳ תמימה משיבת נפש״.",
+  "נביאים": "סיימת את ספר הנביאים! קולם של הנביאים מהדהד בך. ״וְחָזוֹן רָב חָזָה יְשַׁעְיָהוּ״.",
+  "כתובים": "סיימת את הכתובים! חכמה, שירה ותפילה — כולם שלך. ״אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים״.",
+};
+
 function randomItem<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 interface CelebrationData {
-  type: "chapter" | "book";
-  bookName: string;
+  type: "chapter" | "book" | "section" | "tanakh";
+  bookName?: string;
   chapterNum?: number;
+  sectionName?: string;
   count: number;
 }
 
@@ -115,7 +122,13 @@ export default function TanakhPage() {
 
     if (data.chapterJustCompleted) {
       setCompletedChapters((prev) => new Set([...prev, selectedChapter]));
-      if (data.bookJustCompleted) {
+      if (data.tanakhJustCompleted) {
+        setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+        setCelebration({ type: "tanakh", count: data.completedBooksCount });
+      } else if (data.sectionJustCompleted) {
+        setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+        setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount });
+      } else if (data.bookJustCompleted) {
         setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
         setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
       } else {
@@ -137,7 +150,13 @@ export default function TanakhPage() {
     });
     const data = await res.json();
 
-    if (data.bookJustCompleted) {
+    if (data.tanakhJustCompleted) {
+      setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+      setCelebration({ type: "tanakh", count: data.completedBooksCount });
+    } else if (data.sectionJustCompleted) {
+      setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+      setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount });
+    } else if (data.bookJustCompleted) {
       setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
       setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
     } else {
@@ -155,6 +174,16 @@ export default function TanakhPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "clear", book: selectedBook.id, chapter: selectedChapter }),
     });
+  }
+
+  async function handleReset() {
+    await fetch("/api/tanakh/reset", { method: "DELETE" });
+    setReadVerses(new Set());
+    setCompletedChapters(new Set());
+    setPartialChapters(new Set());
+    setCompletedBooks(new Set());
+    setPartialBooks(new Set());
+    setCelebration(null);
   }
 
   function handleRandomTanakh() {
@@ -187,30 +216,79 @@ export default function TanakhPage() {
       {celebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center">
-            <div className="text-5xl mb-4">{celebration.type === "book" ? "🏆" : "⭐"}</div>
-            <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
-            {celebration.type === "chapter" ? (
-              <p className="text-stone-600 mb-3">
-                סיימת את פרק {celebration.chapterNum} ב{celebration.bookName}!<br />
-                <span className="font-semibold text-amber-700">{celebration.count} פרקים הושלמו עד כה</span>
-              </p>
+            {celebration.type === "tanakh" ? (
+              <>
+                <div className="text-6xl mb-4">🎉</div>
+                <h2 className="text-2xl font-bold text-stone-800 mb-3">כל הכבוד!</h2>
+                <p className="text-stone-700 font-semibold text-lg mb-2">סיימת את כל התנ״ך!</p>
+                <p className="text-stone-500 text-sm italic mb-6">
+                  ״תּוֹרַת ה׳ תְּמִימָה מְשִׁיבַת נָפֶשׁ״ — הגעת למשהו שרוב בני האדם לא מגיעים אליו.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => setCelebration(null)}
+                    className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
+                  >
+                    תודה! 🙏
+                  </button>
+                  <button
+                    onClick={handleReset}
+                    className="border-2 border-stone-300 hover:bg-stone-50 text-stone-600 font-medium px-8 py-3 rounded-xl transition-colors"
+                  >
+                    התחל מחדש
+                  </button>
+                </div>
+              </>
+            ) : celebration.type === "section" ? (
+              <>
+                <div className="text-5xl mb-4">🌟</div>
+                <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
+                <p className="text-stone-600 mb-2">
+                  סיימת את <span className="font-bold text-amber-700">{celebration.sectionName}</span>!
+                </p>
+                <p className="text-stone-500 text-sm italic mb-6">
+                  {SECTION_ENCOURAGEMENTS[celebration.sectionName ?? ""] ?? ""}
+                </p>
+                <button
+                  onClick={() => setCelebration(null)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
+                >
+                  תודה!
+                </button>
+              </>
+            ) : celebration.type === "book" ? (
+              <>
+                <div className="text-5xl mb-4">🏆</div>
+                <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
+                <p className="text-stone-600 mb-2">
+                  סיימת את ספר {celebration.bookName}!<br />
+                  <span className="font-semibold text-amber-700">{celebration.count} ספרים הושלמו עד כה</span>
+                </p>
+                <p className="text-stone-500 text-sm italic mb-6">{randomItem(BOOK_ENCOURAGEMENTS)}</p>
+                <button
+                  onClick={() => setCelebration(null)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
+                >
+                  תודה!
+                </button>
+              </>
             ) : (
-              <p className="text-stone-600 mb-3">
-                סיימת את ספר {celebration.bookName}!<br />
-                <span className="font-semibold text-amber-700">{celebration.count} ספרים הושלמו עד כה</span>
-              </p>
+              <>
+                <div className="text-5xl mb-4">⭐</div>
+                <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
+                <p className="text-stone-600 mb-2">
+                  סיימת את פרק {celebration.chapterNum} ב{celebration.bookName}!<br />
+                  <span className="font-semibold text-amber-700">{celebration.count} פרקים הושלמו עד כה</span>
+                </p>
+                <p className="text-stone-500 text-sm italic mb-6">{randomItem(CHAPTER_ENCOURAGEMENTS)}</p>
+                <button
+                  onClick={() => setCelebration(null)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
+                >
+                  תודה!
+                </button>
+              </>
             )}
-            <p className="text-stone-500 text-sm italic mb-6">
-              {celebration.type === "book"
-                ? randomItem(BOOK_ENCOURAGEMENTS)
-                : randomItem(CHAPTER_ENCOURAGEMENTS)}
-            </p>
-            <button
-              onClick={() => setCelebration(null)}
-              className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
-            >
-              תודה!
-            </button>
           </div>
         </div>
       )}
