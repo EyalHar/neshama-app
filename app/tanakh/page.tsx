@@ -37,6 +37,7 @@ interface CelebrationData {
   chapterNum?: number;
   sectionName?: string;
   count: number;
+  nextUnreadChapter?: number;
 }
 
 export default function TanakhPage() {
@@ -132,7 +133,8 @@ export default function TanakhPage() {
         setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
         setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
       } else {
-        setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal });
+        const newCompleted = new Set([...completedChapters, selectedChapter]);
+        setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
       }
     }
   }
@@ -160,7 +162,8 @@ export default function TanakhPage() {
       setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
       setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
     } else {
-      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal });
+      const newCompleted = new Set([...completedChapters, selectedChapter]);
+      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
     }
   }
 
@@ -184,6 +187,13 @@ export default function TanakhPage() {
     setCompletedBooks(new Set());
     setPartialBooks(new Set());
     setCelebration(null);
+  }
+
+  function findNextUnreadChapter(afterChapter: number, completed: Set<number>): number | undefined {
+    for (let ch = afterChapter + 1; ch <= selectedBook.chapters; ch++) {
+      if (!completed.has(ch)) return ch;
+    }
+    return undefined;
   }
 
   function handleRandomTanakh() {
@@ -281,12 +291,25 @@ export default function TanakhPage() {
                   <span className="font-semibold text-amber-700">{celebration.count} פרקים הושלמו עד כה</span>
                 </p>
                 <p className="text-stone-500 text-sm italic mb-6">{randomItem(CHAPTER_ENCOURAGEMENTS)}</p>
-                <button
-                  onClick={() => setCelebration(null)}
-                  className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
-                >
-                  תודה!
-                </button>
+                <div className="flex flex-col gap-3">
+                  {celebration.nextUnreadChapter && (
+                    <button
+                      onClick={() => {
+                        setSelectedChapter(celebration.nextUnreadChapter!);
+                        setCelebration(null);
+                      }}
+                      className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
+                    >
+                      לפרק הבא שלא נקרא ({celebration.nextUnreadChapter})
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setCelebration(null)}
+                    className={`font-medium px-8 py-3 rounded-xl transition-colors ${celebration.nextUnreadChapter ? "border border-stone-300 hover:bg-stone-50 text-stone-600" : "bg-amber-700 hover:bg-amber-800 text-white"}`}
+                  >
+                    תודה!
+                  </button>
+                </div>
               </>
             )}
           </div>
