@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
@@ -13,7 +14,19 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
+  const [completedChapters, setCompletedChapters] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!session?.user) { setCompletedChapters(null); return; }
+    fetch("/api/tanakh/stats")
+      .then((r) => r.json())
+      .then((d) => setCompletedChapters(d.completedChapters ?? 0))
+      .catch(() => {});
+  }, [session, pathname]);
+
+  const firstName = session?.user?.name?.split(" ")[0];
 
   return (
     <>
@@ -64,8 +77,18 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="px-6 py-4 border-t border-stone-700">
-          <p className="text-stone-500 text-xs text-center">עוד דפים בקרוב...</p>
+        <div className="px-6 py-4 border-t border-stone-700 space-y-1">
+          {firstName && (
+            <p className="text-stone-300 text-xs">שלום, {firstName}</p>
+          )}
+          {completedChapters !== null && completedChapters > 0 && (
+            <p className="text-amber-400 text-xs">
+              עד כה נקראו {completedChapters} פרקים
+            </p>
+          )}
+          {!firstName && (
+            <p className="text-stone-500 text-xs text-center">עוד דפים בקרוב...</p>
+          )}
         </div>
       </aside>
 
