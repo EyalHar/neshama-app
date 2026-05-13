@@ -46,6 +46,30 @@ export default function TanakhPage() {
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
+  const [restored, setRestored] = useState(false);
+
+  // Restore last position from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("tanakh-position");
+    if (saved) {
+      try {
+        const { bookId, chapter } = JSON.parse(saved);
+        const book = TANAKH_BOOKS.find((b) => b.id === bookId);
+        if (book) {
+          setSelectedBook(book);
+          setSelectedChapter(chapter);
+          setActiveSection(book.section);
+        }
+      } catch {}
+    }
+    setRestored(true);
+  }, []);
+
+  // Save position to localStorage on change
+  useEffect(() => {
+    if (!restored) return;
+    localStorage.setItem("tanakh-position", JSON.stringify({ bookId: selectedBook.id, chapter: selectedChapter }));
+  }, [selectedBook, selectedChapter, restored]);
 
   const loadChapter = useCallback(async (bookId: string, chapter: number) => {
     setLoading(true);
@@ -66,8 +90,9 @@ export default function TanakhPage() {
   }, []);
 
   useEffect(() => {
+    if (!restored) return;
     loadChapter(selectedBook.id, selectedChapter);
-  }, [selectedBook, selectedChapter, loadChapter]);
+  }, [selectedBook, selectedChapter, loadChapter, restored]);
 
   async function toggleVerse(verseIndex: number) {
     if (!session) return;
