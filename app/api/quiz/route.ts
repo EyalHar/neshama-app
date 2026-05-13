@@ -5,8 +5,10 @@ import { TANAKH_BOOKS, fetchChapter, toHebrewNumeral } from "@/lib/tanakh";
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Strip Hebrew diacritics: niqqud (U+05B0–U+05C7) + cantillation/teamim (U+0591–U+05AF)
+// Maqaf (U+05BE) is replaced with a space first so connected words don't merge
 function stripDiacritics(text: string): string {
   return text
+    .replace(/־/g, " ")
     .replace(/[֑-ׇ]/g, "")
     .replace(/\s+/g, " ")
     .trim();
