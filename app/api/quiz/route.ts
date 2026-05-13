@@ -126,13 +126,14 @@ async function generateQuiz() {
     const verseWithBlank = textRaw.replace(rawToken, "_____");
     const actualMissingWord = rawToken; // show with niqqud when answer is revealed
 
-    // Step 4: Shuffle options (use the actual token as it appears in the verse)
-    const options = [actualMissingWord, ...groqData.wrong_options];
+    // Step 4: Shuffle options — correct answer displayed without niqqud (like the wrong options)
+    const actualMissingWordClean = stripDiacritics(actualMissingWord);
+    const options = [actualMissingWordClean, ...groqData.wrong_options];
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [options[i], options[j]] = [options[j], options[i]];
     }
-    const correctIndex = options.indexOf(actualMissingWord);
+    const correctIndex = options.indexOf(actualMissingWordClean);
 
     const referenceHe = `${book.he} ${toHebrewNumeral(chapter)}:${toHebrewNumeral(verse)}`;
 
