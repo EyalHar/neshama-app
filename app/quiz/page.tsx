@@ -67,6 +67,7 @@ export default function QuizPage() {
       body: JSON.stringify({ book: question.book, chapter: question.chapter, verse: question.verse, totalVerses: 0 }),
     });
     setMarking(false);
+    window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
   }
 
   async function handleNextQuestion() {
