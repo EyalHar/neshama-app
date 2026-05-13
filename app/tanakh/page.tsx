@@ -163,6 +163,7 @@ export default function TanakhPage() {
     const data = await res.json();
 
     if (data.chapterJustCompleted) {
+      window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
       setCompletedChapters((prev) => new Set([...prev, selectedChapter]));
       if (data.tanakhJustCompleted) {
         setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
@@ -196,6 +197,7 @@ export default function TanakhPage() {
       body: JSON.stringify({ action: "complete", book: selectedBook.id, chapter: selectedChapter, verseCount: verses.length }),
     });
     const data = await res.json();
+    window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
 
     if (data.tanakhJustCompleted) {
       setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
@@ -226,6 +228,7 @@ export default function TanakhPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "clear", book: selectedBook.id, chapter: selectedChapter }),
     });
+    window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
   }
 
   async function handleReset() {

@@ -18,13 +18,20 @@ export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const [completedChapters, setCompletedChapters] = useState<number | null>(null);
 
-  useEffect(() => {
+  const fetchStats = () => {
     if (!session?.user) { setCompletedChapters(null); return; }
     fetch("/api/tanakh/stats")
       .then((r) => r.json())
       .then((d) => setCompletedChapters(d.completedChapters ?? 0))
       .catch(() => {});
-  }, [session, pathname]);
+  };
+
+  useEffect(() => { fetchStats(); }, [session, pathname]);
+
+  useEffect(() => {
+    window.addEventListener("tanakh-stats-update", fetchStats);
+    return () => window.removeEventListener("tanakh-stats-update", fetchStats);
+  }, [session]);
 
   const firstName = session?.user?.name?.split(" ")[0];
 
