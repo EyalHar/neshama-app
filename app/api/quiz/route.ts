@@ -33,21 +33,52 @@ function findWordInVerse(verse: string, word: string): string | null {
   return null;
 }
 
-async function fetchRandomVerse(): Promise<{ book: (typeof TANAKH_BOOKS)[0]; chapter: number; verse: number; text: string } | null> {
-  // Try a few times in case Sefaria returns empty
+async function fetchRandomVerse(): Promise<{
+  book: (typeof TANAKH_BOOKS)[0];
+  chapter: number;
+  verse: number;
+  textRaw: string;   // with niqqud — for display
+  textClean: string; // without diacritics — for Groq
+} | null> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const book = TANAKH_BOOKS[Math.floor(Math.random() * TANAKH_BOOKS.length)];
     const chapter = Math.floor(Math.random() * book.chapters) + 1;
     try {
       const verses = await fetchChapter(book.id, chapter);
       const valid = verses
-        .map((text, i) => ({ text: stripDiacritics(text), verse: i + 1 }))
-        .filter((v) => v.text.length >= 20 && v.text.length <= 200);
+        .map((rawText, i) => ({
+          textRaw: rawText,
+          textClean: stripDiacritics(rawText),
+          verse: i + 1,
+        }))
+        .filter((v) => v.textClean.length >= 20 && v.textClean.length <= 200);
       if (valid.length === 0) continue;
       const picked = valid[Math.floor(Math.random() * valid.length)];
-      return { book, chapter, verse: picked.verse, text: picked.text };
+      return { book, chapter, verse: picked.verse, textRaw: picked.textRaw, textClean: picked.textClean };
     } catch {
       continue;
+    }
+  }
+  return null;
+}
+
+// Find the index of the matching clean token, then return the raw token at that index
+function findRawToken(
+  textRaw: string,
+  textClean: string,
+  cleanWord: string
+): string | null {
+  const rawTokens = textRaw.split(/\s+/);
+  const cleanTokens = textClean.split(/\s+/);
+
+  for (let i = 0; i < cleanTokens.length; i++) {
+    const t = cleanTokens[i];
+    if (
+      t === cleanWord ||
+      (t.includes(cleanWord) && t.length <= cleanWord.length + 3) ||
+      (cleanWord.includes(t) && t.length >= 2 && t.length >= cleanWord.length - 2)
+    ) {
+      return rawTokens[i] ?? null;
     }
   }
   return null;
@@ -58,7 +89,7 @@ async function generateQuiz() {
     const verseData = await fetchRandomVerse();
     if (!verseData) throw new Error("Could not fetch verse from Sefaria");
 
-    const { book, chapter, verse, text: verseText } = verseData;
+    const { book, chapter, verse, textRaw, textClean } = verseData;
 
     // Step 2: Ask Groq ONLY to pick a word to blank and generate 3 wrong alternatives
     const completion = await client.chat.completions.create({
@@ -77,7 +108,7 @@ async function generateQuiz() {
 
 החלופות — מאותו תחום סמנטי, הגיוניות דקדוקית אך שגויות בהקשר הספציפי.`,
         },
-        { role: "user", content: `הפסוק: ${verseText}` },
+        { role: "user", content: `הפסוק: ${textClean}` },
       ],
     });
 
@@ -86,14 +117,14 @@ async function generateQuiz() {
     const groqData = JSON.parse(groqText);
     const missingWord: string = groqData.missing_word;
 
-    // Step 3: Find the word in the actual Sefaria text (flexible matching)
-    const matchedToken = findWordInVerse(verseText, missingWord);
-    if (!matchedToken) {
+    // Step 3: Find the raw token (with niqqud) that corresponds to the clean word Groq returned
+    const rawToken = findRawToken(textRaw, textClean, missingWord);
+    if (!rawToken) {
       throw new Error(`Word "${missingWord}" not found in verse`);
     }
-    // Use the exact token as it appears in the verse
-    const actualMissingWord = matchedToken;
-    const verseWithBlank = verseText.replace(actualMissingWord, "_____");
+    // Blank out in the raw (niqqud) text — all other words keep their niqqud
+    const verseWithBlank = textRaw.replace(rawToken, "_____");
+    const actualMissingWord = rawToken; // show with niqqud when answer is revealed
 
     // Step 4: Shuffle options (use the actual token as it appears in the verse)
     const options = [actualMissingWord, ...groqData.wrong_options];
