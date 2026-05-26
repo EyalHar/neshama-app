@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
 import Confetti from "@/app/components/Confetti";
 
@@ -374,12 +374,7 @@ export default function TanakhPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-stone-800">קריאת תנ״ך</h1>
-            {session ? (
-              <p className="text-stone-500 text-sm mt-0.5">
-                שלום, {session.user?.name?.split(" ")[0]} ·{" "}
-                <button onClick={() => signOut()} className="text-amber-600 hover:underline">התנתק</button>
-              </p>
-            ) : (
+            {!session && (
               <a href="/login" className="text-amber-600 text-sm hover:underline">התחבר לשמירת התקדמות</a>
             )}
           </div>

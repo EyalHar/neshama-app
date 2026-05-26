@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
@@ -93,8 +93,21 @@ export default function Sidebar() {
               עד כה נקראו {completedChapters} פרקים
             </p>
           )}
+          {firstName && (
+            <button
+              onClick={() => signOut()}
+              className="text-stone-400 hover:text-amber-300 text-xs transition-colors"
+            >
+              התנתק
+            </button>
+          )}
           {!firstName && (
-            <p className="text-stone-500 text-xs text-center">עוד דפים בקרוב...</p>
+            <Link
+              href="/login"
+              className="block text-center text-xs text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              התחבר לשמירת התקדמות
+            </Link>
           )}
         </div>
       </aside>
