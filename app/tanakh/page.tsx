@@ -96,6 +96,8 @@ export default function TanakhPage() {
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
   const [restored, setRestored] = useState(false);
+  const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null);
+  const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
 
   // Restore last position from localStorage
   useEffect(() => {
@@ -142,6 +144,17 @@ export default function TanakhPage() {
     if (!restored) return;
     loadChapter(selectedBook.id, selectedChapter);
   }, [selectedBook, selectedChapter, loadChapter, restored]);
+
+  useEffect(() => {
+    if (!pendingRandomVerse || verses.length === 0) return;
+    setPendingRandomVerse(false);
+    const verseNum = Math.floor(Math.random() * verses.length) + 1;
+    setHighlightedVerse(verseNum);
+    setTimeout(() => {
+      document.getElementById(`verse-${verseNum}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+    setTimeout(() => setHighlightedVerse(null), 2500);
+  }, [verses, pendingRandomVerse]);
 
   async function toggleVerse(verseIndex: number) {
     if (!session) return;
@@ -261,6 +274,15 @@ export default function TanakhPage() {
     setSelectedChapter(chapter);
   }
 
+  function handleRandomVerse() {
+    const book = randomBook();
+    const chapter = randomChapter(book);
+    setSelectedBook(book);
+    setSelectedChapter(chapter);
+    setActiveSection(book.section);
+    setPendingRandomVerse(true);
+  }
+
   function selectBook(book: typeof TANAKH_BOOKS[0]) {
     setSelectedBook(book);
     setSelectedChapter(1);
@@ -378,18 +400,24 @@ export default function TanakhPage() {
               <a href="/login" className="text-amber-600 text-sm hover:underline">התחבר לשמירת התקדמות</a>
             )}
           </div>
-          <div className="flex flex-col gap-1 items-end">
+          <div className="flex flex-col gap-1 w-36">
             <button
               onClick={handleRandomTanakh}
-              className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+              className="w-full bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
             >
-              אקראי מכל התנ״ך
+              פרק אקראי מהתנ״ך
             </button>
             <button
               onClick={handleRandomInBook}
-              className="bg-stone-600 hover:bg-stone-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+              className="w-full bg-stone-600 hover:bg-stone-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
             >
-              אקראי מ{selectedBook.he}
+              פרק אקראי מ{selectedBook.he}
+            </button>
+            <button
+              onClick={handleRandomVerse}
+              className="w-full bg-stone-400 hover:bg-stone-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+            >
+              פסוק אקראי מהתנ״ך
             </button>
           </div>
         </div>
@@ -503,9 +531,12 @@ export default function TanakhPage() {
               return (
                 <div
                   key={i}
+                  id={`verse-${i + 1}`}
                   onClick={() => toggleVerse(i)}
                   className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors ${
-                    isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
+                    highlightedVerse === i + 1
+                      ? "bg-amber-200 ring-2 ring-amber-400"
+                      : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
                   } ${session ? "cursor-pointer" : "cursor-default"}`}
                 >
                   <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
