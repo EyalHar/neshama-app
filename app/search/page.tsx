@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
 
@@ -26,15 +26,10 @@ function getBookHe(bookId: string) {
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState("tanakh");
-  const [partial, setPartial] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-
-  useEffect(() => {
-    if (searched && query.trim()) handleSearch();
-  }, [partial]);
 
   async function handleSearch(e?: React.FormEvent) {
     e?.preventDefault();
@@ -42,7 +37,7 @@ export default function SearchPage() {
     setLoading(true);
     setSearched(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&scope=${scope}&partial=${partial}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&scope=${scope}`);
       const data = await res.json();
       setResults(data.results ?? []);
       setTotal(data.total ?? null);
@@ -55,7 +50,7 @@ export default function SearchPage() {
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
       <h1 className="text-2xl font-bold text-stone-800 mb-6">חיפוש בתנ״ך</h1>
 
-      <form onSubmit={handleSearch} className="flex gap-2 mb-2">
+      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
         <input
           type="text"
           value={query}
@@ -72,16 +67,6 @@ export default function SearchPage() {
           חפש
         </button>
       </form>
-
-      <label className="flex items-center gap-2 mb-4 cursor-pointer w-fit">
-        <input
-          type="checkbox"
-          checked={partial}
-          onChange={(e) => setPartial(e.target.checked)}
-          className="w-4 h-4 accent-amber-600"
-        />
-        <span className="text-sm text-stone-600">חפש כחלק ממילה</span>
-      </label>
 
       <div className="flex gap-2 mb-6">
         {SCOPES.map((s) => (
