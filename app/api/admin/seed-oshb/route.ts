@@ -88,9 +88,21 @@ function parseXml(xml: string, bookId: string, startVerseIndex: number): { verse
   return { verses, words, nextVerseIndex: verseIndex };
 }
 
-async function batchInsert<T extends object>(items: T[], size: number, fn: (batch: T[]) => Promise<void>) {
-  for (let i = 0; i < items.length; i += size) {
-    await fn(items.slice(i, i + size));
+async function insertVerses(verses: VerseData[]) {
+  for (const v of verses) {
+    await prisma.$executeRawUnsafe(
+      `INSERT OR IGNORE INTO "VerseText" (book, chapter, verse, verseIndex, text, plainText, firstLetter, lastLetter) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      v.book, v.chapter, v.verse, v.verseIndex, v.text, v.plainText, v.firstLetter, v.lastLetter
+    );
+  }
+}
+
+async function insertWords(words: WordData[]) {
+  for (const w of words) {
+    await prisma.$executeRawUnsafe(
+      `INSERT OR IGNORE INTO "WordEntry" (book, chapter, verse, verseIndex, wordNum, word, lemma, morph, plain) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      w.book, w.chapter, w.verse, w.verseIndex, w.wordNum, w.word, w.lemma, w.morph, w.plain
+    );
   }
 }
 
@@ -120,12 +132,8 @@ export async function GET() {
           const { verses, words, nextVerseIndex } = parseXml(xml, bookId, verseIndex);
           verseIndex = nextVerseIndex;
 
-          await batchInsert(verses, 200, (batch) =>
-            prisma.verseText.createMany({ data: batch, skipDuplicates: true })
-          );
-          await batchInsert(words, 500, (batch) =>
-            prisma.wordEntry.createMany({ data: batch, skipDuplicates: true })
-          );
+          await insertVerses(verses);
+          await insertWords(words);
 
           totalVerses += verses.length;
           totalWords += words.length;

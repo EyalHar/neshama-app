@@ -9,6 +9,7 @@ export default function SeedPage() {
   const [books, setBooks] = useState<BookStatus[]>([]);
   const [done, setDone] = useState(false);
   const [summary, setSummary] = useState<{ totalVerses: number; totalWords: number } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   function startSeed() {
     setRunning(true);
@@ -38,12 +39,17 @@ export default function SeedPage() {
         setRunning(false);
         es.close();
       } else if (data.type === "error") {
+        setErrorMsg(data.msg ?? "שגיאה לא ידועה");
         setRunning(false);
         es.close();
       }
     };
 
-    es.onerror = () => { setRunning(false); es.close(); };
+    es.onerror = () => {
+      setErrorMsg("החיבור נותק — ודא שהשרת פועל ונסה שוב");
+      setRunning(false);
+      es.close();
+    };
   }
 
   const doneCount = books.filter((b) => b.status === "done").length;
@@ -58,9 +64,16 @@ export default function SeedPage() {
         פעולה חד-פעמית — אורכת כ-5–10 דקות.
       </p>
 
+      {errorMsg && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+          <p className="text-red-700 font-medium mb-1">שגיאה</p>
+          <p className="text-red-600 text-sm font-mono">{errorMsg}</p>
+        </div>
+      )}
+
       {!running && !done && (
         <button
-          onClick={startSeed}
+          onClick={() => { setErrorMsg(null); startSeed(); }}
           className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-6 py-3 rounded-xl transition-colors"
         >
           התחל אכלוס
