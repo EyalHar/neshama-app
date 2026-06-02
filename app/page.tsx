@@ -18,6 +18,22 @@ const FEATURES = [
     labelColor: "text-teal-700",
   },
   {
+    href: "/letters",
+    title: "אות ראשונה ואחרונה",
+    description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",
+    icon: "א",
+    color: "from-violet-50 to-purple-50 border-violet-200 hover:border-violet-400",
+    labelColor: "text-violet-700",
+  },
+  {
+    href: "/advanced",
+    title: "חיפוש מתקדם",
+    description: "חיפוש תת-מחרוזת, חיפוש לפי שורש עברי וחיפוש לפי בניין — על כל מילות התנ״ך",
+    icon: "⚙",
+    color: "from-slate-50 to-gray-50 border-slate-200 hover:border-slate-400",
+    labelColor: "text-slate-700",
+  },
+  {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",

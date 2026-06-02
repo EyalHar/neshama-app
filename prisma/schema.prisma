@@ -65,6 +65,40 @@ model ReadVerse {
   @@unique([userId, book, chapter, verse])
 }
 
+model VerseText {
+  id          Int    @id @default(autoincrement())
+  book        String
+  chapter     Int
+  verse       Int
+  verseIndex  Int
+  text        String
+  plainText   String
+  firstLetter String
+  lastLetter  String
+
+  @@unique([book, chapter, verse])
+  @@index([firstLetter, lastLetter])
+  @@index([verseIndex])
+}
+
+model WordEntry {
+  id         Int    @id @default(autoincrement())
+  book       String
+  chapter    Int
+  verse      Int
+  verseIndex Int
+  wordNum    Int
+  word       String
+  lemma      String
+  morph      String
+  plain      String
+
+  @@unique([book, chapter, verse, wordNum])
+  @@index([lemma])
+  @@index([verseIndex])
+  @@index([book, chapter, verse])
+}
+
 model CompletedChapter {
   id          String   @id @default(cuid())
   userId      String
