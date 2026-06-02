@@ -99,8 +99,23 @@ export default function TanakhPage() {
   const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null);
   const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
 
-  // Restore last position from localStorage
+  // Restore position — URL params take priority over localStorage
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlBookId = urlParams.get("book");
+    const urlChapter = urlParams.get("chapter");
+
+    if (urlBookId) {
+      const book = TANAKH_BOOKS.find((b) => b.id === urlBookId);
+      if (book) {
+        setSelectedBook(book);
+        setSelectedChapter(urlChapter ? parseInt(urlChapter) : 1);
+        setActiveSection(book.section);
+        setRestored(true);
+        return;
+      }
+    }
+
     const saved = localStorage.getItem("tanakh-position");
     if (saved) {
       try {

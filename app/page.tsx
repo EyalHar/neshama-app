@@ -10,6 +10,14 @@ const FEATURES = [
     labelColor: "text-stone-700",
   },
   {
+    href: "/search",
+    title: "חיפוש בתנ״ך",
+    description: "חפש מילה או ביטוי בכל התנ״ך וקבל את כל הפסוקים שבהם הוא מופיע",
+    icon: "🔍",
+    color: "from-teal-50 to-cyan-50 border-teal-200 hover:border-teal-400",
+    labelColor: "text-teal-700",
+  },
+  {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",
@@ -58,16 +66,6 @@ export default function HomePage() {
             </Link>
           ))}
 
-          {/* Placeholder */}
-          <div className="border-2 border-dashed border-stone-200 rounded-2xl p-7 opacity-40">
-            <div className="flex items-start gap-4">
-              <span className="text-4xl">✨</span>
-              <div>
-                <h2 className="text-xl font-bold text-stone-400 mb-1">בקרוב...</h2>
-                <p className="text-stone-400">עוד כלי חדש בדרך</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

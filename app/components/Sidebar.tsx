@@ -8,6 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
+  { href: "/search", label: "חיפוש", icon: "🔍" },
   { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },
 ];
