@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { TANAKH_BOOKS } from "@/lib/tanakh";
 
 const SCOPE_FILTERS: Record<string, string> = {
   tanakh: "Tanakh",
@@ -92,6 +93,14 @@ export async function GET(req: NextRequest) {
 
   const seen = new Set<string>();
   const results = parseHits(allHits, seen);
+
+  const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
+  results.sort((a, b) => {
+    const bookDiff = (bookOrder[a.bookId] ?? 999) - (bookOrder[b.bookId] ?? 999);
+    if (bookDiff !== 0) return bookDiff;
+    if (a.chapter !== b.chapter) return a.chapter - b.chapter;
+    return a.verse - b.verse;
+  });
 
   return NextResponse.json({ results, total: results.length });
 }
