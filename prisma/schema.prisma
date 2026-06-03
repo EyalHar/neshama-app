@@ -65,6 +65,21 @@ model ReadVerse {
   @@unique([userId, book, chapter, verse])
 }
 
+model UnknownRoot {
+  id            Int       @id @default(autoincrement())
+  strongsNum    String    @unique   // "H776"
+  lemmaHe       String              // "אֶרֶץ"
+  lemmaPlain    String              // "ארץ"
+  xlit          String              // "erets"
+  definition    String              // "earth, land"
+  derivation    String              // "from an unused root..."
+  issue         String              // "unused_root" | "no_parent"
+  suggestedRoot String?             // הצעת שורש
+  suggestedAt   DateTime?
+
+  @@index([lemmaPlain])
+}
+
 model StrongsEntry {
   number      String  @id       // "H6817"
   lemmaHe     String            // "צָעַק" (עם ניקוד)

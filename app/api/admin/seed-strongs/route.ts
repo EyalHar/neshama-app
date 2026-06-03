@@ -48,14 +48,22 @@ export async function GET() {
           await prisma.$executeRawUnsafe(
             `INSERT OR REPLACE INTO "StrongsEntry" (number, lemmaHe, lemmaPlain, xlit, definition, derivedFrom, isPrimitive)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            key,
-            lemmaHe,
-            lemmaPlain,
-            entry.xlit ?? "",
-            entry.strongs_def ?? "",
-            derivedFrom,
-            isPrimitive ? 1 : 0
+            key, lemmaHe, lemmaPlain, entry.xlit ?? "",
+            entry.strongs_def ?? "", derivedFrom, isPrimitive ? 1 : 0
           );
+
+          // Flag problematic entries (no known root linkage)
+          const isUnused = /unused root/i.test(derivation);
+          const hasNoParent = !isUnused && !isPrimitive && derivedFrom === "" && derivation !== "" && lemmaPlain.length >= 2;
+          if (isUnused || hasNoParent) {
+            const issue = isUnused ? "unused_root" : "no_parent";
+            await prisma.$executeRawUnsafe(
+              `INSERT OR IGNORE INTO "UnknownRoot" (strongsNum, lemmaHe, lemmaPlain, xlit, definition, derivation, issue)
+               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              key, lemmaHe, lemmaPlain, entry.xlit ?? "",
+              entry.strongs_def ?? "", derivation, issue
+            );
+          }
           count++;
         }
 
