@@ -4,7 +4,9 @@ import { TANAKH_BOOKS } from "@/lib/tanakh";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
-// OSHB morph codes: HV{stem}...
+type WordRow = { book: string; chapter: number; verse: number; word: string };
+type VerseRow = { book: string; chapter: number; verse: number; text: string };
+
 export const BINYANIM = [
   { id: "q", he: "קַל",       en: "Qal" },
   { id: "N", he: "נִפְעַל",   en: "Niphal" },
@@ -20,13 +22,10 @@ export async function GET(req: NextRequest) {
   const stem = searchParams.get("stem");
   if (!stem) return NextResponse.json({ results: [] });
 
-  const morphPrefix = `HV${stem}`;
-
-  const wordRows = await prisma.wordEntry.findMany({
-    where: { morph: { startsWith: morphPrefix } },
-    select: { book: true, chapter: true, verse: true, word: true },
-    take: 5000,
-  });
+  const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
+    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ? LIMIT 5000`,
+    `HV${stem}%`
+  );
 
   const verseMap = new Map<string, { book: string; chapter: number; verse: number; forms: Set<string> }>();
   for (const w of wordRows) {
@@ -44,10 +43,14 @@ export async function GET(req: NextRequest) {
   });
 
   const top200 = verseKeys.slice(0, 200);
-  const verseTexts = await prisma.verseText.findMany({
-    where: { OR: top200.map((v) => ({ book: v.book, chapter: v.chapter, verse: v.verse })) },
-    select: { book: true, chapter: true, verse: true, text: true },
-  });
+  if (top200.length === 0) return NextResponse.json({ results: [], total: 0 });
+
+  const verseTexts = await prisma.$queryRawUnsafe<VerseRow[]>(
+    `SELECT book, chapter, verse, text FROM "VerseText" WHERE ${
+      top200.map(() => `(book = ? AND chapter = ? AND verse = ?)`).join(" OR ")
+    }`,
+    ...top200.flatMap((v) => [v.book, v.chapter, v.verse])
+  );
 
   const textMap = new Map(verseTexts.map((v) => [`${v.book}|${v.chapter}|${v.verse}`, v.text]));
 

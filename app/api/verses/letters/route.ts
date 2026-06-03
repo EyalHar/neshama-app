@@ -4,6 +4,8 @@ import { TANAKH_BOOKS } from "@/lib/tanakh";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
+type VerseRow = { book: string; chapter: number; verse: number; text: string };
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const first = searchParams.get("first")?.trim();
@@ -11,11 +13,10 @@ export async function GET(req: NextRequest) {
 
   if (!first || !last) return NextResponse.json({ results: [] });
 
-  const rows = await prisma.verseText.findMany({
-    where: { firstLetter: first, lastLetter: last },
-    select: { book: true, chapter: true, verse: true, text: true },
-    take: 200,
-  });
+  const rows = await prisma.$queryRawUnsafe<VerseRow[]>(
+    `SELECT book, chapter, verse, text FROM "VerseText" WHERE firstLetter = ? AND lastLetter = ? LIMIT 200`,
+    first, last
+  );
 
   rows.sort((a, b) => {
     const diff = (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999);
