@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/search", label: "חיפוש", icon: "🔍" },
   { href: "/letters", label: "אות ראשונה ואחרונה", icon: "א" },
   { href: "/advanced", label: "חיפוש מתקדם", icon: "⚙" },
+  { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },
   { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },
 ];
