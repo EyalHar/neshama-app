@@ -11,6 +11,35 @@ export default function SeedPage() {
   const [summary, setSummary] = useState<{ totalVerses: number; totalWords: number } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [strongsRunning, setStrongsRunning] = useState(false);
+  const [strongsDone, setStrongsDone] = useState(false);
+  const [strongsMsg, setStrongsMsg] = useState<string | null>(null);
+  const [strongsCount, setStrongsCount] = useState<number | null>(null);
+
+  function startStrongsSeed() {
+    setStrongsRunning(true);
+    setStrongsDone(false);
+    setStrongsMsg("מוריד...");
+    setStrongsCount(null);
+
+    const es = new EventSource("/api/admin/seed-strongs");
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type === "progress") setStrongsMsg(data.msg);
+      else if (data.type === "complete") {
+        setStrongsCount(data.count);
+        setStrongsDone(true);
+        setStrongsRunning(false);
+        es.close();
+      } else if (data.type === "error") {
+        setStrongsMsg(`שגיאה: ${data.msg}`);
+        setStrongsRunning(false);
+        es.close();
+      }
+    };
+    es.onerror = () => { setStrongsRunning(false); setStrongsMsg("החיבור נותק"); es.close(); };
+  }
+
   function startSeed() {
     setRunning(true);
     setBooks([]);
@@ -117,6 +146,33 @@ export default function SeedPage() {
           )}
         </>
       )}
+
+      {/* Strong's seed section */}
+      <div className="mt-10 pt-8 border-t border-stone-200">
+        <h2 className="text-lg font-bold text-stone-800 mb-1">אכלוס מילון Strong's</h2>
+        <p className="text-stone-500 text-sm mb-4">
+          מוריד את מילון Strong's Hebrew (8,674 ערכים) ושומר קישורי שורש-נגזרת. פעולה חד-פעמית — כ-2 דקות.
+        </p>
+
+        {!strongsRunning && !strongsDone && (
+          <button
+            onClick={startStrongsSeed}
+            className="bg-violet-700 hover:bg-violet-800 text-white font-medium px-6 py-3 rounded-xl transition-colors"
+          >
+            אכלס מילון Strong's
+          </button>
+        )}
+
+        {(strongsRunning || strongsDone) && (
+          <div className="bg-white border border-stone-200 rounded-xl p-4">
+            {strongsDone ? (
+              <p className="text-green-700 font-medium">✓ הושלם — {strongsCount?.toLocaleString()} ערכים נשמרו</p>
+            ) : (
+              <p className="text-amber-600 text-sm">{strongsMsg}</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
