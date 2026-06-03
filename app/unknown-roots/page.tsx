@@ -85,6 +85,7 @@ export default function UnknownRootsPage() {
                   <th className="text-right px-4 py-3 text-stone-600 font-medium">מילה</th>
                   <th className="text-right px-4 py-3 text-stone-600 font-medium">הגייה</th>
                   <th className="text-right px-4 py-3 text-stone-600 font-medium">הגדרה</th>
+                  <th className="text-right px-4 py-3 text-stone-600 font-medium">מקור (Strong's)</th>
                   <th className="text-right px-4 py-3 text-stone-600 font-medium">בעיה</th>
                   <th className="text-right px-4 py-3 text-stone-600 font-medium">הצעת שורש</th>
                   <th className="px-4 py-3"></th>
@@ -105,6 +106,7 @@ export default function UnknownRootsPage() {
                     <td className="px-4 py-2.5 font-bold text-lg">{row.lemmaHe}</td>
                     <td className="px-4 py-2.5 text-stone-500 text-xs">{row.xlit}</td>
                     <td className="px-4 py-2.5 text-stone-600 max-w-xs truncate" title={row.definition}>{row.definition}</td>
+                    <td className="px-4 py-2.5 text-stone-400 text-xs max-w-xs truncate italic" title={row.derivation}>{row.derivation}</td>
                     <td className="px-4 py-2.5">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${row.issue === "unused_root" ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-600"}`}>
                         {ISSUE_LABELS[row.issue] ?? row.issue}
