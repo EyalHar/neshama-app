@@ -108,7 +108,8 @@ export default function AdvancedPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-6">חיפוש מתקדם</h1>
+      <h1 className="text-2xl font-bold text-stone-800 mb-1">חיפוש מתקדם</h1>
+      <p className="text-stone-400 text-xs mb-6">Based on <a href="https://github.com/openscriptures/morphhb" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-600">Open Scriptures Hebrew Bible</a></p>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b border-stone-200 pb-0">

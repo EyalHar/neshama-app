@@ -57,7 +57,8 @@ export default function LettersPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
       <h1 className="text-2xl font-bold text-stone-800 mb-2">חיפוש פסוקים לפי אות</h1>
-      <p className="text-stone-500 text-sm mb-6">מצא פסוקים שמתחילים ונגמרים באותיות שתבחר</p>
+      <p className="text-stone-500 text-sm mb-1">מצא פסוקים שמתחילים ונגמרים באותיות שתבחר</p>
+      <p className="text-stone-400 text-xs mb-6">Based on <a href="https://github.com/openscriptures/morphhb" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-600">Open Scriptures Hebrew Bible</a></p>
 
       <div className="bg-white rounded-2xl border border-stone-200 p-5 shadow-sm mb-6 space-y-5">
         <LetterPicker label="מתחיל ב..." value={first} onChange={setFirst} />
