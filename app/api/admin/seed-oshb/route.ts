@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // Canonical Tanakh order: [OSHB filename, Sefaria book ID]
@@ -112,8 +113,8 @@ async function insertWords(words: WordData[]) {
   }
 }
 
-export async function GET(req: Request) {
-  const scope = new URL(req.url).searchParams.get("scope") ?? "all";
+export async function GET(req: NextRequest) {
+  const scope = req.nextUrl.searchParams.get("scope") ?? "all";
   const books = SCOPE_MAP[scope] ?? ALL_BOOKS;
 
   const encoder = new TextEncoder();
