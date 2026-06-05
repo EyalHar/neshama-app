@@ -64,10 +64,14 @@ export default function AdvancedPage() {
   const [binyanStem, setBinyanStem] = useState("q");
   const [results, setResults] = useState<Result[]>([]);
   const [total, setTotal] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [lastSubstringQ, setLastSubstringQ] = useState("");
 
-  async function search(url: string) {
+  async function search(url: string, resetPage = true) {
+    if (resetPage) setPage(1);
     setLoading(true);
     setSearched(true);
     setResults([]);
@@ -77,15 +81,23 @@ export default function AdvancedPage() {
       const data = await res.json();
       setResults(data.results ?? []);
       setTotal(data.total ?? 0);
+      if (data.pages) setPages(data.pages);
     } finally {
       setLoading(false);
     }
   }
 
-  function handleSubstring(e: React.FormEvent) {
+  function handleSubstring(e: React.FormEvent, p = 1) {
     e.preventDefault();
     if (substringQ.trim().length < 2) return;
-    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}`);
+    setLastSubstringQ(substringQ.trim());
+    setPage(p);
+    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}&page=${p}`, p === 1);
+  }
+
+  function goToPage(p: number) {
+    setPage(p);
+    search(`/api/verses/substring?q=${encodeURIComponent(lastSubstringQ)}&page=${p}`, false);
   }
 
   function handleRoot(e: React.FormEvent) {
@@ -229,13 +241,26 @@ export default function AdvancedPage() {
           <>
             <p className="text-stone-500 text-sm my-4">
               נמצאו {total?.toLocaleString()} פסוקים
-              {total !== null && total > results.length ? ` (מציג ${results.length})` : ""}
+              {tab === "substring" && pages > 1 && ` · עמוד ${page} מתוך ${pages}`}
             </p>
             <div className="space-y-3">
               {results.map((r) => (
                 <ResultCard key={`${r.book}-${r.chapter}-${r.verse}`} r={r} />
               ))}
             </div>
+            {tab === "substring" && pages > 1 && (
+              <div className="flex gap-2 justify-center mt-6">
+                <button onClick={() => goToPage(page - 1)} disabled={page <= 1 || loading}
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors text-sm">
+                  ← הקודם
+                </button>
+                <span className="px-4 py-2 text-stone-500 text-sm">{page} / {pages}</span>
+                <button onClick={() => goToPage(page + 1)} disabled={page >= pages || loading}
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors text-sm">
+                  הבא →
+                </button>
+              </div>
+            )}
           </>
         )
       )}
