@@ -135,7 +135,7 @@ export async function GET(req: NextRequest) {
           `SELECT MAX(verseIndex) as maxIdx FROM "VerseText"`
         ).catch(() => [{ maxIdx: null }]);
         const maxIdx = maxRows[0]?.maxIdx ?? null;
-        let verseIndex = (maxIdx ?? 0) + 1;
+        let verseIndex = Number(maxIdx ?? 0) + 1;
 
         for (const [oshbId, bookId] of books) {
           send({ type: "progress", book: bookId, status: "downloading" });
