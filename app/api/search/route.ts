@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const filter = SCOPE_FILTERS[scope] ?? "Tanakh";
   const cleanQuery = stripDiacritics(query);
 
-  const body = { query: cleanQuery, filters: [filter], filter_fields: ["path"], size: 200, start: 0 };
+  const body = { query: cleanQuery, filters: [filter], filter_fields: ["path"], size: 800, start: 0 };
   const res = await fetch("https://www.sefaria.org/api/search-wrapper", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -37,6 +37,10 @@ export async function GET(req: NextRequest) {
   const seen = new Set<string>();
   const results = hits.flatMap((hit) => {
     const id: string = (hit._id as string) ?? "";
+
+    // Filter out non-Hebrew results (e.g. English translations)
+    if (!id.includes("[he]")) return [];
+
     const highlightArr = (hit.highlight as Record<string, string[]> | undefined)?.["exact"];
     const rawHighlight: string = highlightArr?.[0] ?? "";
 

@@ -27,12 +27,11 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState("tanakh");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  async function handleSearch(e?: React.FormEvent) {
-    e?.preventDefault();
+  async function handleSearch(e?: { preventDefault?: () => void }) {
+    e?.preventDefault?.();
     if (!query.trim()) return;
     setLoading(true);
     setSearched(true);
@@ -40,7 +39,6 @@ export default function SearchPage() {
       const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&scope=${scope}`);
       const data = await res.json();
       setResults(data.results ?? []);
-      setTotal(data.total ?? null);
     } finally {
       setLoading(false);
     }
@@ -96,9 +94,11 @@ export default function SearchPage() {
           <p className="text-stone-500 text-center py-8">לא נמצאו תוצאות</p>
         ) : (
           <>
-            <p className="text-stone-500 text-sm mb-4">
-              נמצאו {total !== null ? total.toLocaleString() : results.length} תוצאות
-              {total !== null && total > results.length ? ` (מציג ${results.length})` : ""}
+            <p className="text-stone-500 text-sm mb-1">
+              מציג {results.length} תוצאות רלוונטיות
+            </p>
+            <p className="text-stone-400 text-xs mb-4">
+              לחיפוש <strong>כל</strong> המופעים השתמש ב<Link href="/advanced" className="underline hover:text-stone-600">חיפוש מתקדם → תת-מחרוזת</Link>
             </p>
             <div className="space-y-3">
               {results.map((r) => (
