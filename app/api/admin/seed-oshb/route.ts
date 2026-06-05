@@ -123,17 +123,20 @@ export async function GET(req: NextRequest) {
       const send = (data: object) =>
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
 
-      // Start verseIndex after existing data so sections can be seeded independently
-      type MaxRow = { maxIdx: number | null };
-      const [{ maxIdx }] = await prisma.$queryRawUnsafe<MaxRow[]>(
-        `SELECT MAX(verseIndex) as maxIdx FROM "VerseText"`
-      );
-      let verseIndex = (maxIdx ?? 0) + 1;
+      send({ type: "progress", book: "", status: "starting" });
 
       let totalVerses = 0;
       let totalWords = 0;
 
       try {
+        // Start verseIndex after existing data
+        type MaxRow = { maxIdx: number | null };
+        const maxRows = await prisma.$queryRawUnsafe<MaxRow[]>(
+          `SELECT MAX(verseIndex) as maxIdx FROM "VerseText"`
+        ).catch(() => [{ maxIdx: null }]);
+        const maxIdx = maxRows[0]?.maxIdx ?? null;
+        let verseIndex = (maxIdx ?? 0) + 1;
+
         for (const [oshbId, bookId] of books) {
           send({ type: "progress", book: bookId, status: "downloading" });
 
