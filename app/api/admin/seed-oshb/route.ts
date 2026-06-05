@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
 
 // Canonical Tanakh order: [OSHB filename, Sefaria book ID]
-const BOOKS: [string, string][] = [
-  // תורה
+const TORAH: [string, string][] = [
   ["Gen", "Genesis"], ["Exod", "Exodus"], ["Lev", "Leviticus"],
   ["Num", "Numbers"], ["Deut", "Deuteronomy"],
-  // נביאים
+];
+const NEVI: [string, string][] = [
   ["Josh", "Joshua"], ["Judg", "Judges"], ["1Sam", "I Samuel"],
   ["2Sam", "II Samuel"], ["1Kgs", "I Kings"], ["2Kgs", "II Kings"],
   ["Isa", "Isaiah"], ["Jer", "Jeremiah"], ["Ezek", "Ezekiel"],
@@ -13,13 +13,19 @@ const BOOKS: [string, string][] = [
   ["Obad", "Obadiah"], ["Jonah", "Jonah"], ["Mic", "Micah"],
   ["Nah", "Nahum"], ["Hab", "Habakkuk"], ["Zeph", "Zephaniah"],
   ["Hag", "Haggai"], ["Zech", "Zechariah"], ["Mal", "Malachi"],
-  // כתובים
+];
+const KETUVIM: [string, string][] = [
   ["Ps", "Psalms"], ["Prov", "Proverbs"], ["Job", "Job"],
   ["Song", "Song of Songs"], ["Ruth", "Ruth"], ["Lam", "Lamentations"],
   ["Eccl", "Ecclesiastes"], ["Esth", "Esther"], ["Dan", "Daniel"],
   ["Ezra", "Ezra"], ["Neh", "Nehemiah"],
   ["1Chr", "I Chronicles"], ["2Chr", "II Chronicles"],
 ];
+const ALL_BOOKS = [...TORAH, ...NEVI, ...KETUVIM];
+
+const SCOPE_MAP: Record<string, [string, string][]> = {
+  torah: TORAH, nevi: NEVI, ketuvim: KETUVIM, all: ALL_BOOKS,
+};
 
 function stripToLetters(text: string): string {
   return text.replace(/[^א-ת\s]/g, "").replace(/\s+/g, " ").trim();
@@ -106,19 +112,28 @@ async function insertWords(words: WordData[]) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const scope = new URL(req.url).searchParams.get("scope") ?? "all";
+  const books = SCOPE_MAP[scope] ?? ALL_BOOKS;
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       const send = (data: object) =>
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
 
+      // Start verseIndex after existing data so sections can be seeded independently
+      type MaxRow = { maxIdx: number | null };
+      const [{ maxIdx }] = await prisma.$queryRawUnsafe<MaxRow[]>(
+        `SELECT MAX(verseIndex) as maxIdx FROM "VerseText"`
+      );
+      let verseIndex = (maxIdx ?? 0) + 1;
+
       let totalVerses = 0;
       let totalWords = 0;
-      let verseIndex = 1;
 
       try {
-        for (const [oshbId, bookId] of BOOKS) {
+        for (const [oshbId, bookId] of books) {
           send({ type: "progress", book: bookId, status: "downloading" });
 
           const res = await fetch(
