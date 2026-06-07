@@ -53,7 +53,7 @@ export default function HomePage() {
             התנ״ך שבקרבי
           </h1>
           <p className="text-stone-500 text-xl leading-relaxed max-w-xl mx-auto">
-            חיבור אישי לכתבי הקודש — כלים שמחברים בין הלב לבין המילה הנצחית
+            חיבור אישי לתורה נביאים וכתובים — כלים שמחברים בין הלב לבין המילה הנצחית
           </p>
           <div className="mt-6 w-16 h-1 bg-amber-400 mx-auto rounded-full" />
         </div>

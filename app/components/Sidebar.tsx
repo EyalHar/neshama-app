@@ -62,7 +62,7 @@ export default function Sidebar() {
           <h1 className="text-xl font-bold text-amber-300 leading-snug">
             התנ״ך שבקרבי
           </h1>
-          <p className="text-stone-400 text-xs mt-1">חיבור אישי לכתבי הקודש</p>
+          <p className="text-stone-400 text-xs mt-1">חיבור אישי לתורה נביאים וכתובים</p>
         </div>
 
         {/* Nav */}
