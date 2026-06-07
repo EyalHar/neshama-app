@@ -10,14 +10,6 @@ const FEATURES = [
     labelColor: "text-stone-700",
   },
   {
-    href: "/search",
-    title: "חיפוש בתנ״ך",
-    description: "חפש מילה או ביטוי בכל התנ״ך וקבל את כל הפסוקים שבהם הוא מופיע",
-    icon: "🔍",
-    color: "from-teal-50 to-cyan-50 border-teal-200 hover:border-teal-400",
-    labelColor: "text-teal-700",
-  },
-  {
     href: "/letters",
     title: "אות ראשונה ואחרונה",
     description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",
@@ -27,11 +19,11 @@ const FEATURES = [
   },
   {
     href: "/advanced",
-    title: "חיפוש מתקדם",
-    description: "חיפוש תת-מחרוזת, חיפוש לפי שורש עברי וחיפוש לפי בניין — על כל מילות התנ״ך",
-    icon: "⚙",
-    color: "from-slate-50 to-gray-50 border-slate-200 hover:border-slate-400",
-    labelColor: "text-slate-700",
+    title: "חיפוש בתנ״ך",
+    description: "חיפוש בסיסי, חיפוש תת-מחרוזת, חיפוש לפי שורש עברי וחיפוש לפי בניין — על כל מילות התנ״ך",
+    icon: "🔍",
+    color: "from-teal-50 to-cyan-50 border-teal-200 hover:border-teal-400",
+    labelColor: "text-teal-700",
   },
   {
     href: "/quiz",

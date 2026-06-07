@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TANAKH_BOOKS } from "@/lib/tanakh";
+import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
 
-const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
 type VerseRow = { book: string; chapter: number; verse: number; text: string; plainText: string };
 type CountRow = { total: number | bigint };
@@ -16,35 +15,35 @@ export async function GET(req: NextRequest) {
 
   if (!q || q.length < 2) return NextResponse.json({ results: [], total: 0, page, pageSize });
 
+  const scope = searchParams.get("scope") ?? "tanakh";
+  const bookIds = scopeBookIds(scope);
+  const scopeFilter = bookIds ? `AND book IN (${bookIds.map(() => "?").join(",")})` : "";
+  const scopeArgs = bookIds ?? [];
+
+  // "whole" mode matches q as a complete word/phrase (space-bounded in plainText),
+  // so a search for "משה" doesn't match inside "חמשה". Plain mode matches any substring.
+  const whole = searchParams.get("whole") === "1";
+  const matchClause = whole
+    ? `(plainText = ? OR plainText LIKE ? OR plainText LIKE ? OR plainText LIKE ?)`
+    : `plainText LIKE ?`;
+  const matchArgs = whole ? [q, `${q} %`, `% ${q}`, `% ${q} %`] : [`%${q}%`];
+
+  const bookOrderCase = TANAKH_BOOKS.map((b, i) => `WHEN '${b.id}' THEN ${i}`).join(" ");
+
   const [countRows, rows] = await Promise.all([
     prisma.$queryRawUnsafe<CountRow[]>(
-      `SELECT COUNT(*) as total FROM "VerseText" WHERE plainText LIKE ?`, `%${q}%`
+      `SELECT COUNT(*) as total FROM "VerseText" WHERE ${matchClause} ${scopeFilter}`, ...matchArgs, ...scopeArgs
     ),
     prisma.$queryRawUnsafe<VerseRow[]>(
       `SELECT book, chapter, verse, text, plainText FROM "VerseText"
-       WHERE plainText LIKE ?
-       ORDER BY (SELECT idx FROM (
-         SELECT book as b, MIN(verseIndex) as idx FROM "VerseText" GROUP BY book
-       ) WHERE b = book) + chapter * 1000 + verse
+       WHERE ${matchClause} ${scopeFilter}
+       ORDER BY CASE book ${bookOrderCase} ELSE 999 END, chapter, verse
        LIMIT ? OFFSET ?`,
-      `%${q}%`, pageSize, offset
-    ).catch(() =>
-      // fallback without subquery if it fails
-      prisma.$queryRawUnsafe<VerseRow[]>(
-        `SELECT book, chapter, verse, text, plainText FROM "VerseText" WHERE plainText LIKE ? LIMIT ? OFFSET ?`,
-        `%${q}%`, pageSize, offset
-      )
+      ...matchArgs, ...scopeArgs, pageSize, offset
     ),
   ]);
 
   const total = Number(countRows[0]?.total ?? 0);
-
-  rows.sort((a, b) => {
-    const diff = (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999);
-    if (diff !== 0) return diff;
-    if (a.chapter !== b.chapter) return a.chapter - b.chapter;
-    return a.verse - b.verse;
-  });
 
   const results = rows.map((r) => ({
     ...r,

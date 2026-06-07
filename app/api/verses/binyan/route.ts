@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TANAKH_BOOKS } from "@/lib/tanakh";
+import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
@@ -17,14 +17,22 @@ export const BINYANIM = [
   { id: "t", he: "הִתְפַּעֵל", en: "Hitpael" },
 ];
 
+const PAGE_SIZE = 200;
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const stem = searchParams.get("stem");
+  const scope = searchParams.get("scope") ?? "tanakh";
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1") || 1);
   if (!stem) return NextResponse.json({ results: [] });
 
+  const bookIds = scopeBookIds(scope);
+  const scopeFilter = bookIds ? `AND book IN (${bookIds.map(() => "?").join(",")})` : "";
+  const scopeArgs = bookIds ?? [];
+
   const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
-    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ? LIMIT 5000`,
-    `HV${stem}%`
+    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ? ${scopeFilter} LIMIT 5000`,
+    `HV${stem}%`, ...scopeArgs
   );
 
   const verseMap = new Map<string, { book: string; chapter: number; verse: number; forms: Set<string> }>();
@@ -42,19 +50,22 @@ export async function GET(req: NextRequest) {
     return a.verse - b.verse;
   });
 
-  const top200 = verseKeys.slice(0, 200);
-  if (top200.length === 0) return NextResponse.json({ results: [], total: 0 });
+  const total = verseKeys.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const offset = (page - 1) * PAGE_SIZE;
+  const pageSlice = verseKeys.slice(offset, offset + PAGE_SIZE);
+  if (pageSlice.length === 0) return NextResponse.json({ results: [], total, pages, page, pageSize: PAGE_SIZE });
 
   const verseTexts = await prisma.$queryRawUnsafe<VerseRow[]>(
     `SELECT book, chapter, verse, text FROM "VerseText" WHERE ${
-      top200.map(() => `(book = ? AND chapter = ? AND verse = ?)`).join(" OR ")
+      pageSlice.map(() => `(book = ? AND chapter = ? AND verse = ?)`).join(" OR ")
     }`,
-    ...top200.flatMap((v) => [v.book, v.chapter, v.verse])
+    ...pageSlice.flatMap((v) => [v.book, v.chapter, v.verse])
   );
 
   const textMap = new Map(verseTexts.map((v) => [`${v.book}|${v.chapter}|${v.verse}`, v.text]));
 
-  const results = top200.map((v) => ({
+  const results = pageSlice.map((v) => ({
     book: v.book,
     bookHe: TANAKH_BOOKS.find((b) => b.id === v.book)?.he ?? v.book,
     chapter: v.chapter,
@@ -63,5 +74,5 @@ export async function GET(req: NextRequest) {
     forms: [...v.forms],
   }));
 
-  return NextResponse.json({ results, total: verseMap.size });
+  return NextResponse.json({ results, total, pages, page, pageSize: PAGE_SIZE });
 }

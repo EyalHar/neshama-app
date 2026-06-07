@@ -80,6 +80,15 @@ export function toHebrewNumeral(n: number): string {
 
 export type Section = "תורה" | "נביאים" | "כתובים";
 
+const SECTION_BY_SCOPE: Record<string, Section> = { torah: "תורה", nevi: "נביאים", ketuvim: "כתובים" };
+
+// Returns the book ids included in a search scope ("tanakh" / no match → null = no filter)
+export function scopeBookIds(scope: string): string[] | null {
+  const section = SECTION_BY_SCOPE[scope];
+  if (!section) return null;
+  return TANAKH_BOOKS.filter((b) => b.section === section).map((b) => b.id);
+}
+
 // Given a set of completed (bookId, chapter) pairs, return which section just completed (if any)
 export function checkSectionCompletion(
   completedEntries: { book: string; chapter: number }[],
