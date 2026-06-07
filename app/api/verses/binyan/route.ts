@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   const scopeArgs = bookIds ?? [];
 
   const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
-    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ? ${scopeFilter} LIMIT 5000`,
+    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ? ${scopeFilter}`,
     `HV${stem}%`, ...scopeArgs
   );
 
@@ -51,10 +51,11 @@ export async function GET(req: NextRequest) {
   });
 
   const total = verseKeys.length;
+  const occurrences = wordRows.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const offset = (page - 1) * PAGE_SIZE;
   const pageSlice = verseKeys.slice(offset, offset + PAGE_SIZE);
-  if (pageSlice.length === 0) return NextResponse.json({ results: [], total, pages, page, pageSize: PAGE_SIZE });
+  if (pageSlice.length === 0) return NextResponse.json({ results: [], total, occurrences, pages, page, pageSize: PAGE_SIZE });
 
   const verseTexts = await prisma.$queryRawUnsafe<VerseRow[]>(
     `SELECT book, chapter, verse, text FROM "VerseText" WHERE ${
@@ -74,5 +75,5 @@ export async function GET(req: NextRequest) {
     forms: [...v.forms],
   }));
 
-  return NextResponse.json({ results, total, pages, page, pageSize: PAGE_SIZE });
+  return NextResponse.json({ results, total, occurrences, pages, page, pageSize: PAGE_SIZE });
 }

@@ -76,6 +76,7 @@ export default function AdvancedPage() {
   const [binyanStem, setBinyanStem] = useState("q");
   const [results, setResults] = useState<Result[]>([]);
   const [total, setTotal] = useState<number | null>(null);
+  const [occurrences, setOccurrences] = useState<number | null>(null);
   const [rootView, setRootView] = useState<"direct" | "etymological">("direct");
   const [rootDirectTotal, setRootDirectTotal] = useState<number | null>(null);
   const [rootEtymTotal, setRootEtymTotal] = useState<number | null>(null);
@@ -102,6 +103,7 @@ export default function AdvancedPage() {
     setSearched(true);
     setResults([]);
     setTotal(null);
+    setOccurrences(null);
 
     try {
       const res = await fetch(url, { signal: controller.signal });
@@ -109,6 +111,7 @@ export default function AdvancedPage() {
       if (abortRef.current !== controller) return; // superseded by a newer search
       setResults(data.results ?? []);
       setTotal(data.total ?? 0);
+      setOccurrences(typeof data.occurrences === "number" ? data.occurrences : null);
       setPages(data.pages ?? 1);
       setPageSize(data.pageSize ?? 500);
       setRootDirectTotal(isRoot ? (data.directTotal ?? data.total ?? 0) : null);
@@ -399,6 +402,7 @@ export default function AdvancedPage() {
             <div className="flex items-center justify-between flex-wrap gap-2 my-4">
               <p className="text-stone-500 text-sm">
                 נמצאו {total?.toLocaleString()} פסוקים
+                {occurrences != null && ` (${occurrences.toLocaleString()} מופעים)`}
                 {pages > 1 && ` · עמוד ${page} מתוך ${pages}`}
               </p>
               {pages > 1 && (

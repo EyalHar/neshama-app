@@ -4,7 +4,7 @@ import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
 
 
 type VerseRow = { book: string; chapter: number; verse: number; text: string; plainText: string };
-type CountRow = { total: number | bigint };
+type CountRow = { total: number | bigint; occurrences: number | bigint | null };
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const pageSize = 500;
   const offset = (page - 1) * pageSize;
 
-  if (!q || q.length < 2) return NextResponse.json({ results: [], total: 0, page, pageSize });
+  if (!q || q.length < 2) return NextResponse.json({ results: [], total: 0, occurrences: 0, page, pageSize });
 
   const scope = searchParams.get("scope") ?? "tanakh";
   const bookIds = scopeBookIds(scope);
@@ -30,9 +30,18 @@ export async function GET(req: NextRequest) {
 
   const bookOrderCase = TANAKH_BOOKS.map((b, i) => `WHEN '${b.id}' THEN ${i}`).join(" ");
 
+  // Count not just matching verses but total occurrences of q within them, via the
+  // standard SQL trick: (length of text - length with q removed) / length of q.
+  // In "whole" mode, occurrences are space-padded so e.g. "משה" doesn't count "ומשה".
+  const occurrencesExpr = whole
+    ? `SUM((LENGTH(' ' || plainText || ' ') - LENGTH(REPLACE(' ' || plainText || ' ', ?, ''))) / LENGTH(?))`
+    : `SUM((LENGTH(plainText) - LENGTH(REPLACE(plainText, ?, ''))) / LENGTH(?))`;
+  const occurrencesArgs = whole ? [` ${q} `, ` ${q} `] : [q, q];
+
   const [countRows, rows] = await Promise.all([
     prisma.$queryRawUnsafe<CountRow[]>(
-      `SELECT COUNT(*) as total FROM "VerseText" WHERE ${matchClause} ${scopeFilter}`, ...matchArgs, ...scopeArgs
+      `SELECT COUNT(*) as total, ${occurrencesExpr} as occurrences FROM "VerseText" WHERE ${matchClause} ${scopeFilter}`,
+      ...occurrencesArgs, ...matchArgs, ...scopeArgs
     ),
     prisma.$queryRawUnsafe<VerseRow[]>(
       `SELECT book, chapter, verse, text, plainText FROM "VerseText"
@@ -44,11 +53,12 @@ export async function GET(req: NextRequest) {
   ]);
 
   const total = Number(countRows[0]?.total ?? 0);
+  const occurrences = countRows[0]?.occurrences != null ? Number(countRows[0].occurrences) : null;
 
   const results = rows.map((r) => ({
     ...r,
     bookHe: TANAKH_BOOKS.find((b) => b.id === r.book)?.he ?? r.book,
   }));
 
-  return NextResponse.json({ results, total, page, pageSize, pages: Math.ceil(total / pageSize) });
+  return NextResponse.json({ results, total, occurrences, page, pageSize, pages: Math.ceil(total / pageSize) });
 }

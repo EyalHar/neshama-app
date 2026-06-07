@@ -62,17 +62,21 @@ async function fetchWordRows(numbers: string[]): Promise<WordRow[]> {
   });
 }
 
-// Groups word rows into verses, applying scope filtering and excluding verses already claimed elsewhere
-function groupByVerse(wordRows: WordRow[], bookIds: string[] | null, exclude: Set<string>): Map<string, VerseGroup> {
+// Groups word rows into verses, applying scope filtering and excluding verses already claimed
+// elsewhere. Also counts total word-level occurrences (a verse can contain the same root more
+// than once), which can exceed the verse count returned alongside it.
+function groupByVerse(wordRows: WordRow[], bookIds: string[] | null, exclude: Set<string>): { verseMap: Map<string, VerseGroup>; occurrences: number } {
   const verseMap = new Map<string, VerseGroup>();
+  let occurrences = 0;
   for (const w of wordRows) {
     if (bookIds && !bookIds.includes(w.book)) continue;
     const key = `${w.book}|${w.chapter}|${w.verse}`;
     if (exclude.has(key)) continue;
     if (!verseMap.has(key)) verseMap.set(key, { book: w.book, chapter: w.chapter, verse: w.verse, forms: new Set() });
     verseMap.get(key)!.forms.add(w.word);
+    occurrences++;
   }
-  return verseMap;
+  return { verseMap, occurrences };
 }
 
 const PAGE_SIZE = 200;
@@ -143,8 +147,9 @@ export async function GET(req: NextRequest) {
       `SELECT book, chapter, verse, word FROM "WordEntry" WHERE ${nums.map(() => `lemma LIKE ?`).join(" OR ")}`,
       ...nums.map((n) => `%${n}`)
     );
-    const { results, total, pages } = await resolveVerseGroup(groupByVerse(wordRows, bookIds, new Set()), page);
-    return NextResponse.json({ results, total, pages, page, pageSize: PAGE_SIZE, directTotal: total, etymologicalTotal: 0 });
+    const { verseMap, occurrences } = groupByVerse(wordRows, bookIds, new Set());
+    const { results, total, pages } = await resolveVerseGroup(verseMap, page);
+    return NextResponse.json({ results, total, occurrences, pages, page, pageSize: PAGE_SIZE, directTotal: total, etymologicalTotal: 0 });
   }
 
   // Step 2: BFS to collect the full root family, keeping track of which numbers were directly
@@ -160,18 +165,20 @@ export async function GET(req: NextRequest) {
     fetchWordRows(etymNumbers),
   ]);
 
-  const directVerseMap = groupByVerse(directWordRows, bookIds, new Set());
+  const { verseMap: directVerseMap, occurrences: directOccurrences } = groupByVerse(directWordRows, bookIds, new Set());
   // A verse that already appears among the direct matches stays there — etymological list only
   // holds verses reached exclusively through the expanded (non-seed) family
-  const etymVerseMap = groupByVerse(etymWordRows, bookIds, new Set(directVerseMap.keys()));
+  const { verseMap: etymVerseMap, occurrences: etymOccurrences } = groupByVerse(etymWordRows, bookIds, new Set(directVerseMap.keys()));
 
   // Only resolve (fetch verse text + paginate) the view the client is currently displaying
   const activeMap = view === "etymological" ? etymVerseMap : directVerseMap;
+  const activeOccurrences = view === "etymological" ? etymOccurrences : directOccurrences;
   const { results, total, pages } = await resolveVerseGroup(activeMap, page);
 
   return NextResponse.json({
     results,
     total,
+    occurrences: activeOccurrences,
     pages,
     page,
     pageSize: PAGE_SIZE,
