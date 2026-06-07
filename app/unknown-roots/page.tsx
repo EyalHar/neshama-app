@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { toHebrewNumeral } from "@/lib/tanakh";
+
+type VerseRef = { book: string; bookHe: string; chapter: number; verse: number; text: string };
 
 type Row = {
-  id: number; strongsNum: string; lemmaHe: string; lemmaPlain: string;
-  xlit: string; definition: string; derivation: string; issue: string;
+  id: number; strongsNum: string; lemmaHe: string;
   suggestedRoot: string | null;
-};
-
-const ISSUE_LABELS: Record<string, string> = {
-  unused_root: "שורש לא בשימוש",
-  no_parent: "ללא הפניה ידועה",
+  verseRef: VerseRef | null;
 };
 
 export default function UnknownRootsPage() {
@@ -78,59 +77,66 @@ export default function UnknownRootsPage() {
 
           {/* Table */}
           <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-stone-50 border-b border-stone-200">
+            <table className="w-full text-sm border-separate border-spacing-0">
+              <thead className="bg-stone-50">
                 <tr>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">מספר</th>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">מילה</th>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">הגייה</th>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">הגדרה</th>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">מקור (Strong's)</th>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">בעיה</th>
-                  <th className="text-right px-4 py-3 text-stone-600 font-medium">הצעת שורש</th>
-                  <th className="px-4 py-3"></th>
+                  <th className="text-right px-4 py-3 text-stone-600 font-medium border-b border-stone-200">מילה</th>
+                  <th className="text-right px-4 py-3 text-stone-600 font-medium border-b border-stone-200">הפסוק שבו המילה נמצאת בתנ״ך</th>
+                  <th className="text-right px-4 py-3 text-stone-600 font-medium border-b border-stone-200">הצעת שורש</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((row) => (
-                  <tr key={row.id} className="border-b border-stone-100 hover:bg-stone-50">
-                    <td className="px-4 py-2.5">
+                {filtered.map((row, i) => (
+                  <tr key={row.id} className={`${i % 2 === 1 ? "bg-stone-50/40" : ""} hover:bg-amber-50/40 transition-colors`}>
+                    <td className="px-4 py-3 align-top border-b border-stone-100">
+                      <p className="font-bold text-lg text-stone-800">{row.lemmaHe}</p>
                       <a
                         href={`https://www.blueletterbible.org/lexicon/${row.strongsNum.toLowerCase()}/he/wlc/0-1/`}
                         target="_blank" rel="noopener noreferrer"
-                        className="text-amber-700 underline font-mono text-xs"
+                        className="text-amber-700 hover:underline font-mono text-xs"
                       >
                         {row.strongsNum}
                       </a>
                     </td>
-                    <td className="px-4 py-2.5 font-bold text-lg">{row.lemmaHe}</td>
-                    <td className="px-4 py-2.5 text-stone-500 text-xs">{row.xlit}</td>
-                    <td className="px-4 py-2.5 text-stone-600 max-w-xs truncate" title={row.definition}>{row.definition}</td>
-                    <td className="px-4 py-2.5 text-stone-400 text-xs max-w-xs truncate italic" title={row.derivation}>{row.derivation}</td>
-                    <td className="px-4 py-2.5">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${row.issue === "unused_root" ? "bg-orange-100 text-orange-700" : "bg-stone-100 text-stone-600"}`}>
-                        {ISSUE_LABELS[row.issue] ?? row.issue}
-                      </span>
+                    <td className="px-4 py-3 align-top border-b border-stone-100 max-w-md">
+                      {row.verseRef ? (
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium text-amber-700 mb-1">
+                              {row.verseRef.bookHe} {toHebrewNumeral(row.verseRef.chapter)}&lrm;:{toHebrewNumeral(row.verseRef.verse)}
+                            </p>
+                            <p className="text-stone-600 leading-relaxed">{row.verseRef.text}</p>
+                          </div>
+                          <Link
+                            href={`/tanakh?book=${encodeURIComponent(row.verseRef.book)}&chapter=${row.verseRef.chapter}`}
+                            className="shrink-0 text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap"
+                          >
+                            קרא פרק ←
+                          </Link>
+                        </div>
+                      ) : (
+                        <span className="text-stone-300 text-xs">לא נמצא פסוק</span>
+                      )}
                     </td>
-                    <td className="px-4 py-2.5">
-                      <input
-                        type="text"
-                        value={editing[row.id] ?? row.suggestedRoot ?? ""}
-                        onChange={(e) => setEditing((prev) => ({ ...prev, [row.id]: e.target.value }))}
-                        onKeyDown={(e) => e.key === "Enter" && save(row)}
-                        placeholder="הצע שורש..."
-                        className="border border-stone-200 rounded-lg px-2 py-1 text-sm w-24 focus:outline-none focus:ring-1 focus:ring-amber-400 text-right"
-                        dir="rtl"
-                      />
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <button
-                        onClick={() => save(row)}
-                        disabled={saving === row.id}
-                        className="text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-2 py-1 rounded-lg transition-colors disabled:opacity-40"
-                      >
-                        {saving === row.id ? "..." : "שמור"}
-                      </button>
+                    <td className="px-4 py-3 align-top border-b border-stone-100">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editing[row.id] ?? row.suggestedRoot ?? ""}
+                          onChange={(e) => setEditing((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                          onKeyDown={(e) => e.key === "Enter" && save(row)}
+                          placeholder="הצע שורש..."
+                          className="border border-stone-200 rounded-lg px-2 py-1 text-sm w-24 focus:outline-none focus:ring-1 focus:ring-amber-400 text-right"
+                          dir="rtl"
+                        />
+                        <button
+                          onClick={() => save(row)}
+                          disabled={saving === row.id}
+                          className="text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-40 whitespace-nowrap"
+                        >
+                          {saving === row.id ? "..." : "שמור"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
