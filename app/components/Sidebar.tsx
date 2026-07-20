@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
   { href: "/letters", label: "אות ראשונה ואחרונה", icon: "א" },
   { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
+  { href: "/events", label: "אירועי התנ״ך", icon: "📜" },
   { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },
   { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },

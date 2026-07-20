@@ -26,6 +26,14 @@ const FEATURES = [
     labelColor: "text-teal-700",
   },
   {
+    href: "/events",
+    title: "אירועי התנ״ך",
+    description: "הזן אירוע מהתנ״ך וקבל את כל המקורות בהם הוא מוזכר — מעמד מתן תורה, קריעת ים סוף ועוד",
+    icon: "📜",
+    color: "from-rose-50 to-pink-50 border-rose-200 hover:border-rose-400",
+    labelColor: "text-rose-700",
+  },
+  {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",
