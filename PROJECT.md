@@ -28,9 +28,8 @@ neshama-app/
 │   │   │   ├── reset/          ← Delete all user progress
 │   │   │   └── stats/          ← Completed chapters count
 │   │   ├── verses/
-│   │   │   ├── binyan/         ← Search by Hebrew verb stem
 │   │   │   ├── letters/        ← Search by first/last letter
-│   │   │   ├── root/           ← Search by Hebrew root (+ etymological)
+│   │   │   ├── root/           ← Search by Hebrew root and/or verb stem (+ etymological)
 │   │   │   └── substring/      ← Substring / basic word search
 │   │   └── admin/
 │   │       ├── seed-oshb/      ← Seed morphology data
@@ -67,7 +66,7 @@ neshama-app/
 | `/` | Home — feature cards linking to all sections |
 | `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti |
 | `/letters` | Search verses by first and/or last Hebrew letter |
-| `/advanced` | Multi-tab search: basic, substring, root (direct/etymological), binyan |
+| `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological) |
 | `/quiz` | Fill-in-the-blank verse quiz with 4-choice answers |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
@@ -104,8 +103,7 @@ neshama-app/
 
 ### Verse Search
 - `GET /api/verses/substring?q=&scope=&whole=&page=` — Word/substring search (500/page)
-- `GET /api/verses/root?root=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree (200/page)
-- `GET /api/verses/binyan?stem=&scope=&page=` — Verb stem (binyan) filter
+- `GET /api/verses/root?root=&stem=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) filter; `root` and `stem` are each optional but at least one is required (200/page)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
 
 ### AI
@@ -125,8 +123,7 @@ neshama-app/
 
 ### Advanced Search
 - **Basic / Substring** — Hebrew text search with pagination
-- **Root Search** — Enter Hebrew root, maps to Strong's number, BFS expands to full family tree; toggle direct vs. etymological view; scope filter (All / Torah / Nevi'im / Ketuvim)
-- **Binyan Search** — Filter by verb stem: Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael
+- **Root + Binyan Search** — Enter a Hebrew root and/or filter by verb stem (Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael); when both are set, results are intersected (word must match the root family *and* the chosen binyan). Root alone maps to a Strong's number and BFS-expands to the full family tree with a direct vs. etymological view toggle; binyan alone (no root) is a plain morph-code filter with no etymological view. Scope filter (All / Torah / Nevi'im / Ketuvim)
 - **Letter Search** — Verses starting and/or ending with chosen Hebrew letters
 
 ### Neshama (Soul)

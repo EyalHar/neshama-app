@@ -7,6 +7,7 @@ import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 
 const BINYANIM = [
+  { id: "all", label: "כל הבניינים" },
   { id: "q", label: "קַל (Qal)" },
   { id: "N", label: "נִפְעַל (Niphal)" },
   { id: "p", label: "פִּיעֵל (Piel)" },
@@ -21,7 +22,7 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root" | "binyan";
+type Tab = "basic" | "substring" | "root";
 
 const SCOPES = [
   { id: "tanakh", label: "כל התנ״ך" },
@@ -78,7 +79,7 @@ export default function AdvancedPage() {
   const [lastFavoritesOnly, setLastFavoritesOnly] = useState(false);
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
-  const [binyanStem, setBinyanStem] = useState("q");
+  const [stem, setStem] = useState("all");
   const [results, setResults] = useState<Result[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [occurrences, setOccurrences] = useState<number | null>(null);
@@ -94,7 +95,7 @@ export default function AdvancedPage() {
   const [lastScope, setLastScope] = useState<typeof SCOPES[number]["id"]>("tanakh");
   const [lastSubstringQ, setLastSubstringQ] = useState("");
   const [lastRootQ, setLastRootQ] = useState("");
-  const [lastBinyanStem, setLastBinyanStem] = useState("q");
+  const [lastStem, setLastStem] = useState("all");
   const abortRef = useRef<AbortController | null>(null);
 
   async function search(url: string, resetPage = true) {
@@ -139,6 +140,14 @@ export default function AdvancedPage() {
     return fav ? "&favoritesOnly=1" : "";
   }
 
+  function rootUrl(rootValue: string, stemValue: string, scopeValue: string, view: "direct" | "etymological", p: number, fav: boolean) {
+    const params = new URLSearchParams({ scope: scopeValue, view, page: String(p) });
+    if (rootValue) params.set("root", rootValue);
+    if (stemValue && stemValue !== "all") params.set("stem", stemValue);
+    if (fav) params.set("favoritesOnly", "1");
+    return `/api/verses/root?${params.toString()}`;
+  }
+
   function handleBasic(e: React.FormEvent, p = 1) {
     e.preventDefault();
     if (basicQ.trim().length < 2) return;
@@ -166,42 +175,34 @@ export default function AdvancedPage() {
       const whole = tab === "basic" ? "&whole=1" : "";
       search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}`, false);
     } else if (tab === "root") {
-      search(`/api/verses/root?root=${encodeURIComponent(lastRootQ)}&scope=${lastScope}&view=${rootView}&page=${p}${favParam(lastFavoritesOnly)}`, false);
-    } else if (tab === "binyan") {
-      search(`/api/verses/binyan?stem=${lastBinyanStem}&scope=${lastScope}&page=${p}${favParam(lastFavoritesOnly)}`, false);
+      search(rootUrl(lastRootQ, lastStem, lastScope, rootView, p, lastFavoritesOnly), false);
     }
   }
 
   function handleRoot(e: React.FormEvent, p = 1) {
     e.preventDefault();
-    if (!rootQ.trim()) return;
+    const hasRoot = rootQ.trim().length > 0;
+    const hasStem = stem !== "all";
+    if (!hasRoot && !hasStem) return;
     setLastRootQ(rootQ.trim());
+    setLastStem(stem);
     setLastScope(scope);
     setLastFavoritesOnly(favoritesOnly);
     setRootView("direct");
     setPage(p);
-    search(`/api/verses/root?root=${encodeURIComponent(rootQ.trim())}&scope=${scope}&view=direct&page=${p}${favParam(favoritesOnly)}`, p === 1);
+    search(rootUrl(rootQ.trim(), stem, scope, "direct", p, favoritesOnly), p === 1);
   }
 
   function switchRootView(view: "direct" | "etymological") {
     if (view === rootView) return;
     setRootView(view);
-    search(`/api/verses/root?root=${encodeURIComponent(lastRootQ)}&scope=${lastScope}&view=${view}&page=1${favParam(lastFavoritesOnly)}`, true);
-  }
-
-  function handleBinyan(p = 1) {
-    setLastBinyanStem(binyanStem);
-    setLastScope(scope);
-    setLastFavoritesOnly(favoritesOnly);
-    setPage(p);
-    search(`/api/verses/binyan?stem=${binyanStem}&scope=${scope}&page=${p}${favParam(favoritesOnly)}`, p === 1);
+    search(rootUrl(lastRootQ, lastStem, lastScope, view, 1, lastFavoritesOnly), true);
   }
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "basic", label: "חיפוש בסיסי" },
     { id: "substring", label: "חיפוש תת-מחרוזת" },
-    { id: "root", label: "חיפוש לפי שורש" },
-    { id: "binyan", label: "חיפוש לפי בניין" },
+    { id: "root", label: "חיפוש לפי שורש ובניין" },
   ];
 
   const isEmpty = searched && !loading && (
@@ -313,45 +314,37 @@ export default function AdvancedPage() {
         </div>
       )}
 
-      {/* Root */}
+      {/* Root + Binyan */}
       {tab === "root" && (
         <div>
           <p className="text-stone-500 text-sm mb-4">
-            הקלד שורש (ללא ניקוד). המערכת מוצאת את מספר Strong's של השורש ומחזירה את כל צורותיו בתנ״ך.
+            הקלד שורש (ללא ניקוד) ו/או בחר בניין — אפשר להשתמש בשניהם יחד כדי לצמצם לתוצאות שהן גם מהשורש וגם מהבניין המבוקשים.
           </p>
           <form onSubmit={handleRoot} className="flex gap-2 mb-4">
             <input
               type="text"
               value={rootQ}
               onChange={(e) => setRootQ(e.target.value)}
-              placeholder="לדוגמה: ברא  אהב  שמר"
+              placeholder="לדוגמה: ברא  אהב  שמר (אופציונלי)"
               className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
             />
             <button
               type="submit"
-              disabled={!rootQ.trim() || loading}
+              disabled={(!rootQ.trim() && stem === "all") || loading}
               className="bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
             >
               חפש
             </button>
           </form>
-        </div>
-      )}
-
-      {/* Binyan */}
-      {tab === "binyan" && (
-        <div>
-          <p className="text-stone-500 text-sm mb-4">
-            מוצא את כל הפסוקים שמכילים פועל בבניין שנבחר.
-          </p>
           <div className="flex flex-wrap gap-2 mb-4">
             {BINYANIM.map((b) => (
               <button
                 key={b.id}
-                onClick={() => setBinyanStem(b.id)}
+                type="button"
+                onClick={() => setStem(b.id)}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                  binyanStem === b.id
+                  stem === b.id
                     ? "bg-amber-700 text-white"
                     : "bg-white border border-stone-200 text-stone-700 hover:border-amber-400"
                 }`}
@@ -360,13 +353,6 @@ export default function AdvancedPage() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => handleBinyan(1)}
-            disabled={loading}
-            className="bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-medium px-6 py-2.5 rounded-xl transition-colors"
-          >
-            חפש
-          </button>
         </div>
       )}
 

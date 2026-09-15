@@ -48,19 +48,28 @@ function extractStrongsNumber(lemma: string): string | null {
   return m ? m[1] : null;
 }
 
-async function fetchWordRows(numbers: string[]): Promise<WordRow[]> {
+async function fetchWordRows(numbers: string[], stem: string | null): Promise<WordRow[]> {
   if (numbers.length === 0) return [];
   const plain = numbers.map((n) => n.replace(/^H/, ""));
+  const stemFilter = stem ? ` AND morph LIKE ?` : "";
   const rows = await prisma.$queryRawUnsafe<(WordRow & { lemma: string })[]>(
     `SELECT book, chapter, verse, word, lemma FROM "WordEntry"
-     WHERE ${plain.map(() => `lemma LIKE ?`).join(" OR ")}`,
-    ...plain.map((n) => `%${n}%`)
+     WHERE (${plain.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
+    ...plain.map((n) => `%${n}%`), ...(stem ? [`HV${stem}%`] : [])
   );
   const numSet = new Set(plain);
   return rows.filter((r) => {
     const num = extractStrongsNumber(r.lemma);
     return num !== null && numSet.has(num);
   });
+}
+
+// Binyan-only search (no root given) — filters WordEntry by morph alone.
+async function fetchWordRowsByStem(stem: string): Promise<WordRow[]> {
+  return prisma.$queryRawUnsafe<WordRow[]>(
+    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ?`,
+    `HV${stem}%`
+  );
 }
 
 // Groups word rows into verses, applying scope filtering and excluding verses already claimed
@@ -135,10 +144,12 @@ async function resolveVerseGroup(verseMap: Map<string, VerseGroup>, page: number
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const root = stripDiacritics(searchParams.get("root")?.trim() ?? "");
+  const stem = searchParams.get("stem")?.trim() || null;
   const scope = searchParams.get("scope") ?? "tanakh";
   const view = searchParams.get("view") === "etymological" ? "etymological" : "direct";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1") || 1);
-  if (!root || root.length < 2) return NextResponse.json({ results: [] });
+  const hasRoot = root.length >= 2;
+  if (!hasRoot && !stem) return NextResponse.json({ results: [] });
 
   const bookIds = scopeBookIds(scope);
 
@@ -149,6 +160,16 @@ export async function GET(req: NextRequest) {
     const userId = await getCurrentUserId();
     if (!userId) return NextResponse.json({ results: [], total: 0, pages: 1, page, pageSize: PAGE_SIZE, directTotal: 0, etymologicalTotal: 0 });
     favoriteKeys = await getFavoriteVerseKeySet(userId);
+  }
+
+  // Binyan-only search: no root given, filter by verb stem alone — no root family, so no
+  // etymological view is possible.
+  if (!hasRoot) {
+    const wordRows = await fetchWordRowsByStem(stem!);
+    const grouped = groupByVerse(wordRows, bookIds, new Set());
+    const { map: verseMap, occurrences } = filterToFavorites(grouped.verseMap, grouped.occurrences, favoriteKeys);
+    const { results, total, pages } = await resolveVerseGroup(verseMap, page);
+    return NextResponse.json({ results, total, occurrences, pages, page, pageSize: PAGE_SIZE, directTotal: total, etymologicalTotal: 0 });
   }
 
   // Step 1: find seed Strong's numbers by lemmaPlain match
@@ -169,9 +190,10 @@ export async function GET(req: NextRequest) {
     }
 
     const nums = [...new Set(lemmaRows.map((r) => r.lemma.replace(/^[a-z/]+/, "").trim()).filter(Boolean))];
+    const stemFilter = stem ? ` AND morph LIKE ?` : "";
     const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
-      `SELECT book, chapter, verse, word FROM "WordEntry" WHERE ${nums.map(() => `lemma LIKE ?`).join(" OR ")}`,
-      ...nums.map((n) => `%${n}`)
+      `SELECT book, chapter, verse, word FROM "WordEntry" WHERE (${nums.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
+      ...nums.map((n) => `%${n}`), ...(stem ? [`HV${stem}%`] : [])
     );
     const grouped = groupByVerse(wordRows, bookIds, new Set());
     const { map: verseMap, occurrences } = filterToFavorites(grouped.verseMap, grouped.occurrences, favoriteKeys);
@@ -188,8 +210,8 @@ export async function GET(req: NextRequest) {
 
   // Step 3: fetch direct matches and etymologically-expanded matches separately
   const [directWordRows, etymWordRows] = await Promise.all([
-    fetchWordRows(seedNumbers),
-    fetchWordRows(etymNumbers),
+    fetchWordRows(seedNumbers, stem),
+    fetchWordRows(etymNumbers, stem),
   ]);
 
   const directGrouped = groupByVerse(directWordRows, bookIds, new Set());
