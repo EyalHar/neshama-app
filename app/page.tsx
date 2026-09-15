@@ -10,6 +10,14 @@ const FEATURES = [
     labelColor: "text-stone-700",
   },
   {
+    href: "/favorites",
+    title: "המועדפים שלי",
+    description: "פרקים ופסוקים ששמרת כמועדפים — הכל במקום אחד, מוכן לחזור אליו בכל רגע",
+    icon: "♥",
+    color: "from-red-50 to-rose-50 border-red-200 hover:border-red-400",
+    labelColor: "text-red-700",
+  },
+  {
     href: "/letters",
     title: "אות ראשונה ואחרונה",
     description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",

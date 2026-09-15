@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
+import { getCurrentUserId } from "@/lib/favorites";
 
 
 type VerseRow = { book: string; chapter: number; verse: number; text: string; plainText: string };
@@ -19,6 +20,18 @@ export async function GET(req: NextRequest) {
   const bookIds = scopeBookIds(scope);
   const scopeFilter = bookIds ? `AND book IN (${bookIds.map(() => "?").join(",")})` : "";
   const scopeArgs = bookIds ?? [];
+
+  // Favorites-only filter — restrict results to the signed-in user's favorited verses
+  const favoritesOnly = searchParams.get("favoritesOnly") === "1";
+  let favUserId: string | null = null;
+  if (favoritesOnly) {
+    favUserId = await getCurrentUserId();
+    if (!favUserId) return NextResponse.json({ results: [], total: 0, occurrences: 0, page, pageSize, pages: 1 });
+  }
+  const favFilter = favUserId
+    ? `AND EXISTS (SELECT 1 FROM "FavoriteVerse" fv WHERE fv.userId = ? AND fv.book = "VerseText".book AND fv.chapter = "VerseText".chapter AND fv.verse = "VerseText".verse)`
+    : "";
+  const favArgs = favUserId ? [favUserId] : [];
 
   // "whole" mode matches q as a complete word/phrase (space-bounded in plainText),
   // so a search for "משה" doesn't match inside "חמשה". Plain mode matches any substring.
@@ -40,15 +53,15 @@ export async function GET(req: NextRequest) {
 
   const [countRows, rows] = await Promise.all([
     prisma.$queryRawUnsafe<CountRow[]>(
-      `SELECT COUNT(*) as total, ${occurrencesExpr} as occurrences FROM "VerseText" WHERE ${matchClause} ${scopeFilter}`,
-      ...occurrencesArgs, ...matchArgs, ...scopeArgs
+      `SELECT COUNT(*) as total, ${occurrencesExpr} as occurrences FROM "VerseText" WHERE ${matchClause} ${scopeFilter} ${favFilter}`,
+      ...occurrencesArgs, ...matchArgs, ...scopeArgs, ...favArgs
     ),
     prisma.$queryRawUnsafe<VerseRow[]>(
       `SELECT book, chapter, verse, text, plainText FROM "VerseText"
-       WHERE ${matchClause} ${scopeFilter}
+       WHERE ${matchClause} ${scopeFilter} ${favFilter}
        ORDER BY CASE book ${bookOrderCase} ELSE 999 END, chapter, verse
        LIMIT ? OFFSET ?`,
-      ...matchArgs, ...scopeArgs, pageSize, offset
+      ...matchArgs, ...scopeArgs, ...favArgs, pageSize, offset
     ),
   ]);
 

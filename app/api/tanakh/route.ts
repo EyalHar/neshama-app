@@ -59,6 +59,8 @@ export async function GET(request: NextRequest) {
     let partialChapters: number[] = [];
     let completedBooks: string[] = [];
     let partialBooks: string[] = [];
+    let favoriteVerses: number[] = [];
+    let favoriteChapters: number[] = [];
 
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({ where: { email: session.user.email } });
@@ -107,10 +109,24 @@ export async function GET(request: NextRequest) {
             partialBooks.push(b.id);
           }
         }
+
+        // Favorite verses for this chapter
+        const favVerses = await prisma.favoriteVerse.findMany({
+          where: { userId: user.id, book, chapter },
+          select: { verse: true },
+        });
+        favoriteVerses = favVerses.map((v) => v.verse);
+
+        // Favorite chapters for this book
+        const favChapters = await prisma.favoriteChapter.findMany({
+          where: { userId: user.id, book },
+          select: { chapter: true },
+        });
+        favoriteChapters = favChapters.map((c) => c.chapter);
       }
     }
 
-    return NextResponse.json({ verses, readVerses, completedChapters, partialChapters, completedBooks, partialBooks });
+    return NextResponse.json({ verses, readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters });
   } catch {
     return NextResponse.json({ error: "Failed to fetch chapter" }, { status: 500 });
   }

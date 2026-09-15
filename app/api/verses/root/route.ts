@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
+import { getCurrentUserId, getFavoriteVerseKeySet } from "@/lib/favorites";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
@@ -79,6 +80,22 @@ function groupByVerse(wordRows: WordRow[], bookIds: string[] | null, exclude: Se
   return { verseMap, occurrences };
 }
 
+// Restricts a verse map to only the keys present in the favorites set (no-op when inactive).
+// When it does filter, the occurrence count is re-approximated from the remaining forms,
+// since the original word-level count no longer applies to the reduced verse set.
+function filterToFavorites(map: Map<string, VerseGroup>, occurrences: number, favoriteKeys: Set<string> | null): { map: Map<string, VerseGroup>; occurrences: number } {
+  if (!favoriteKeys) return { map, occurrences };
+  const filtered = new Map<string, VerseGroup>();
+  let filteredOccurrences = 0;
+  for (const [key, value] of map) {
+    if (favoriteKeys.has(key)) {
+      filtered.set(key, value);
+      filteredOccurrences += value.forms.size;
+    }
+  }
+  return { map: filtered, occurrences: filteredOccurrences };
+}
+
 const PAGE_SIZE = 200;
 
 async function resolveVerseGroup(verseMap: Map<string, VerseGroup>, page: number) {
@@ -125,6 +142,15 @@ export async function GET(req: NextRequest) {
 
   const bookIds = scopeBookIds(scope);
 
+  // Favorites-only filter — restrict results to the signed-in user's favorited verses
+  const favoritesOnly = searchParams.get("favoritesOnly") === "1";
+  let favoriteKeys: Set<string> | null = null;
+  if (favoritesOnly) {
+    const userId = await getCurrentUserId();
+    if (!userId) return NextResponse.json({ results: [], total: 0, pages: 1, page, pageSize: PAGE_SIZE, directTotal: 0, etymologicalTotal: 0 });
+    favoriteKeys = await getFavoriteVerseKeySet(userId);
+  }
+
   // Step 1: find seed Strong's numbers by lemmaPlain match
   type LemmaRow = { number: string };
   const seedRows = await prisma.$queryRawUnsafe<LemmaRow[]>(
@@ -147,7 +173,8 @@ export async function GET(req: NextRequest) {
       `SELECT book, chapter, verse, word FROM "WordEntry" WHERE ${nums.map(() => `lemma LIKE ?`).join(" OR ")}`,
       ...nums.map((n) => `%${n}`)
     );
-    const { verseMap, occurrences } = groupByVerse(wordRows, bookIds, new Set());
+    const grouped = groupByVerse(wordRows, bookIds, new Set());
+    const { map: verseMap, occurrences } = filterToFavorites(grouped.verseMap, grouped.occurrences, favoriteKeys);
     const { results, total, pages } = await resolveVerseGroup(verseMap, page);
     return NextResponse.json({ results, total, occurrences, pages, page, pageSize: PAGE_SIZE, directTotal: total, etymologicalTotal: 0 });
   }
@@ -165,10 +192,13 @@ export async function GET(req: NextRequest) {
     fetchWordRows(etymNumbers),
   ]);
 
-  const { verseMap: directVerseMap, occurrences: directOccurrences } = groupByVerse(directWordRows, bookIds, new Set());
+  const directGrouped = groupByVerse(directWordRows, bookIds, new Set());
   // A verse that already appears among the direct matches stays there — etymological list only
   // holds verses reached exclusively through the expanded (non-seed) family
-  const { verseMap: etymVerseMap, occurrences: etymOccurrences } = groupByVerse(etymWordRows, bookIds, new Set(directVerseMap.keys()));
+  const etymGrouped = groupByVerse(etymWordRows, bookIds, new Set(directGrouped.verseMap.keys()));
+
+  const { map: directVerseMap, occurrences: directOccurrences } = filterToFavorites(directGrouped.verseMap, directGrouped.occurrences, favoriteKeys);
+  const { map: etymVerseMap, occurrences: etymOccurrences } = filterToFavorites(etymGrouped.verseMap, etymGrouped.occurrences, favoriteKeys);
 
   // Only resolve (fetch verse text + paginate) the view the client is currently displaying
   const activeMap = view === "etymological" ? etymVerseMap : directVerseMap;

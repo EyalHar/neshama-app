@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
+import HeartIcon from "@/app/components/HeartIcon";
 
 const BINYANIM = [
   { id: "q", label: "קַל (Qal)" },
@@ -68,9 +70,12 @@ function NotSeeded() {
 }
 
 export default function AdvancedPage() {
+  const { data: session } = useSession();
   const [tab, setTab] = useState<Tab>("basic");
   const [basicQ, setBasicQ] = useState("");
   const [scope, setScope] = useState<typeof SCOPES[number]["id"]>("tanakh");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [lastFavoritesOnly, setLastFavoritesOnly] = useState(false);
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
   const [binyanStem, setBinyanStem] = useState("q");
@@ -130,13 +135,18 @@ export default function AdvancedPage() {
     abortRef.current?.abort();
   }
 
+  function favParam(fav: boolean) {
+    return fav ? "&favoritesOnly=1" : "";
+  }
+
   function handleBasic(e: React.FormEvent, p = 1) {
     e.preventDefault();
     if (basicQ.trim().length < 2) return;
     setLastBasicQ(basicQ.trim());
     setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
     setPage(p);
-    search(`/api/verses/substring?q=${encodeURIComponent(basicQ.trim())}&scope=${scope}&whole=1&page=${p}`, p === 1);
+    search(`/api/verses/substring?q=${encodeURIComponent(basicQ.trim())}&scope=${scope}&whole=1&page=${p}${favParam(favoritesOnly)}`, p === 1);
   }
 
   function handleSubstring(e: React.FormEvent, p = 1) {
@@ -144,8 +154,9 @@ export default function AdvancedPage() {
     if (substringQ.trim().length < 2) return;
     setLastSubstringQ(substringQ.trim());
     setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
     setPage(p);
-    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}&scope=${scope}&page=${p}`, p === 1);
+    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}&scope=${scope}&page=${p}${favParam(favoritesOnly)}`, p === 1);
   }
 
   function goToPage(p: number) {
@@ -153,11 +164,11 @@ export default function AdvancedPage() {
     if (tab === "basic" || tab === "substring") {
       const q = tab === "basic" ? lastBasicQ : lastSubstringQ;
       const whole = tab === "basic" ? "&whole=1" : "";
-      search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}`, false);
+      search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}`, false);
     } else if (tab === "root") {
-      search(`/api/verses/root?root=${encodeURIComponent(lastRootQ)}&scope=${lastScope}&view=${rootView}&page=${p}`, false);
+      search(`/api/verses/root?root=${encodeURIComponent(lastRootQ)}&scope=${lastScope}&view=${rootView}&page=${p}${favParam(lastFavoritesOnly)}`, false);
     } else if (tab === "binyan") {
-      search(`/api/verses/binyan?stem=${lastBinyanStem}&scope=${lastScope}&page=${p}`, false);
+      search(`/api/verses/binyan?stem=${lastBinyanStem}&scope=${lastScope}&page=${p}${favParam(lastFavoritesOnly)}`, false);
     }
   }
 
@@ -166,22 +177,24 @@ export default function AdvancedPage() {
     if (!rootQ.trim()) return;
     setLastRootQ(rootQ.trim());
     setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
     setRootView("direct");
     setPage(p);
-    search(`/api/verses/root?root=${encodeURIComponent(rootQ.trim())}&scope=${scope}&view=direct&page=${p}`, p === 1);
+    search(`/api/verses/root?root=${encodeURIComponent(rootQ.trim())}&scope=${scope}&view=direct&page=${p}${favParam(favoritesOnly)}`, p === 1);
   }
 
   function switchRootView(view: "direct" | "etymological") {
     if (view === rootView) return;
     setRootView(view);
-    search(`/api/verses/root?root=${encodeURIComponent(lastRootQ)}&scope=${lastScope}&view=${view}&page=1`, true);
+    search(`/api/verses/root?root=${encodeURIComponent(lastRootQ)}&scope=${lastScope}&view=${view}&page=1${favParam(lastFavoritesOnly)}`, true);
   }
 
   function handleBinyan(p = 1) {
     setLastBinyanStem(binyanStem);
     setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
     setPage(p);
-    search(`/api/verses/binyan?stem=${binyanStem}&scope=${scope}&page=${p}`, p === 1);
+    search(`/api/verses/binyan?stem=${binyanStem}&scope=${scope}&page=${p}${favParam(favoritesOnly)}`, p === 1);
   }
 
   const tabs: { id: Tab; label: string }[] = [
@@ -233,6 +246,19 @@ export default function AdvancedPage() {
             {s.label}
           </button>
         ))}
+
+        {session && (
+          <label className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={favoritesOnly}
+              onChange={(e) => setFavoritesOnly(e.target.checked)}
+              className="w-4 h-4 accent-red-600 cursor-pointer"
+            />
+            <HeartIcon filled={favoritesOnly} size={15} />
+            חפש רק במועדפים שלי
+          </label>
+        )}
       </div>
 
       {/* Basic */}

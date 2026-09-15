@@ -17,6 +17,8 @@ model User {
   sessions      Session[]
   readVerses        ReadVerse[]
   completedChapters CompletedChapter[]
+  favoriteVerses    FavoriteVerse[]
+  favoriteChapters  FavoriteChapter[]
 }
 
 model Account {
@@ -133,6 +135,29 @@ model CompletedChapter {
   chapter     Int
   completedAt DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, book, chapter])
+}
+
+model FavoriteVerse {
+  id        String   @id @default(cuid())
+  userId    String
+  book      String
+  chapter   Int
+  verse     Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, book, chapter, verse])
+}
+
+model FavoriteChapter {
+  id        String   @id @default(cuid())
+  userId    String
+  book      String
+  chapter   Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, book, chapter])
 }

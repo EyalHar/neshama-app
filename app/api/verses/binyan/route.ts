@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
+import { getCurrentUserId, getFavoriteVerseKeySet } from "@/lib/favorites";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
@@ -30,6 +31,15 @@ export async function GET(req: NextRequest) {
   const scopeFilter = bookIds ? `AND book IN (${bookIds.map(() => "?").join(",")})` : "";
   const scopeArgs = bookIds ?? [];
 
+  // Favorites-only filter — restrict results to the signed-in user's favorited verses
+  const favoritesOnly = searchParams.get("favoritesOnly") === "1";
+  let favoriteKeys: Set<string> | null = null;
+  if (favoritesOnly) {
+    const userId = await getCurrentUserId();
+    if (!userId) return NextResponse.json({ results: [], total: 0, occurrences: 0, pages: 1, page, pageSize: PAGE_SIZE });
+    favoriteKeys = await getFavoriteVerseKeySet(userId);
+  }
+
   const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
     `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ? ${scopeFilter}`,
     `HV${stem}%`, ...scopeArgs
@@ -38,6 +48,7 @@ export async function GET(req: NextRequest) {
   const verseMap = new Map<string, { book: string; chapter: number; verse: number; forms: Set<string> }>();
   for (const w of wordRows) {
     const key = `${w.book}|${w.chapter}|${w.verse}`;
+    if (favoriteKeys && !favoriteKeys.has(key)) continue;
     if (!verseMap.has(key)) verseMap.set(key, { book: w.book, chapter: w.chapter, verse: w.verse, forms: new Set() });
     verseMap.get(key)!.forms.add(w.word);
   }
@@ -51,7 +62,7 @@ export async function GET(req: NextRequest) {
   });
 
   const total = verseKeys.length;
-  const occurrences = wordRows.length;
+  const occurrences = favoriteKeys ? wordRows.filter((w) => favoriteKeys!.has(`${w.book}|${w.chapter}|${w.verse}`)).length : wordRows.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const offset = (page - 1) * PAGE_SIZE;
   const pageSlice = verseKeys.slice(offset, offset + PAGE_SIZE);

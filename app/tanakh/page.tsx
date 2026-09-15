@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
 import Confetti from "@/app/components/Confetti";
+import HeartIcon from "@/app/components/HeartIcon";
 
 function playNote(ctx: AudioContext, freq: number, start: number, dur: number, vol = 0.25) {
   const osc = ctx.createOscillator();
@@ -92,6 +93,8 @@ export default function TanakhPage() {
   const [partialChapters, setPartialChapters] = useState<Set<number>>(new Set());
   const [completedBooks, setCompletedBooks] = useState<Set<string>>(new Set());
   const [partialBooks, setPartialBooks] = useState<Set<string>>(new Set());
+  const [favoriteVerses, setFavoriteVerses] = useState<Set<number>>(new Set());
+  const [favoriteChapters, setFavoriteChapters] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
@@ -150,6 +153,8 @@ export default function TanakhPage() {
       setPartialChapters(new Set(data.partialChapters ?? []));
       setCompletedBooks(new Set(data.completedBooks ?? []));
       setPartialBooks(new Set(data.partialBooks ?? []));
+      setFavoriteVerses(new Set(data.favoriteVerses ?? []));
+      setFavoriteChapters(new Set(data.favoriteChapters ?? []));
     } finally {
       setLoading(false);
     }
@@ -210,6 +215,54 @@ export default function TanakhPage() {
         playCelebrationSound("chapter");
         setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
       }
+    }
+  }
+
+  async function toggleVerseFavorite(e: React.MouseEvent, verseNum: number) {
+    e.stopPropagation();
+    if (!session) return;
+    const wasFav = favoriteVerses.has(verseNum);
+    setFavoriteVerses((prev) => {
+      const s = new Set(prev);
+      if (wasFav) s.delete(verseNum); else s.add(verseNum);
+      return s;
+    });
+    try {
+      await fetch("/api/favorites/verse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ book: selectedBook.id, chapter: selectedChapter, verse: verseNum }),
+      });
+    } catch {
+      // revert on network failure
+      setFavoriteVerses((prev) => {
+        const s = new Set(prev);
+        if (wasFav) s.add(verseNum); else s.delete(verseNum);
+        return s;
+      });
+    }
+  }
+
+  async function toggleChapterFavorite() {
+    if (!session) return;
+    const wasFav = favoriteChapters.has(selectedChapter);
+    setFavoriteChapters((prev) => {
+      const s = new Set(prev);
+      if (wasFav) s.delete(selectedChapter); else s.add(selectedChapter);
+      return s;
+    });
+    try {
+      await fetch("/api/favorites/chapter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ book: selectedBook.id, chapter: selectedChapter }),
+      });
+    } catch {
+      setFavoriteChapters((prev) => {
+        const s = new Set(prev);
+        if (wasFav) s.add(selectedChapter); else s.delete(selectedChapter);
+        return s;
+      });
     }
   }
 
@@ -522,6 +575,17 @@ export default function TanakhPage() {
             <h2 className="text-xl font-bold text-stone-700">
               {selectedBook.he} פרק {toHebrewNumeral(selectedChapter)}
             </h2>
+            {session && (
+              <button
+                type="button"
+                onClick={toggleChapterFavorite}
+                title={favoriteChapters.has(selectedChapter) ? "הסר פרק מהמועדפים" : "הוסף פרק למועדפים"}
+                aria-pressed={favoriteChapters.has(selectedChapter)}
+                className="p-1 rounded-full hover:bg-red-50 transition-colors"
+              >
+                <HeartIcon filled={favoriteChapters.has(selectedChapter)} size={22} />
+              </button>
+            )}
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
             {!isBookComplete && isChapterComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הפרק הושלם</span>}
           </div>
@@ -543,6 +607,7 @@ export default function TanakhPage() {
           <div className="space-y-1">
             {verses.map((verse, i) => {
               const isRead = readVerses.has(i + 1);
+              const isFav = favoriteVerses.has(i + 1);
               return (
                 <div
                   key={i}
@@ -560,6 +625,19 @@ export default function TanakhPage() {
                   <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
                     {verse}
                   </p>
+                  {session && (
+                    <button
+                      type="button"
+                      onClick={(e) => toggleVerseFavorite(e, i + 1)}
+                      title={isFav ? "הסר פסוק מהמועדפים" : "הוסף פסוק למועדפים"}
+                      aria-pressed={isFav}
+                      className={`self-start mt-1 shrink-0 p-0.5 rounded-full hover:bg-red-50 transition-opacity ${
+                        isFav ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                      }`}
+                    >
+                      <HeartIcon filled={isFav} size={17} />
+                    </button>
+                  )}
                   {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
                 </div>
               );
