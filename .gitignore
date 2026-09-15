@@ -3,6 +3,10 @@
 # Database backups
 /backups
 
+# local database
+prisma/*.db
+prisma/*.db-journal
+
 # dependencies
 /node_modules
 /.pnp
