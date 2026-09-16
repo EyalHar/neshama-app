@@ -48,14 +48,24 @@ function extractStrongsNumber(lemma: string): string | null {
   return m ? m[1] : null;
 }
 
+// Binyan is encoded as "V{stem}" inside the verb's morph segment (e.g. "Vtq1cs"), but that
+// segment isn't always at the start of the field — a prefixed word (conjunction/article/
+// preposition) pushes it after a "/" (e.g. "HC/Vtq1cs" for a vav-consecutive form), so the
+// match must not be anchored to the start. GLOB (not LIKE) is required because SQLite's LIKE
+// is case-insensitive by default, which would conflate Piel/Pual ("p"/"P") and Hiphil/Hophal
+// ("h"/"H").
+function stemGlob(stem: string): string {
+  return `*V${stem}*`;
+}
+
 async function fetchWordRows(numbers: string[], stem: string | null): Promise<WordRow[]> {
   if (numbers.length === 0) return [];
   const plain = numbers.map((n) => n.replace(/^H/, ""));
-  const stemFilter = stem ? ` AND morph LIKE ?` : "";
+  const stemFilter = stem ? ` AND morph GLOB ?` : "";
   const rows = await prisma.$queryRawUnsafe<(WordRow & { lemma: string })[]>(
     `SELECT book, chapter, verse, word, lemma FROM "WordEntry"
      WHERE (${plain.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
-    ...plain.map((n) => `%${n}%`), ...(stem ? [`HV${stem}%`] : [])
+    ...plain.map((n) => `%${n}%`), ...(stem ? [stemGlob(stem)] : [])
   );
   const numSet = new Set(plain);
   return rows.filter((r) => {
@@ -67,8 +77,8 @@ async function fetchWordRows(numbers: string[], stem: string | null): Promise<Wo
 // Binyan-only search (no root given) — filters WordEntry by morph alone.
 async function fetchWordRowsByStem(stem: string): Promise<WordRow[]> {
   return prisma.$queryRawUnsafe<WordRow[]>(
-    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph LIKE ?`,
-    `HV${stem}%`
+    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph GLOB ?`,
+    stemGlob(stem)
   );
 }
 
@@ -190,10 +200,10 @@ export async function GET(req: NextRequest) {
     }
 
     const nums = [...new Set(lemmaRows.map((r) => r.lemma.replace(/^[a-z/]+/, "").trim()).filter(Boolean))];
-    const stemFilter = stem ? ` AND morph LIKE ?` : "";
+    const stemFilter = stem ? ` AND morph GLOB ?` : "";
     const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
       `SELECT book, chapter, verse, word FROM "WordEntry" WHERE (${nums.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
-      ...nums.map((n) => `%${n}`), ...(stem ? [`HV${stem}%`] : [])
+      ...nums.map((n) => `%${n}`), ...(stem ? [stemGlob(stem)] : [])
     );
     const grouped = groupByVerse(wordRows, bookIds, new Set());
     const { map: verseMap, occurrences } = filterToFavorites(grouped.verseMap, grouped.occurrences, favoriteKeys);
