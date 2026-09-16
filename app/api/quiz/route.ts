@@ -95,7 +95,7 @@ async function generateQuiz() {
 
     // Step 2: Ask Groq ONLY to pick a word to blank and generate 3 wrong alternatives
     const completion = await client.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       response_format: { type: "json_object" },
       messages: [
         {
