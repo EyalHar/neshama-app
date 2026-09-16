@@ -82,7 +82,7 @@ export default function Sidebar() {
                     : "text-stone-300 hover:bg-stone-800 hover:text-amber-200"
                 }`}
               >
-                <span className="text-base">{item.icon}</span>
+                <span className="w-5 shrink-0 text-center text-base">{item.icon}</span>
                 {item.label}
               </Link>
             );
