@@ -108,7 +108,7 @@ export default function UnknownRootsPage() {
                             <p className="text-stone-600 leading-relaxed">{row.verseRef.text}</p>
                           </div>
                           <Link
-                            href={`/tanakh?book=${encodeURIComponent(row.verseRef.book)}&chapter=${row.verseRef.chapter}`}
+                            href={`/tanakh?book=${encodeURIComponent(row.verseRef.book)}&chapter=${row.verseRef.chapter}&verse=${row.verseRef.verse}`}
                             className="shrink-0 text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap"
                           >
                             קרא פרק ←

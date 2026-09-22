@@ -101,12 +101,15 @@ export default function TanakhPage() {
   const [restored, setRestored] = useState(false);
   const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null);
   const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
+  const [pendingVerseParam, setPendingVerseParam] = useState<number | null>(null);
+  const [linkHighlightedVerse, setLinkHighlightedVerse] = useState<number | null>(null);
 
   // Restore position — URL params take priority over localStorage
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlBookId = urlParams.get("book");
     const urlChapter = urlParams.get("chapter");
+    const urlVerse = urlParams.get("verse");
 
     if (urlBookId) {
       const book = TANAKH_BOOKS.find((b) => b.id === urlBookId);
@@ -115,6 +118,7 @@ export default function TanakhPage() {
         setSelectedChapter(urlChapter ? parseInt(urlChapter) : 1);
         setActiveSection(book.section);
         setRestored(true);
+        if (urlVerse) setPendingVerseParam(parseInt(urlVerse));
         return;
       }
     }
@@ -175,6 +179,20 @@ export default function TanakhPage() {
     }, 150);
     setTimeout(() => setHighlightedVerse(null), 2500);
   }, [verses, pendingRandomVerse]);
+
+  // Arriving via a link that points at a specific verse (from search results, favorites,
+  // the quiz, etc.) — scroll to it and briefly highlight it, more subtly than the
+  // random-verse jump above and for a shorter 1 second.
+  useEffect(() => {
+    if (!pendingVerseParam || verses.length === 0) return;
+    const verseNum = pendingVerseParam;
+    setPendingVerseParam(null);
+    setLinkHighlightedVerse(verseNum);
+    setTimeout(() => {
+      document.getElementById(`verse-${verseNum}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+    setTimeout(() => setLinkHighlightedVerse(null), 1000);
+  }, [verses, pendingVerseParam]);
 
   async function toggleVerse(verseIndex: number) {
     if (!session) return;
@@ -579,7 +597,7 @@ export default function TanakhPage() {
               <button
                 type="button"
                 onClick={toggleChapterFavorite}
-                title={favoriteChapters.has(selectedChapter) ? "הסר פרק מהמועדפים" : "הוסף פרק למועדפים"}
+                title={favoriteChapters.has(selectedChapter) ? "הסר פרק מהאהובים ביותר" : "הוסף פרק לאהובים ביותר"}
                 aria-pressed={favoriteChapters.has(selectedChapter)}
                 className="p-1 rounded-full hover:bg-red-50 transition-colors"
               >
@@ -613,9 +631,11 @@ export default function TanakhPage() {
                   key={i}
                   id={`verse-${i + 1}`}
                   onClick={() => toggleVerse(i)}
-                  className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
                     highlightedVerse === i + 1
                       ? "bg-amber-200 ring-2 ring-amber-400"
+                      : linkHighlightedVerse === i + 1
+                      ? "bg-amber-50 ring-1 ring-amber-200"
                       : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
                   } ${session ? "cursor-pointer" : "cursor-default"}`}
                 >
@@ -629,7 +649,7 @@ export default function TanakhPage() {
                     <button
                       type="button"
                       onClick={(e) => toggleVerseFavorite(e, i + 1)}
-                      title={isFav ? "הסר פסוק מהמועדפים" : "הוסף פסוק למועדפים"}
+                      title={isFav ? "הסר פסוק מהאהובים ביותר" : "הוסף פסוק לאהובים ביותר"}
                       aria-pressed={isFav}
                       className={`self-start mt-1 shrink-0 p-0.5 rounded-full hover:bg-red-50 transition-opacity ${
                         isFav ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"

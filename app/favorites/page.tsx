@@ -8,12 +8,14 @@ import HeartIcon from "@/app/components/HeartIcon";
 
 type FavoriteChapterItem = { book: string; bookHe: string; chapter: number };
 type FavoriteVerseItem = { book: string; bookHe: string; chapter: number; verse: number; text: string };
+type FavTab = "verses" | "chapters";
 
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
   const [chapters, setChapters] = useState<FavoriteChapterItem[]>([]);
   const [verses, setVerses] = useState<FavoriteVerseItem[]>([]);
   const [fetching, setFetching] = useState(false);
+  const [tab, setTab] = useState<FavTab>("verses");
   const loading = status === "loading" || (!!session && fetching);
 
   useEffect(() => {
@@ -50,13 +52,13 @@ export default function FavoritesPage() {
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
       <div className="flex items-center gap-2 mb-1">
         <HeartIcon filled size={24} />
-        <h1 className="text-2xl font-bold text-stone-800">המועדפים שלי</h1>
+        <h1 className="text-2xl font-bold text-stone-800">האהובים ביותר עליי</h1>
       </div>
-      <p className="text-stone-400 text-sm mb-6">פרקים ופסוקים ששמרת — כל המועדפים שלך במקום אחד</p>
+      <p className="text-stone-400 text-sm mb-6">פרקים ופסוקים ששמרת — כל האהובים ביותר שלך במקום אחד</p>
 
       {status !== "loading" && !session && (
         <div className="bg-white border border-stone-200 rounded-2xl p-8 text-center">
-          <p className="text-stone-600 mb-2">כדי לשמור ולצפות במועדפים יש להתחבר</p>
+          <p className="text-stone-600 mb-2">כדי לשמור ולצפות באהובים ביותר יש להתחבר</p>
           <a href="/login" className="text-amber-600 hover:underline">התחבר</a>
         </div>
       )}
@@ -71,13 +73,36 @@ export default function FavoritesPage() {
       )}
 
       {session && !loading && (
-        <div className="space-y-10">
+        <div>
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 border-b border-stone-200 pb-0">
+            {(
+              [
+                { id: "verses", label: "פסוקים אהובים ביותר" },
+                { id: "chapters", label: "הפרקים האהובים ביותר" },
+              ] as { id: FavTab; label: string }[]
+            ).map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors -mb-px border-b-2 ${
+                  tab === t.id
+                    ? "border-amber-600 text-amber-700 bg-amber-50"
+                    : "border-transparent text-stone-500 hover:text-stone-700"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
           {/* Favorite chapters */}
-          <section>
-            <h2 className="text-lg font-bold text-stone-700 mb-3">פרקים מועדפים</h2>
+          <section hidden={tab !== "chapters"}>
+            <h2 className="text-lg font-bold text-stone-700 mb-3">הפרקים האהובים ביותר</h2>
             {chapters.length === 0 ? (
               <p className="text-stone-400 text-sm">
-                עדיין אין לך פרקים מועדפים — לחץ על סמל הלב ליד כותרת הפרק בדף{" "}
+                עדיין לא סימנת פרקים כאהובים ביותר — לחץ על סמל הלב ליד כותרת הפרק בדף{" "}
                 <Link href="/tanakh" className="text-amber-600 hover:underline">קריאת תנ״ך</Link> כדי להוסיף.
               </p>
             ) : (
@@ -96,7 +121,7 @@ export default function FavoritesPage() {
                     <button
                       type="button"
                       onClick={() => removeChapter(c)}
-                      title="הסר מהמועדפים"
+                      title="הסר מהאהובים ביותר"
                       className="p-1 rounded-full hover:bg-red-50 transition-colors"
                     >
                       <HeartIcon filled size={16} />
@@ -108,11 +133,11 @@ export default function FavoritesPage() {
           </section>
 
           {/* Favorite verses */}
-          <section>
-            <h2 className="text-lg font-bold text-stone-700 mb-3">פסוקים מועדפים</h2>
+          <section hidden={tab !== "verses"}>
+            <h2 className="text-lg font-bold text-stone-700 mb-3">פסוקים אהובים ביותר</h2>
             {verses.length === 0 ? (
               <p className="text-stone-400 text-sm">
-                עדיין אין לך פסוקים מועדפים — עבור עם העכבר על פסוק בדף{" "}
+                עדיין לא סימנת פסוקים כאהובים ביותר — עבור עם העכבר על פסוק בדף{" "}
                 <Link href="/tanakh" className="text-amber-600 hover:underline">קריאת תנ״ך</Link> ולחץ על סמל הלב כדי להוסיף.
               </p>
             ) : (
@@ -130,13 +155,13 @@ export default function FavoritesPage() {
                         <button
                           type="button"
                           onClick={() => removeVerse(v)}
-                          title="הסר מהמועדפים"
+                          title="הסר מהאהובים ביותר"
                           className="p-1 rounded-full hover:bg-red-50 transition-colors"
                         >
                           <HeartIcon filled size={18} />
                         </button>
                         <Link
-                          href={`/tanakh?book=${encodeURIComponent(v.book)}&chapter=${v.chapter}`}
+                          href={`/tanakh?book=${encodeURIComponent(v.book)}&chapter=${v.chapter}&verse=${v.verse}`}
                           className="text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                         >
                           קרא פרק ←

@@ -11,8 +11,8 @@ const FEATURES = [
   },
   {
     href: "/favorites",
-    title: "המועדפים שלי",
-    description: "פרקים ופסוקים ששמרת כמועדפים — הכל במקום אחד, מוכן לחזור אליו בכל רגע",
+    title: "האהובים ביותר עליי",
+    description: "פרקים ופסוקים ששמרת כאהובים ביותר — הכל במקום אחד, מוכן לחזור אליו בכל רגע",
     icon: "♥",
     color: "from-red-50 to-rose-50 border-red-200 hover:border-red-400",
     labelColor: "text-red-700",
@@ -66,7 +66,7 @@ export default function HomePage() {
         {/* Hero */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-stone-800 mb-4 leading-tight">
-            התנ״ך שבקרבי
+            שַׁלְהֶבֶתְ יָֽה
           </h1>
           <p className="text-stone-500 text-xl leading-relaxed max-w-xl mx-auto">
             חיבור אישי לתורה נביאים וכתובים — כלים שמחברים בין הלב לבין המילה הנצחית

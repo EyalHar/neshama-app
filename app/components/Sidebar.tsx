@@ -8,7 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
-  { href: "/favorites", label: "המועדפים שלי", icon: "♥" },
+  { href: "/favorites", label: "האהובים ביותר עליי", icon: "♥" },
   { href: "/letters", label: "אות ראשונה ואחרונה", icon: "א" },
   { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
   { href: "/events", label: "אירועי התנ״ך", icon: "📜" },
@@ -62,7 +62,7 @@ export default function Sidebar() {
         {/* Site title */}
         <div className="px-6 py-8 border-b border-stone-700">
           <h1 className="text-xl font-bold text-amber-300 leading-snug">
-            התנ״ך שבקרבי
+            שַׁלְהֶבֶתְ יָֽה
           </h1>
           <p className="text-stone-400 text-xs mt-1">חיבור אישי לתורה נביאים וכתובים</p>
         </div>

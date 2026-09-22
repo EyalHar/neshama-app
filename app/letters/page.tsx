@@ -109,7 +109,7 @@ export default function LettersPage() {
                       </p>
                     </div>
                     <Link
-                      href={`/tanakh?book=${encodeURIComponent(r.book)}&chapter=${r.chapter}`}
+                      href={`/tanakh?book=${encodeURIComponent(r.book)}&chapter=${r.chapter}&verse=${r.verse}`}
                       className="shrink-0 text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                     >
                       קרא פרק ←

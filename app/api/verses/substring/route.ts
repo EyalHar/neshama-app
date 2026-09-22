@@ -7,9 +7,31 @@ import { getCurrentUserId } from "@/lib/favorites";
 type VerseRow = { book: string; chapter: number; verse: number; text: string; plainText: string };
 type CountRow = { total: number | bigint; occurrences: number | bigint | null };
 
+// Same ta'amim (cantillation) ranges stripped at seed time when building VerseText.text
+// (see stripCantillation() in app/api/admin/seed-oshb/route.ts) — kept consistent so a
+// pasted query with trope marks still matches the stored, nikud-preserved text.
+// Meteg (U+05BD) is a secondary-stress mark outside that cantillation range, so it survived
+// into VerseText.text at seed time — but users think of it as a trope-like mark too, so it's
+// ignored here at query time on both sides of the comparison (query text + stored column).
+const METEG = "ֽ";
+function stripTaamim(text: string): string {
+  return text.replace(/[֑-֯׀׃׆]/g, "").split(METEG).join("").replace(/\//g, "").replace(/\s+/g, " ").trim();
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const q = searchParams.get("q")?.trim();
+  const rawQ = searchParams.get("q")?.trim();
+
+  // Nikud-exact mode matches against VerseText.text (nikud kept, ta'amim stripped at seed
+  // time) instead of VerseText.plainText (letters only). Strip any ta'amim/meteg from the
+  // query itself first, so pasted trope marks are ignored while nikud differences still count.
+  const nikudMode = searchParams.get("nikud") === "1";
+  const q = nikudMode ? (rawQ ? stripTaamim(rawQ) : rawQ) : rawQ;
+  // METEG is a fixed internal constant (not user input), so inlining it into the SQL
+  // expression here is safe — REPLACE strips it from the stored column before matching,
+  // without needing to touch already-seeded VerseText rows.
+  const column = nikudMode ? `REPLACE(text, '${METEG}', '')` : "plainText";
+
   const page = parseInt(searchParams.get("page") ?? "1");
   const pageSize = 500;
   const offset = (page - 1) * pageSize;
@@ -33,12 +55,12 @@ export async function GET(req: NextRequest) {
     : "";
   const favArgs = favUserId ? [favUserId] : [];
 
-  // "whole" mode matches q as a complete word/phrase (space-bounded in plainText),
+  // "whole" mode matches q as a complete word/phrase (space-bounded in the match column),
   // so a search for "משה" doesn't match inside "חמשה". Plain mode matches any substring.
   const whole = searchParams.get("whole") === "1";
   const matchClause = whole
-    ? `(plainText = ? OR plainText LIKE ? OR plainText LIKE ? OR plainText LIKE ?)`
-    : `plainText LIKE ?`;
+    ? `(${column} = ? OR ${column} LIKE ? OR ${column} LIKE ? OR ${column} LIKE ?)`
+    : `${column} LIKE ?`;
   const matchArgs = whole ? [q, `${q} %`, `% ${q}`, `% ${q} %`] : [`%${q}%`];
 
   const bookOrderCase = TANAKH_BOOKS.map((b, i) => `WHEN '${b.id}' THEN ${i}`).join(" ");
@@ -47,8 +69,8 @@ export async function GET(req: NextRequest) {
   // standard SQL trick: (length of text - length with q removed) / length of q.
   // In "whole" mode, occurrences are space-padded so e.g. "משה" doesn't count "ומשה".
   const occurrencesExpr = whole
-    ? `SUM((LENGTH(' ' || plainText || ' ') - LENGTH(REPLACE(' ' || plainText || ' ', ?, ''))) / LENGTH(?))`
-    : `SUM((LENGTH(plainText) - LENGTH(REPLACE(plainText, ?, ''))) / LENGTH(?))`;
+    ? `SUM((LENGTH(' ' || ${column} || ' ') - LENGTH(REPLACE(' ' || ${column} || ' ', ?, ''))) / LENGTH(?))`
+    : `SUM((LENGTH(${column}) - LENGTH(REPLACE(${column}, ?, ''))) / LENGTH(?))`;
   const occurrencesArgs = whole ? [` ${q} `, ` ${q} `] : [q, q];
 
   const [countRows, rows] = await Promise.all([

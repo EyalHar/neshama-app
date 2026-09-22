@@ -51,7 +51,7 @@ function ResultCard({ r, num }: { r: Result; num: number }) {
           )}
         </div>
         <Link
-          href={`/tanakh?book=${encodeURIComponent(r.book)}&chapter=${r.chapter}`}
+          href={`/tanakh?book=${encodeURIComponent(r.book)}&chapter=${r.chapter}&verse=${r.verse}`}
           className="shrink-0 text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
         >
           קרא פרק ←
@@ -77,6 +77,8 @@ export default function AdvancedPage() {
   const [scope, setScope] = useState<typeof SCOPES[number]["id"]>("tanakh");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [lastFavoritesOnly, setLastFavoritesOnly] = useState(false);
+  const [nikudMode, setNikudMode] = useState(false);
+  const [lastNikudMode, setLastNikudMode] = useState(false);
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
   const [stem, setStem] = useState("all");
@@ -140,6 +142,10 @@ export default function AdvancedPage() {
     return fav ? "&favoritesOnly=1" : "";
   }
 
+  function nikudParam(n: boolean) {
+    return n ? "&nikud=1" : "";
+  }
+
   function rootUrl(rootValue: string, stemValue: string, scopeValue: string, view: "direct" | "etymological", p: number, fav: boolean) {
     const params = new URLSearchParams({ scope: scopeValue, view, page: String(p) });
     if (rootValue) params.set("root", rootValue);
@@ -154,8 +160,9 @@ export default function AdvancedPage() {
     setLastBasicQ(basicQ.trim());
     setLastScope(scope);
     setLastFavoritesOnly(favoritesOnly);
+    setLastNikudMode(nikudMode);
     setPage(p);
-    search(`/api/verses/substring?q=${encodeURIComponent(basicQ.trim())}&scope=${scope}&whole=1&page=${p}${favParam(favoritesOnly)}`, p === 1);
+    search(`/api/verses/substring?q=${encodeURIComponent(basicQ.trim())}&scope=${scope}&whole=1&page=${p}${favParam(favoritesOnly)}${nikudParam(nikudMode)}`, p === 1);
   }
 
   function handleSubstring(e: React.FormEvent, p = 1) {
@@ -164,8 +171,9 @@ export default function AdvancedPage() {
     setLastSubstringQ(substringQ.trim());
     setLastScope(scope);
     setLastFavoritesOnly(favoritesOnly);
+    setLastNikudMode(nikudMode);
     setPage(p);
-    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}&scope=${scope}&page=${p}${favParam(favoritesOnly)}`, p === 1);
+    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}&scope=${scope}&page=${p}${favParam(favoritesOnly)}${nikudParam(nikudMode)}`, p === 1);
   }
 
   function goToPage(p: number) {
@@ -173,7 +181,7 @@ export default function AdvancedPage() {
     if (tab === "basic" || tab === "substring") {
       const q = tab === "basic" ? lastBasicQ : lastSubstringQ;
       const whole = tab === "basic" ? "&whole=1" : "";
-      search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}`, false);
+      search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}${nikudParam(lastNikudMode)}`, false);
     } else if (tab === "root") {
       search(rootUrl(lastRootQ, lastStem, lastScope, rootView, p, lastFavoritesOnly), false);
     }
@@ -257,7 +265,19 @@ export default function AdvancedPage() {
               className="w-4 h-4 accent-red-600 cursor-pointer"
             />
             <HeartIcon filled={favoritesOnly} size={15} />
-            חפש רק במועדפים שלי
+            חפש רק באהובים ביותר שלי
+          </label>
+        )}
+
+        {(tab === "basic" || tab === "substring") && (
+          <label className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={nikudMode}
+              onChange={(e) => setNikudMode(e.target.checked)}
+              className="w-4 h-4 accent-amber-700 cursor-pointer"
+            />
+            חפש עם ניקוד מדויק
           </label>
         )}
       </div>
@@ -266,14 +286,16 @@ export default function AdvancedPage() {
       {tab === "basic" && (
         <div>
           <p className="text-stone-500 text-sm mb-4">
-            חפש מילה או ביטוי בתנ״ך
+            {nikudMode
+              ? "חפש מילה או ביטוי בתנ״ך — התאמה מדויקת של הניקוד (טעמים יתעלמו)"
+              : "חפש מילה או ביטוי בתנ״ך"}
           </p>
           <form onSubmit={handleBasic} className="flex gap-2 mb-4">
             <input
               type="text"
               value={basicQ}
               onChange={(e) => setBasicQ(e.target.value)}
-              placeholder="חפש מילה או ביטוי..."
+              placeholder={nikudMode ? "לדוגמה: בְּרֵאשִׁית" : "חפש מילה או ביטוי..."}
               className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
             />
@@ -292,14 +314,16 @@ export default function AdvancedPage() {
       {tab === "substring" && (
         <div>
           <p className="text-stone-500 text-sm mb-4">
-            מוצא כל פסוק שמכיל את הרצף המבוקש — ללא ניקוד
+            {nikudMode
+              ? "מוצא כל פסוק שמכיל את הרצף המבוקש — עם ניקוד מדויק (טעמים יתעלמו)"
+              : "מוצא כל פסוק שמכיל את הרצף המבוקש — ללא ניקוד"}
           </p>
           <form onSubmit={handleSubstring} className="flex gap-2 mb-4">
             <input
               type="text"
               value={substringQ}
               onChange={(e) => setSubstringQ(e.target.value)}
-              placeholder="לדוגמה: ראשי"
+              placeholder={nikudMode ? "לדוגמה: רֵאשִׁי" : "לדוגמה: ראשי"}
               className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
             />

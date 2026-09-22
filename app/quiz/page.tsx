@@ -78,8 +78,7 @@ export default function QuizPage() {
   async function handleGoToVerse() {
     await doMarkAsRead();
     if (question) {
-      localStorage.setItem("tanakh-position", JSON.stringify({ bookId: question.book, chapter: question.chapter }));
-      router.push("/tanakh");
+      router.push(`/tanakh?book=${encodeURIComponent(question.book)}&chapter=${question.chapter}&verse=${question.verse}`);
     }
   }
 
