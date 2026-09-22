@@ -66,18 +66,23 @@ function parseSefRef(ref: string): { book: string; chapter: number; verse: numbe
 
 export async function POST(request: NextRequest) {
   try {
-    const { event } = await request.json();
+    const { event, exclude } = await request.json();
 
     if (!event?.trim()) {
       return NextResponse.json({ error: "נא להזין שם אירוע" }, { status: 400 });
     }
+
+    const excludeRefs: string[] = Array.isArray(exclude) ? exclude : [];
+    const userContent = excludeRefs.length
+      ? `אירוע: ${event}\n\nהמקורות הבאים כבר נמצאו והוצגו למשתמש — אל תחזיר אותם שוב, החזר עד 10 מקורות נוספים ואחרים בלבד (אם אין עוד מקורות רלוונטיים, החזר sources כרשימה ריקה):\n${excludeRefs.join(", ")}`
+      : `אירוע: ${event}`;
 
     const completion = await client.chat.completions.create({
       model: "openai/gpt-oss-120b",
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `אירוע: ${event}` },
+        { role: "user", content: userContent },
       ],
     });
 
@@ -86,22 +91,25 @@ export async function POST(request: NextRequest) {
 
     const groqResult = JSON.parse(text);
 
+    // Safety net beyond the prompt instruction — drop anything the model re-sent anyway.
+    const excludeSet = new Set(excludeRefs.map((r) => r.trim().toLowerCase()));
+    const rawSources = (groqResult.sources as { sefaria_ref: string; reference_he: string; context: string }[])
+      .filter((s) => !excludeSet.has(s.sefaria_ref?.trim().toLowerCase()));
+
     const sources = await Promise.all(
-      (groqResult.sources as { sefaria_ref: string; reference_he: string; context: string }[]).map(
-        async (s) => {
-          const hebrewText = await fetchVerseFromSefaria(s.sefaria_ref);
-          const parsed = parseSefRef(s.sefaria_ref);
-          return {
-            reference_he: s.reference_he,
-            sefaria_ref: s.sefaria_ref,
-            text: hebrewText ?? "לא נמצא טקסט",
-            context: s.context,
-            book: parsed?.book ?? "",
-            chapter: parsed?.chapter ?? 0,
-            verse: parsed?.verse ?? 0,
-          };
-        }
-      )
+      rawSources.map(async (s) => {
+        const hebrewText = await fetchVerseFromSefaria(s.sefaria_ref);
+        const parsed = parseSefRef(s.sefaria_ref);
+        return {
+          reference_he: s.reference_he,
+          sefaria_ref: s.sefaria_ref,
+          text: hebrewText ?? "לא נמצא טקסט",
+          context: s.context,
+          book: parsed?.book ?? "",
+          chapter: parsed?.chapter ?? 0,
+          verse: parsed?.verse ?? 0,
+        };
+      })
     );
 
     return NextResponse.json({

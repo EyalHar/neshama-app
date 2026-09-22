@@ -24,7 +24,10 @@ export default function EventsPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [eventInput, setEventInput] = useState("");
+  const [searchedEvent, setSearchedEvent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [noMoreResults, setNoMoreResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<EventResult | null>(null);
   const [markingSet, setMarkingSet] = useState<Set<number>>(new Set());
@@ -37,6 +40,8 @@ export default function EventsPage() {
     setError(null);
     setResult(null);
     setMarkedSet(new Set());
+    setNoMoreResults(false);
+    setSearchedEvent(eventInput.trim());
 
     try {
       const res = await fetch("/api/events", {
@@ -47,6 +52,7 @@ export default function EventsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "שגיאה");
       setResult(data);
+      if (!data.sources || data.sources.length === 0) setNoMoreResults(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "אירעה שגיאה, נסה שוב");
     } finally {
@@ -54,10 +60,36 @@ export default function EventsPage() {
     }
   }
 
+  async function handleLoadMore() {
+    if (!result || loadingMore) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: searchedEvent, exclude: result.sources.map((s) => s.sefaria_ref) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "שגיאה");
+      if (!data.sources || data.sources.length === 0) {
+        setNoMoreResults(true);
+      } else {
+        setResult((prev) => prev && { ...prev, sources: [...prev.sources, ...data.sources] });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "אירעה שגיאה, נסה שוב");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
   function handleReset() {
     setResult(null);
     setError(null);
     setEventInput("");
+    setSearchedEvent("");
+    setNoMoreResults(false);
     setMarkedSet(new Set());
   }
 
@@ -77,9 +109,8 @@ export default function EventsPage() {
     }
   }
 
-  function navigateToChapter(book: string, chapter: number) {
-    localStorage.setItem("tanakh-position", JSON.stringify({ bookId: book, chapter }));
-    router.push("/tanakh");
+  function navigateToChapter(book: string, chapter: number, verse: number) {
+    router.push(`/tanakh?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`);
   }
 
   return (
@@ -203,7 +234,7 @@ export default function EventsPage() {
                         )}
 
                         <button
-                          onClick={() => navigateToChapter(source.book, source.chapter)}
+                          onClick={() => navigateToChapter(source.book, source.chapter, source.verse)}
                           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 transition-colors"
                         >
                           עבור לפרק ←
@@ -219,6 +250,27 @@ export default function EventsPage() {
               <p className="text-center text-stone-400 text-sm">
                 <a href="/login" className="text-rose-600 hover:underline">התחבר</a> כדי לסמן קטעים שנקראו
               </p>
+            )}
+
+            {/* Load more */}
+            {!noMoreResults && (
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="w-full bg-rose-50 hover:bg-rose-100 disabled:opacity-50 text-rose-700 font-medium py-3 rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    מחפש עוד מקורות...
+                  </>
+                ) : (
+                  "חפש עוד..."
+                )}
+              </button>
             )}
 
             {/* Reset */}
