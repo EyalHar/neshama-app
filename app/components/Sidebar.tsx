@@ -13,8 +13,10 @@ const NAV_ITEMS = [
   { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
   { href: "/events", label: "אירועי התנ״ך", icon: "📜" },
   { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },
+  { href: "/unique-words", label: "מילים יחידאיות", icon: "1" },
   { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },
+  { href: "/jerusalem-names", label: "שמות ירושלים", icon: "🏛" },
 ];
 
 export default function Sidebar() {
@@ -44,7 +46,7 @@ export default function Sidebar() {
     <>
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-stone-900 text-amber-100 px-4 py-3" dir="rtl">
-        <span className="font-bold text-lg">התנ״ך שבקרבי</span>
+        <span className="font-bold text-lg">שַׁלְהֶבֶתְ יָֽה</span>
         <button onClick={() => setOpen(!open)} className="text-amber-200 text-2xl leading-none">
           {open ? "✕" : "☰"}
         </button>

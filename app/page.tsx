@@ -42,6 +42,14 @@ const FEATURES = [
     labelColor: "text-rose-700",
   },
   {
+    href: "/unique-words",
+    title: "מילים יחידאיות",
+    description: "מילים שמופיעות פעם אחת בלבד בכל התנ״ך, מחולקות לפי תורה, נביאים וכתובים",
+    icon: "1",
+    color: "from-emerald-50 to-green-50 border-emerald-200 hover:border-emerald-400",
+    labelColor: "text-emerald-700",
+  },
+  {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",
@@ -56,6 +64,14 @@ const FEATURES = [
     icon: "🕊",
     color: "from-amber-50 to-orange-50 border-amber-200 hover:border-amber-400",
     labelColor: "text-amber-700",
+  },
+  {
+    href: "/jerusalem-names",
+    title: "שמות ירושלים",
+    description: "מבחר שמותיה של ירושלים בתנ״ך — מ׳שלם׳ ו׳ציון׳ ועד ׳עיר הקודש׳ — עם כל המקורות, מקושרים לקורא",
+    icon: "🏛",
+    color: "from-yellow-50 to-yellow-100 border-yellow-300 hover:border-yellow-500",
+    labelColor: "text-yellow-800",
   },
 ];
 

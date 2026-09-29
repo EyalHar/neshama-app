@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+
+const STORAGE_KEY = "events-search-state";
 
 type Source = {
   reference_he: string;
@@ -32,6 +34,35 @@ export default function EventsPage() {
   const [result, setResult] = useState<EventResult | null>(null);
   const [markingSet, setMarkingSet] = useState<Set<number>>(new Set());
   const [markedSet, setMarkedSet] = useState<Set<number>>(new Set());
+  const [hydrated, setHydrated] = useState(false);
+
+  // Restore the last search when returning to this page (e.g. after following a
+  // source link to /tanakh and coming back) — so it doesn't have to be re-run.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setEventInput(parsed.eventInput ?? "");
+        setSearchedEvent(parsed.searchedEvent ?? "");
+        setResult(parsed.result ?? null);
+        setNoMoreResults(!!parsed.noMoreResults);
+        setMarkedSet(new Set(parsed.marked ?? []));
+      }
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  // Persist after restoring, so "חיפוש חדש" (which clears this same state) also
+  // clears the saved copy — one reset button, no separate storage to manage.
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        eventInput, searchedEvent, result, noMoreResults, marked: [...markedSet],
+      }));
+    } catch {}
+  }, [hydrated, eventInput, searchedEvent, result, noMoreResults, markedSet]);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -117,7 +148,16 @@ export default function EventsPage() {
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-rose-50" dir="rtl">
       <div className="max-w-2xl mx-auto px-6 py-14">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="relative text-center mb-10">
+          {result && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className="absolute left-0 top-1 text-xs text-stone-400 hover:text-rose-600 hover:underline transition-colors"
+            >
+              חיפוש חדש
+            </button>
+          )}
           <div className="text-5xl mb-4">📜</div>
           <h1 className="text-3xl font-bold text-stone-800 mb-3">אירועי התנ״ך</h1>
           <p className="text-stone-500 leading-relaxed">

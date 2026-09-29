@@ -88,6 +88,7 @@ export default function TanakhPage() {
   const [selectedBook, setSelectedBook] = useState(TANAKH_BOOKS[0]);
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [verses, setVerses] = useState<string[]>([]);
+  const [versesLoadedFor, setVersesLoadedFor] = useState(""); // `${bookId}-${chapter}` the current `verses` array actually belongs to
   const [readVerses, setReadVerses] = useState<Set<number>>(new Set());
   const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
   const [partialChapters, setPartialChapters] = useState<Set<number>>(new Set());
@@ -102,7 +103,6 @@ export default function TanakhPage() {
   const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null);
   const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
   const [pendingVerseParam, setPendingVerseParam] = useState<number | null>(null);
-  const [linkHighlightedVerse, setLinkHighlightedVerse] = useState<number | null>(null);
 
   // Restore position — URL params take priority over localStorage
   useEffect(() => {
@@ -152,6 +152,7 @@ export default function TanakhPage() {
       const res = await fetch(`/api/tanakh?book=${encodeURIComponent(bookId)}&chapter=${chapter}`);
       const data = await res.json();
       setVerses(data.verses ?? []);
+      setVersesLoadedFor(`${bookId}-${chapter}`);
       setReadVerses(new Set(data.readVerses ?? []));
       setCompletedChapters(new Set(data.completedChapters ?? []));
       setPartialChapters(new Set(data.partialChapters ?? []));
@@ -169,30 +170,36 @@ export default function TanakhPage() {
     loadChapter(selectedBook.id, selectedChapter);
   }, [selectedBook, selectedChapter, loadChapter, restored]);
 
+  // `verses` briefly still holds the PREVIOUS chapter's data after selectedBook/
+  // selectedChapter change (loadChapter clears/repopulates it asynchronously) — so
+  // both effects below must wait for versesLoadedFor to catch up to the current
+  // selection before trusting `verses`, or they'd compute against stale data.
+  const versesReady = verses.length > 0 && versesLoadedFor === `${selectedBook.id}-${selectedChapter}`;
+
+  // Random-verse jump and arriving via a verse-specific link (search results,
+  // favorites, the quiz, etc.) both scroll to the verse and briefly highlight it,
+  // the same subtle way, for 1 second.
   useEffect(() => {
-    if (!pendingRandomVerse || verses.length === 0) return;
+    if (!pendingRandomVerse || !versesReady) return;
     setPendingRandomVerse(false);
     const verseNum = Math.floor(Math.random() * verses.length) + 1;
     setHighlightedVerse(verseNum);
     setTimeout(() => {
       document.getElementById(`verse-${verseNum}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 150);
-    setTimeout(() => setHighlightedVerse(null), 2500);
-  }, [verses, pendingRandomVerse]);
+    setTimeout(() => setHighlightedVerse(null), 1000);
+  }, [verses, versesReady, pendingRandomVerse]);
 
-  // Arriving via a link that points at a specific verse (from search results, favorites,
-  // the quiz, etc.) — scroll to it and briefly highlight it, more subtly than the
-  // random-verse jump above and for a shorter 1 second.
   useEffect(() => {
-    if (!pendingVerseParam || verses.length === 0) return;
+    if (!pendingVerseParam || !versesReady) return;
     const verseNum = pendingVerseParam;
     setPendingVerseParam(null);
-    setLinkHighlightedVerse(verseNum);
+    setHighlightedVerse(verseNum);
     setTimeout(() => {
       document.getElementById(`verse-${verseNum}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 150);
-    setTimeout(() => setLinkHighlightedVerse(null), 1000);
-  }, [verses, pendingVerseParam]);
+    setTimeout(() => setHighlightedVerse(null), 1000);
+  }, [verses, versesReady, pendingVerseParam]);
 
   async function toggleVerse(verseIndex: number) {
     if (!session) return;
@@ -633,8 +640,6 @@ export default function TanakhPage() {
                   onClick={() => toggleVerse(i)}
                   className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
                     highlightedVerse === i + 1
-                      ? "bg-amber-200 ring-2 ring-amber-400"
-                      : linkHighlightedVerse === i + 1
                       ? "bg-amber-50 ring-1 ring-amber-200"
                       : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
                   } ${session ? "cursor-pointer" : "cursor-default"}`}

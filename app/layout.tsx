@@ -10,7 +10,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "התנ״ך שבקרבי",
+  title: "שַׁלְהֶבֶתְ יָֽה",
   description: "חיבור אישי לתורה נביאים וכתובים",
 };
 

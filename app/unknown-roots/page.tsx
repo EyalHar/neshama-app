@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { toHebrewNumeral } from "@/lib/tanakh";
+import { toHebrewNumeral, TANAKH_BOOKS } from "@/lib/tanakh";
+
+const bookOrder = new Map(TANAKH_BOOKS.map((b, i) => [b.id, i]));
+const stripNikud = (s: string) => s.replace(/[֑-ׇ]/g, "");
+
+type SortBy = "default" | "alpha" | "location";
 
 type VerseRef = { book: string; bookHe: string; chapter: number; verse: number; text: string };
 
@@ -16,6 +21,7 @@ export default function UnknownRootsPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "missing" | "done">("all");
+  const [sortBy, setSortBy] = useState<SortBy>("default");
   const [editing, setEditing] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState<number | null>(null);
 
@@ -41,6 +47,22 @@ export default function UnknownRootsPage() {
     if (filter === "missing") return !r.suggestedRoot;
     if (filter === "done") return !!r.suggestedRoot;
     return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "alpha") {
+      return stripNikud(a.lemmaHe).localeCompare(stripNikud(b.lemmaHe), "he");
+    }
+    if (sortBy === "location") {
+      if (!a.verseRef && !b.verseRef) return 0;
+      if (!a.verseRef) return 1; // rows with no verse reference sort last
+      if (!b.verseRef) return -1;
+      const diff = (bookOrder.get(a.verseRef.book) ?? 999) - (bookOrder.get(b.verseRef.book) ?? 999);
+      if (diff !== 0) return diff;
+      if (a.verseRef.chapter !== b.verseRef.chapter) return a.verseRef.chapter - b.verseRef.chapter;
+      return a.verseRef.verse - b.verseRef.verse;
+    }
+    return 0;
   });
 
   const doneCount = rows.filter((r) => r.suggestedRoot).length;
@@ -72,6 +94,13 @@ export default function UnknownRootsPage() {
                   {f === "all" ? "הכל" : f === "missing" ? "חסרים" : "הושלמו"}
                 </button>
               ))}
+              <span className="w-px bg-stone-200 mx-1" />
+              {(["default", "alpha", "location"] as const).map((s) => (
+                <button key={s} onClick={() => setSortBy(s)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${sortBy === s ? "bg-stone-700 text-white" : "bg-white border border-stone-200 text-stone-600 hover:border-stone-400"}`}>
+                  {s === "default" ? "ללא מיון" : s === "alpha" ? "מיון א-ב" : "מיון לפי מיקום בתנ״ך"}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -86,7 +115,7 @@ export default function UnknownRootsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((row, i) => (
+                {sorted.map((row, i) => (
                   <tr key={row.id} className={`${i % 2 === 1 ? "bg-stone-50/40" : ""} hover:bg-amber-50/40 transition-colors`}>
                     <td className="px-4 py-3 align-top border-b border-stone-100">
                       <p className="font-bold text-lg text-stone-800">{row.lemmaHe}</p>

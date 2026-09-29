@@ -22,7 +22,14 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root";
+type Tab = "basic" | "substring" | "root" | "etymology";
+
+type EtymGroup = { key: string; label: string; rootLabel: string | null; definition: string; total: number };
+
+// Hebrew points/cantillation block — used to auto-toggle "חפש עם ניקוד מדויק" based on
+// whether the typed query itself contains nikud, so the user doesn't have to remember
+// to flip the checkbox manually.
+const hasNikud = (s: string) => /[֑-ׇ]/.test(s);
 
 const SCOPES = [
   { id: "tanakh", label: "כל התנ״ך" },
@@ -82,12 +89,16 @@ export default function AdvancedPage() {
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
   const [stem, setStem] = useState("all");
+  const [wordQ, setWordQ] = useState("");
   const [results, setResults] = useState<Result[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [occurrences, setOccurrences] = useState<number | null>(null);
   const [rootView, setRootView] = useState<"direct" | "etymological">("direct");
   const [rootDirectTotal, setRootDirectTotal] = useState<number | null>(null);
   const [rootEtymTotal, setRootEtymTotal] = useState<number | null>(null);
+  const [etymGroups, setEtymGroups] = useState<EtymGroup[]>([]);
+  const [activeGroupKey, setActiveGroupKey] = useState<string | null>(null);
+  const [lastActiveGroupKey, setLastActiveGroupKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [pageSize, setPageSize] = useState(500);
@@ -98,6 +109,7 @@ export default function AdvancedPage() {
   const [lastSubstringQ, setLastSubstringQ] = useState("");
   const [lastRootQ, setLastRootQ] = useState("");
   const [lastStem, setLastStem] = useState("all");
+  const [lastWordQ, setLastWordQ] = useState("");
   const abortRef = useRef<AbortController | null>(null);
 
   async function search(url: string, resetPage = true) {
@@ -105,6 +117,7 @@ export default function AdvancedPage() {
     const controller = new AbortController();
     abortRef.current = controller;
     const isRoot = url.includes("/api/verses/root");
+    const isEtymology = url.includes("/api/verses/etymology");
 
     if (resetPage) setPage(1);
     setLoading(true);
@@ -124,6 +137,15 @@ export default function AdvancedPage() {
       setPageSize(data.pageSize ?? 500);
       setRootDirectTotal(isRoot ? (data.directTotal ?? data.total ?? 0) : null);
       setRootEtymTotal(isRoot ? (data.etymologicalTotal ?? 0) : null);
+      if (isEtymology) {
+        setEtymGroups(data.groups ?? []);
+        const active = data.activeGroup ?? null;
+        setActiveGroupKey(active);
+        setLastActiveGroupKey(active);
+      } else {
+        setEtymGroups([]);
+        setActiveGroupKey(null);
+      }
       setLoading(false);
       abortRef.current = null;
     } catch (err) {
@@ -152,6 +174,13 @@ export default function AdvancedPage() {
     if (stemValue && stemValue !== "all") params.set("stem", stemValue);
     if (fav) params.set("favoritesOnly", "1");
     return `/api/verses/root?${params.toString()}`;
+  }
+
+  function etymologyUrl(wordValue: string, scopeValue: string, groupKey: string | null, p: number, fav: boolean) {
+    const params = new URLSearchParams({ word: wordValue, scope: scopeValue, page: String(p) });
+    if (groupKey) params.set("group", groupKey);
+    if (fav) params.set("favoritesOnly", "1");
+    return `/api/verses/etymology?${params.toString()}`;
   }
 
   function handleBasic(e: React.FormEvent, p = 1) {
@@ -184,6 +213,8 @@ export default function AdvancedPage() {
       search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}${nikudParam(lastNikudMode)}`, false);
     } else if (tab === "root") {
       search(rootUrl(lastRootQ, lastStem, lastScope, rootView, p, lastFavoritesOnly), false);
+    } else if (tab === "etymology") {
+      search(etymologyUrl(lastWordQ, lastScope, lastActiveGroupKey, p, lastFavoritesOnly), false);
     }
   }
 
@@ -207,10 +238,28 @@ export default function AdvancedPage() {
     search(rootUrl(lastRootQ, lastStem, lastScope, view, 1, lastFavoritesOnly), true);
   }
 
+  function handleEtymology(e: React.FormEvent, p = 1) {
+    e.preventDefault();
+    if (wordQ.trim().length < 2) return;
+    setLastWordQ(wordQ.trim());
+    setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
+    setPage(p);
+    search(etymologyUrl(wordQ.trim(), scope, null, p, favoritesOnly), p === 1);
+  }
+
+  function switchGroup(key: string) {
+    if (key === activeGroupKey) return;
+    setActiveGroupKey(key);
+    setLastActiveGroupKey(key);
+    search(etymologyUrl(lastWordQ, lastScope, key, 1, lastFavoritesOnly), true);
+  }
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "basic", label: "חיפוש בסיסי" },
     { id: "substring", label: "חיפוש תת-מחרוזת" },
     { id: "root", label: "חיפוש לפי שורש ובניין" },
+    { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
   ];
 
   const isEmpty = searched && !loading && (
@@ -228,7 +277,7 @@ export default function AdvancedPage() {
         {tabs.map((t) => (
           <button
             key={t.id}
-            onClick={() => { setTab(t.id); setSearched(false); setResults([]); }}
+            onClick={() => { setTab(t.id); setSearched(false); setResults([]); setEtymGroups([]); setActiveGroupKey(null); }}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors -mb-px border-b-2 ${
               tab === t.id
                 ? "border-amber-600 text-amber-700 bg-amber-50"
@@ -294,7 +343,11 @@ export default function AdvancedPage() {
             <input
               type="text"
               value={basicQ}
-              onChange={(e) => setBasicQ(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setBasicQ(v);
+                setNikudMode(hasNikud(v));
+              }}
               placeholder={nikudMode ? "לדוגמה: בְּרֵאשִׁית" : "חפש מילה או ביטוי..."}
               className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
@@ -322,7 +375,11 @@ export default function AdvancedPage() {
             <input
               type="text"
               value={substringQ}
-              onChange={(e) => setSubstringQ(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSubstringQ(v);
+                setNikudMode(hasNikud(v));
+              }}
               placeholder={nikudMode ? "לדוגמה: רֵאשִׁי" : "לדוגמה: ראשי"}
               className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
@@ -380,6 +437,32 @@ export default function AdvancedPage() {
         </div>
       )}
 
+      {/* Etymology (word -> full etymological family) */}
+      {tab === "etymology" && (
+        <div>
+          <p className="text-stone-500 text-sm mb-4">
+            הקלד מילה (ללא ניקוד) — ימצאו כל המילים שקשורות אליה אטימולוגית: אם המילה עצמה שורש, יופיעו כל הנגזרים ממנה; אם היא צורה נגזרת, יופיעו גם המילים ה״אחיות״ שנגזרו מאותו שורש קדום, לא רק הנגזרות ממנה עצמה.
+          </p>
+          <form onSubmit={handleEtymology} className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={wordQ}
+              onChange={(e) => setWordQ(e.target.value)}
+              placeholder="לדוגמה: תפוח"
+              className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={wordQ.trim().length < 2 || loading}
+              className="bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
+            >
+              חפש
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center gap-3 py-10">
@@ -427,6 +510,28 @@ export default function AdvancedPage() {
               </div>
             )}
 
+            {/* Group switcher (etymology tab only) — shown when the typed word matched more
+                than one distinct word-sense/root family, so homograph families are never
+                silently merged into one blob. */}
+            {tab === "etymology" && etymGroups.length > 1 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {etymGroups.map((g) => (
+                  <button
+                    key={g.key}
+                    type="button"
+                    onClick={() => switchGroup(g.key)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors text-right ${
+                      activeGroupKey === g.key ? "bg-amber-700 text-white" : "bg-white border border-stone-200 text-stone-600 hover:border-amber-400"
+                    }`}
+                  >
+                    <span>{g.label}</span>
+                    {g.rootLabel && <span className="opacity-75"> · מהשורש {g.rootLabel}</span>}
+                    <span className="opacity-75"> · {g.total.toLocaleString()}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {showingEtym && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
                 <p className="text-stone-600 text-sm leading-relaxed">
@@ -445,12 +550,12 @@ export default function AdvancedPage() {
                 <div className="flex gap-2">
                   <button onClick={() => goToPage(page - 1)} disabled={page <= 1 || loading}
                     className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors text-sm">
-                    ← הקודם
+                    → הקודם
                   </button>
                   <span className="px-4 py-2 text-stone-500 text-sm">{page} / {pages}</span>
                   <button onClick={() => goToPage(page + 1)} disabled={page >= pages || loading}
                     className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors text-sm">
-                    הבא →
+                    הבא ←
                   </button>
                 </div>
               )}
@@ -464,12 +569,12 @@ export default function AdvancedPage() {
               <div className="flex gap-2 justify-center mt-6">
                 <button onClick={() => goToPage(page - 1)} disabled={page <= 1 || loading}
                   className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors text-sm">
-                  ← הקודם
+                  → הקודם
                 </button>
                 <span className="px-4 py-2 text-stone-500 text-sm">{page} / {pages}</span>
                 <button onClick={() => goToPage(page + 1)} disabled={page >= pages || loading}
                   className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors text-sm">
-                  הבא →
+                  הבא ←
                 </button>
               </div>
             )}

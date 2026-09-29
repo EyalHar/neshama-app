@@ -1,155 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TANAKH_BOOKS, scopeBookIds } from "@/lib/tanakh";
+import { scopeBookIds } from "@/lib/tanakh";
 import { getCurrentUserId, getFavoriteVerseKeySet } from "@/lib/favorites";
-
-const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
-
-function stripDiacritics(text: string): string {
-  return text.replace(/[^א-ת]/g, "");
-}
-
-type StrongsRow = { number: string; derivedFrom: string };
-type WordRow = { book: string; chapter: number; verse: number; word: string };
-type VerseGroup = { book: string; chapter: number; verse: number; forms: Set<string> };
-
-// BFS: collect all Strong's numbers in the same root family
-async function collectRootFamily(seedNumbers: string[]): Promise<string[]> {
-  const family = new Set<string>(seedNumbers);
-  const queue = [...seedNumbers];
-
-  while (queue.length > 0) {
-    const current = queue.splice(0, 50);
-
-    const children = await prisma.$queryRawUnsafe<StrongsRow[]>(
-      `SELECT number, derivedFrom FROM "StrongsEntry"
-       WHERE ${current.map(() => `derivedFrom LIKE ?`).join(" OR ")}`,
-      ...current.map((n) => `%${n}%`)
-    );
-
-    for (const child of children) {
-      if (!family.has(child.number)) {
-        family.add(child.number);
-        queue.push(child.number);
-      }
-    }
-  }
-
-  return [...family];
-}
-
-// WordEntry.lemma stores the bare Strong's number, optionally with morphological prefixes
-// ("b/", "c/b/", "b/d/l/" …) and/or a variant suffix (" a", " b", "+"). A plain substring
-// LIKE match would wrongly match e.g. seed "877" against lemma "1877" — extract the actual
-// number and require an exact match to avoid such false positives.
-function extractStrongsNumber(lemma: string): string | null {
-  const stripped = lemma.replace(/^([a-z]\/)+/, "");
-  const m = stripped.match(/^(\d+)/);
-  return m ? m[1] : null;
-}
-
-// Binyan is encoded as "V{stem}" inside the verb's morph segment (e.g. "Vtq1cs"), but that
-// segment isn't always at the start of the field — a prefixed word (conjunction/article/
-// preposition) pushes it after a "/" (e.g. "HC/Vtq1cs" for a vav-consecutive form), so the
-// match must not be anchored to the start. GLOB (not LIKE) is required because SQLite's LIKE
-// is case-insensitive by default, which would conflate Piel/Pual ("p"/"P") and Hiphil/Hophal
-// ("h"/"H").
-function stemGlob(stem: string): string {
-  return `*V${stem}*`;
-}
-
-async function fetchWordRows(numbers: string[], stem: string | null): Promise<WordRow[]> {
-  if (numbers.length === 0) return [];
-  const plain = numbers.map((n) => n.replace(/^H/, ""));
-  const stemFilter = stem ? ` AND morph GLOB ?` : "";
-  const rows = await prisma.$queryRawUnsafe<(WordRow & { lemma: string })[]>(
-    `SELECT book, chapter, verse, word, lemma FROM "WordEntry"
-     WHERE (${plain.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
-    ...plain.map((n) => `%${n}%`), ...(stem ? [stemGlob(stem)] : [])
-  );
-  const numSet = new Set(plain);
-  return rows.filter((r) => {
-    const num = extractStrongsNumber(r.lemma);
-    return num !== null && numSet.has(num);
-  });
-}
-
-// Binyan-only search (no root given) — filters WordEntry by morph alone.
-async function fetchWordRowsByStem(stem: string): Promise<WordRow[]> {
-  return prisma.$queryRawUnsafe<WordRow[]>(
-    `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph GLOB ?`,
-    stemGlob(stem)
-  );
-}
-
-// Groups word rows into verses, applying scope filtering and excluding verses already claimed
-// elsewhere. Also counts total word-level occurrences (a verse can contain the same root more
-// than once), which can exceed the verse count returned alongside it.
-function groupByVerse(wordRows: WordRow[], bookIds: string[] | null, exclude: Set<string>): { verseMap: Map<string, VerseGroup>; occurrences: number } {
-  const verseMap = new Map<string, VerseGroup>();
-  let occurrences = 0;
-  for (const w of wordRows) {
-    if (bookIds && !bookIds.includes(w.book)) continue;
-    const key = `${w.book}|${w.chapter}|${w.verse}`;
-    if (exclude.has(key)) continue;
-    if (!verseMap.has(key)) verseMap.set(key, { book: w.book, chapter: w.chapter, verse: w.verse, forms: new Set() });
-    verseMap.get(key)!.forms.add(w.word);
-    occurrences++;
-  }
-  return { verseMap, occurrences };
-}
-
-// Restricts a verse map to only the keys present in the favorites set (no-op when inactive).
-// When it does filter, the occurrence count is re-approximated from the remaining forms,
-// since the original word-level count no longer applies to the reduced verse set.
-function filterToFavorites(map: Map<string, VerseGroup>, occurrences: number, favoriteKeys: Set<string> | null): { map: Map<string, VerseGroup>; occurrences: number } {
-  if (!favoriteKeys) return { map, occurrences };
-  const filtered = new Map<string, VerseGroup>();
-  let filteredOccurrences = 0;
-  for (const [key, value] of map) {
-    if (favoriteKeys.has(key)) {
-      filtered.set(key, value);
-      filteredOccurrences += value.forms.size;
-    }
-  }
-  return { map: filtered, occurrences: filteredOccurrences };
-}
-
-const PAGE_SIZE = 200;
-
-async function resolveVerseGroup(verseMap: Map<string, VerseGroup>, page: number) {
-  const verseKeys = [...verseMap.values()].sort((a, b) => {
-    const diff = (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999);
-    if (diff !== 0) return diff;
-    if (a.chapter !== b.chapter) return a.chapter - b.chapter;
-    return a.verse - b.verse;
-  });
-
-  const total = verseKeys.length;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const offset = (page - 1) * PAGE_SIZE;
-  const pageSlice = verseKeys.slice(offset, offset + PAGE_SIZE);
-  if (pageSlice.length === 0) return { results: [], total, pages };
-
-  const verseTexts = await prisma.$queryRawUnsafe<{ book: string; chapter: number; verse: number; text: string }[]>(
-    `SELECT book, chapter, verse, text FROM "VerseText" WHERE ${
-      pageSlice.map(() => `(book = ? AND chapter = ? AND verse = ?)`).join(" OR ")
-    }`,
-    ...pageSlice.flatMap((v) => [v.book, v.chapter, v.verse])
-  );
-
-  const textMap = new Map(verseTexts.map((v) => [`${v.book}|${v.chapter}|${v.verse}`, v.text]));
-  const results = pageSlice.map((v) => ({
-    book: v.book,
-    bookHe: TANAKH_BOOKS.find((b) => b.id === v.book)?.he ?? v.book,
-    chapter: v.chapter,
-    verse: v.verse,
-    text: textMap.get(`${v.book}|${v.chapter}|${v.verse}`) ?? "",
-    forms: [...v.forms],
-  }));
-
-  return { results, total, pages };
-}
+import {
+  stripDiacritics,
+  collectRootFamily,
+  fetchWordRows,
+  fetchWordRowsByStem,
+  groupByVerse,
+  filterToFavorites,
+  resolveVerseGroup,
+  stemGlob,
+  PAGE_SIZE,
+  type WordRow,
+} from "@/lib/rootFamily";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
