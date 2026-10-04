@@ -362,6 +362,34 @@ export default function TanakhPage() {
     setActiveSection(book.section);
   }
 
+  const currentBookIndex = TANAKH_BOOKS.findIndex((b) => b.id === selectedBook.id);
+  const hasNextChapter = selectedChapter < selectedBook.chapters || currentBookIndex + 1 < TANAKH_BOOKS.length;
+  const hasPrevChapter = selectedChapter > 1 || currentBookIndex > 0;
+
+  function goToNextChapter() {
+    if (selectedChapter < selectedBook.chapters) {
+      setSelectedChapter(selectedChapter + 1);
+      return;
+    }
+    const nextBook = TANAKH_BOOKS[currentBookIndex + 1];
+    if (!nextBook) return; // end of the Tanakh (II Chronicles 36)
+    setSelectedBook(nextBook);
+    setSelectedChapter(1);
+    setActiveSection(nextBook.section);
+  }
+
+  function goToPrevChapter() {
+    if (selectedChapter > 1) {
+      setSelectedChapter(selectedChapter - 1);
+      return;
+    }
+    const prevBook = TANAKH_BOOKS[currentBookIndex - 1];
+    if (!prevBook) return; // start of the Tanakh (Genesis 1)
+    setSelectedBook(prevBook);
+    setSelectedChapter(prevBook.chapters);
+    setActiveSection(prevBook.section);
+  }
+
   function handleRandomInBook() {
     const chapter = randomChapter(selectedBook);
     setSelectedChapter(chapter);
@@ -667,6 +695,33 @@ export default function TanakhPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {!loading && verses.length > 0 && (hasPrevChapter || hasNextChapter) && (
+          <div className="flex justify-between items-center mt-6">
+            <div>
+              {hasPrevChapter && (
+                <button
+                  type="button"
+                  onClick={goToPrevChapter}
+                  className="text-sm text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-4 py-2 rounded-lg transition-colors"
+                >
+                  → לפרק הקודם
+                </button>
+              )}
+            </div>
+            <div>
+              {hasNextChapter && (
+                <button
+                  type="button"
+                  onClick={goToNextChapter}
+                  className="text-sm text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-4 py-2 rounded-lg transition-colors"
+                >
+                  לפרק הבא ←
+                </button>
+              )}
+            </div>
           </div>
         )}
 

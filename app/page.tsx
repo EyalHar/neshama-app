@@ -81,7 +81,7 @@ export default function HomePage() {
       <div className="max-w-3xl mx-auto px-6 py-16">
         {/* Hero */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-stone-800 mb-4 leading-tight">
+          <h1 className="flame-title text-5xl font-bold mb-4 leading-tight">
             שַׁלְהֶבֶתְ יָֽה
           </h1>
           <p className="text-stone-500 text-xl leading-relaxed max-w-xl mx-auto">

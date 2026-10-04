@@ -46,7 +46,7 @@ export default function Sidebar() {
     <>
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-stone-900 text-amber-100 px-4 py-3" dir="rtl">
-        <span className="font-bold text-lg">שַׁלְהֶבֶתְ יָֽה</span>
+        <span className="flame-title font-bold text-lg">שַׁלְהֶבֶתְ יָֽה</span>
         <button onClick={() => setOpen(!open)} className="text-amber-200 text-2xl leading-none">
           {open ? "✕" : "☰"}
         </button>
@@ -63,7 +63,7 @@ export default function Sidebar() {
       >
         {/* Site title */}
         <div className="px-6 py-8 border-b border-stone-700">
-          <h1 className="text-xl font-bold text-amber-300 leading-snug">
+          <h1 className="flame-title text-xl font-bold leading-snug">
             שַׁלְהֶבֶתְ יָֽה
           </h1>
           <p className="text-stone-400 text-xs mt-1">חיבור אישי לתורה נביאים וכתובים</p>

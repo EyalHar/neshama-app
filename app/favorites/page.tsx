@@ -142,34 +142,44 @@ export default function FavoritesPage() {
               </p>
             ) : (
               <div className="space-y-3">
-                {verses.map((v) => (
-                  <div key={`${v.book}-${v.chapter}-${v.verse}`} className="bg-white rounded-2xl border border-stone-200 p-4 shadow-sm">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-amber-700 mb-1.5">
-                          {v.bookHe} {toHebrewNumeral(v.chapter)}&lrm;:{toHebrewNumeral(v.verse)}
-                        </p>
-                        <p className="text-stone-700 leading-relaxed">{v.text}</p>
-                      </div>
-                      <div className="flex flex-col items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => removeVerse(v)}
-                          title="הסר מהאהובים ביותר"
-                          className="p-1 rounded-full hover:bg-red-50 transition-colors"
-                        >
-                          <HeartIcon filled size={18} />
-                        </button>
-                        <Link
-                          href={`/tanakh?book=${encodeURIComponent(v.book)}&chapter=${v.chapter}&verse=${v.verse}`}
-                          className="text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-                        >
-                          קרא פרק ←
-                        </Link>
+                {verses.map((v, i) => {
+                  const isNewBook = i === 0 || verses[i - 1].book !== v.book;
+                  return (
+                    <div key={`${v.book}-${v.chapter}-${v.verse}`}>
+                      {isNewBook && (
+                        <h3 className={`text-sm font-bold text-stone-500 mb-2 ${i === 0 ? "" : "mt-5"}`}>
+                          {v.bookHe}
+                        </h3>
+                      )}
+                      <div className="bg-white rounded-2xl border border-stone-200 p-4 shadow-sm">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-amber-700 mb-1.5">
+                              {v.bookHe} {toHebrewNumeral(v.chapter)}&lrm;:{toHebrewNumeral(v.verse)}
+                            </p>
+                            <p className="text-stone-700 leading-relaxed">{v.text}</p>
+                          </div>
+                          <div className="flex flex-col items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => removeVerse(v)}
+                              title="הסר מהאהובים ביותר"
+                              className="p-1 rounded-full hover:bg-red-50 transition-colors"
+                            >
+                              <HeartIcon filled size={18} />
+                            </button>
+                            <Link
+                              href={`/tanakh?book=${encodeURIComponent(v.book)}&chapter=${v.chapter}&verse=${v.verse}`}
+                              className="text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                            >
+                              קרא פרק ←
+                            </Link>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
