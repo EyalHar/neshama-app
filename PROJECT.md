@@ -23,11 +23,17 @@ neshama-app/
 │   │   ├── auth/[...nextauth]/ ← NextAuth handler
 │   │   ├── neshama/            ← AI verse-by-emotion endpoint
 │   │   ├── quiz/               ← AI quiz generation endpoint
+│   │   ├── events/             ← AI biblical-event → source verses
+│   │   ├── favorites/          ← Favorite verses/chapters (list, verse/, chapter/ toggles)
+│   │   ├── hapax/              ← Words occurring once in the Tanakh
+│   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
+│   │   ├── unknown-roots/      ← Crowdsourced missing Strong's roots
 │   │   ├── tanakh/             ← Reading progress CRUD + stats
 │   │   │   ├── bulk/           ← Batch chapter complete/clear
 │   │   │   ├── reset/          ← Delete all user progress
 │   │   │   └── stats/          ← Completed chapters count
 │   │   ├── verses/
+│   │   │   ├── etymology/      ← Word-family (etymological) search
 │   │   │   ├── letters/        ← Search by first/last letter
 │   │   │   ├── root/           ← Search by Hebrew root and/or verb stem (+ etymological)
 │   │   │   └── substring/      ← Substring / basic word search
@@ -37,20 +43,34 @@ neshama-app/
 │   ├── components/
 │   │   ├── Sidebar.tsx         ← Main navigation (right side, RTL)
 │   │   ├── SessionWrapper.tsx  ← NextAuth provider
-│   │   └── Confetti.tsx        ← Milestone celebration animation
+│   │   ├── Confetti.tsx        ← Milestone celebration animation
+│   │   ├── HeartIcon.tsx       ← Favorite toggle icon
+│   │   ├── SpecialLetterText.tsx ← Renders large/small/suspended letters in a verse
+│   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
 │   ├── admin/seed/page.tsx
 │   ├── advanced/page.tsx
+│   ├── events/page.tsx
+│   ├── favorites/page.tsx
+│   ├── jerusalem-names/page.tsx
 │   ├── letters/page.tsx
 │   ├── login/page.tsx
 │   ├── neshama/page.tsx
 │   ├── quiz/page.tsx
+│   ├── special-letters/page.tsx
 │   ├── tanakh/page.tsx
+│   ├── unique-words/page.tsx
 │   ├── unknown-roots/page.tsx
 │   ├── page.tsx                ← Home / landing page
 │   └── layout.tsx              ← Root layout: RTL, Sidebar, SessionWrapper
 ├── lib/
 │   ├── prisma.ts               ← Singleton PrismaClient
-│   └── tanakh.ts               ← Book metadata, Hebrew numerals, Sefaria fetch helper
+│   ├── tanakh.ts               ← Book metadata, Hebrew numerals, Sefaria fetch + special-letter marks
+│   ├── favorites.ts            ← Current user + favorite-verse helpers
+│   ├── hapax.ts                ← Hapax legomena computation
+│   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
+│   ├── rootFamily.ts           ← Strong's family-tree helpers
+│   ├── special-letters.ts      ← Special-letter types, labels, styles
+│   └── special-letters.json    ← Snapshot of all special letters in the Tanakh (from Sefaria)
 ├── prisma/
 │   ├── schema.prisma
 │   └── dev.db
@@ -70,6 +90,11 @@ neshama-app/
 | `/quiz` | Fill-in-the-blank verse quiz with 4-choice answers |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
+| `/favorites` | The user's favorite verses and chapters, grouped by book |
+| `/events` | Enter a biblical event → all source verses that mention it |
+| `/unique-words` | Hapax legomena — words occurring only once in the Tanakh |
+| `/special-letters` | All large, small and suspended letters and inverted nuns, linked to the reader |
+| `/jerusalem-names` | Names of Jerusalem with their source verses |
 | `/login` | Google OAuth login |
 | `/admin/seed` | Database seeding UI (OSHB morphology + Strong's dictionary) |
 
@@ -84,6 +109,8 @@ neshama-app/
 | `Session` | NextAuth sessions |
 | `ReadVerse` | Individual verses marked read (userId, book, chapter, verse) |
 | `CompletedChapter` | Entire chapters marked complete (userId, book, chapter) |
+| `FavoriteVerse` | Verses marked favorite (userId, book, chapter, verse) |
+| `FavoriteChapter` | Chapters marked favorite (userId, book, chapter) |
 | `VerseText` | Full Tanakh with diacritics (`text`), plain text (`plainText`), first/last letter index |
 | `WordEntry` | Morphological analysis per word (lemma, Strong's number, morph code) |
 | `StrongsEntry` | Strong's Hebrew Dictionary (number, lemmaHe, lemmaPlain, xlit, definition, derivedFrom) |
@@ -95,7 +122,7 @@ neshama-app/
 ## API Routes Summary
 
 ### Tanakh Progress
-- `GET /api/tanakh?book=&chapter=` — Fetch chapter from Sefaria + user's read status
+- `GET /api/tanakh?book=&chapter=` — Fetch chapter from Sefaria + user's read/favorite status; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns)
 - `POST /api/tanakh` — Toggle single verse read
 - `POST /api/tanakh/bulk` — Mark/clear entire chapter
 - `DELETE /api/tanakh/reset` — Reset all user progress
@@ -105,10 +132,23 @@ neshama-app/
 - `GET /api/verses/substring?q=&scope=&whole=&page=` — Word/substring search (500/page)
 - `GET /api/verses/root?root=&stem=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) filter; `root` and `stem` are each optional but at least one is required (200/page)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
+- `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
+- `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
+
+### Favorites
+- `GET /api/favorites` — All favorite chapters and verses (verse text live from Sefaria)
+- `POST /api/favorites/verse` — Toggle a favorite verse
+- `POST /api/favorites/chapter` — Toggle a favorite chapter
+
+### Content Pages
+- `GET /api/hapax?section=&page=&mergeSpelling=&mergeDerived=` — Hapax legomena
+- `GET /api/jerusalem-names` — Names of Jerusalem with source verses
+- `GET /api/unknown-roots` / `PATCH /api/unknown-roots` — List / suggest missing roots
 
 ### AI
 - `POST /api/neshama` — Groq: detect emotion → return 2–3 matching verses with message
 - `POST /api/quiz` — Groq: generate fill-in-the-blank quiz from random Tanakh verse
+- `POST /api/events` — Groq: find the source verses of a biblical event
 
 ---
 
@@ -120,6 +160,8 @@ neshama-app/
 - Celebration modals with confetti animations and Web Audio API sounds
 - Resume from last position (localStorage + URL params)
 - Random chapter/book/verse jump buttons
+- Favorite verses and chapters (heart icons)
+- "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
 
 ### Advanced Search
 - **Basic / Substring** — Hebrew text search with pagination
@@ -139,13 +181,34 @@ neshama-app/
 ### Unknown Roots Crowdsourcing
 - Table of Strong's entries with no `derivedFrom` parent
 - Shows one sample verse per entry for context
+- Filter (all / missing / filled) and sort (alphabetical / Tanakh order)
 - Users can propose a root; progress counter (X of Y filled)
+
+### Favorites
+- Heart icons on verses and chapters in the reader (signed-in users)
+- `/favorites` page with verse/chapter tabs, grouped by book
+- "Favorites only" filter on all search tabs
+
+### Biblical Events
+- Enter an event name → Groq returns up to 10 source verses with explanations; verse text is fetched from Sefaria and unresolvable references are dropped
+- "Search more" fetches additional sources, excluding ones already shown
+- Sources can be marked read and opened in the reader
+
+### Hapax Legomena (`/unique-words`)
+- Words whose lexeme occurs exactly once in the whole Tanakh, tabbed by Torah / Nevi'im / Ketuvim
+
+### Special Letters (`/special-letters`)
+- All 63 large, small and suspended letters and inverted nuns (per Sefaria's MAM text), each shown in its word and linked to the verse
+- Data is a static snapshot in `lib/special-letters.json`; the reader computes the same marks live per chapter
+
+### Names of Jerusalem (`/jerusalem-names`)
+- 29 traditional names of Jerusalem with their source verses — some resolved live from the DB, others fixed citations
 
 ---
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)
@@ -156,10 +219,9 @@ neshama-app/
 ## Environment Variables
 ```
 DATABASE_URL          # SQLite path (file:./dev.db)
-NEXTAUTH_SECRET       # NextAuth signing key
-NEXTAUTH_URL          # Base URL for OAuth callbacks
-GOOGLE_ID             # Google OAuth client ID
-GOOGLE_SECRET         # Google OAuth client secret
+AUTH_SECRET           # Auth.js (NextAuth 5) signing key
+AUTH_GOOGLE_ID        # Google OAuth client ID (read automatically by the Google provider)
+AUTH_GOOGLE_SECRET    # Google OAuth client secret
 GROQ_API_KEY          # Groq LLM API key
 ANTHROPIC_API_KEY     # Anthropic API key (installed, reserved for future use)
 ```

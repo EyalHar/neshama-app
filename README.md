@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# נשמה — Neshama App
 
-## Getting Started
+אפליקציית ליווי לקריאה בתנ״ך, בעברית ובכיוון RTL: מעקב קריאה פסוק־אחר־פסוק, חיפוש מתקדם בעברית, התאמת פסוקים למצב רגשי בעזרת AI, חידון, ודפי עיון.
 
-First, run the development server:
+## דפים
+
+- **ראשי** (`/`): כרטיסים לכל אזורי האפליקציה.
+- **קריאת תנ״ך** (`/tanakh`): טקסט עם ניקוד וטעמים מ־Sefaria, סימון פסוקים כנקראו, חגיגות בסיום פרק, ספר, חלק או התנ״ך כולו, אהובים, ופרק או פסוק אקראי. אפשר גם לסמן "הצג אותיות מיוחדות" כדי לראות אותיות רבתי, זעירות ותלויות בצורתן.
+- **האהובים עליי ביותר** (`/favorites`): הפסוקים והפרקים שסומנו כאהובים, מקובצים לפי ספר.
+- **חיפוש בתנ״ך** (`/advanced`): חיפוש מילה ותת־מחרוזת, חיפוש עם ניקוד מדויק, חיפוש לפי שורש ובניין (ישיר או אטימולוגי), וחיפוש קרובי מילה.
+- **אות ראשונה ואחרונה** (`/letters`): פסוקים שמתחילים או מסתיימים באות מסוימת.
+- **אותיות מיוחדות** (`/special-letters`): כל האותיות הרבתי, הזעירות והתלויות והנוני״ן ההפוכות בתנ״ך, עם קישור לפסוק.
+- **מילים יחידאיות** (`/unique-words`): מילים שמופיעות פעם אחת בלבד בתנ״ך.
+- **אירועי התנ״ך** (`/events`): מקורות לאירוע מקראי.
+- **שמות ירושלים** (`/jerusalem-names`): שמותיה של ירושלים ומקורותיהם.
+- **נשמה** (`/neshama`): כותבים מצב רגשי ומקבלים פסוקים מתאימים (Groq).
+- **בחן את עצמך** (`/quiz`): חידון השלמת מילה בפסוק.
+- **שורשים לא ידועים** (`/unknown-roots`): השלמה קהילתית של שורשים חסרים במילון Strong's.
+- **התחברות** (`/login`): התחברות עם Google, שנדרשת לשמירת התקדמות ואהובים.
+- **אכלוס** (`/admin/seed`): אכלוס חד־פעמי של מסד הנתונים (ראו בהמשך).
+
+## Tech Stack
+
+Next.js 16 (App Router, React 19, TypeScript) · Tailwind CSS 4 · NextAuth 5 (Google OAuth) · Prisma + SQLite · Groq (LLM) · Sefaria API
+
+## התקנה והרצה
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx prisma generate
+npx prisma db push      # יוצר את מסד הנתונים לפי prisma/schema.prisma
+npm run dev             # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### משתני סביבה (`.env.local`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+DATABASE_URL=file:./dev.db
+AUTH_SECRET=...
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+GROQ_API_KEY=...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### אכלוס מסד הנתונים
 
-## Learn More
+פיצ'רי החיפוש דורשים אכלוס חד־פעמי של הטקסט, המורפולוגיה (OSHB) ומילון Strong's. אפשר לאכלס דרך הדף `/admin/seed`, או בבקשות `POST /api/admin/seed-oshb` ו־`POST /api/admin/seed-strongs`. האכלוס מחולק לתורה, נביאים וכתובים.
 
-To learn more about Next.js, take a look at the following resources:
+## מסמכים נוספים
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [PROJECT.md](PROJECT.md): מבנה הפרויקט, דפים, מודלים ו־API
+- [FEATURES.md](FEATURES.md): תיעוד מפורט של כל פיצ'ר שנוסף
+- [CLAUDE.md](CLAUDE.md): פקודות והחלטות ארכיטקטורה שאינן מובנות מאליהן
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## מקורות נתונים
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- טקסט המקרא: [Sefaria](https://www.sefaria.org), נוסח "מקרא על פי המסורה" (CC BY-SA)
+- מורפולוגיה: [Open Scriptures Hebrew Bible](https://github.com/openscriptures/morphhb) (CC BY 4.0)
+- מילון Strong's: [Open Scriptures](https://github.com/openscriptures/strongs)

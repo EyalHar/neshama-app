@@ -124,10 +124,51 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-export async function fetchChapter(
+export type SpecialLetterKind = "large" | "small" | "suspended" | "inverted";
+
+// A span [start, end) of a verse's stripped text that Sefaria marks as a special letter
+export type SpecialLetterMark = { verse: number; start: number; end: number; kind: SpecialLetterKind };
+
+// Private-use sentinels survive stripHtml(), so special-letter spans can be located after stripping
+const MARK_OPEN: Record<SpecialLetterKind, string> = {
+  large: "", small: "", suspended: "", inverted: "",
+};
+const MARK_CLOSE = "";
+const KIND_BY_OPEN = Object.fromEntries(
+  Object.entries(MARK_OPEN).map(([kind, ch]) => [ch, kind as SpecialLetterKind])
+);
+const TAG_KIND: Record<string, SpecialLetterKind> = { big: "large", small: "small", sup: "suspended" };
+
+// Sefaria (MAM) wraps special letters as <big>, <small>, bare <sup>, and <span class="mam-spi-invnun">.
+// <small> also wraps the paseq (׀), so only spans containing a Hebrew letter count. Footnotes
+// (Yemenite variants) can contain <big> too — those are left unmarked.
+function markSpecialLetters(html: string): string {
+  return html
+    .replace(/<i class="footnote">[\s\S]*?<\/i>/g, (fn) => fn.replace(/<\/?(big|small|sup)>/g, ""))
+    .replace(/<(big|small|sup)>([^<]*)<\/\1>/g, (whole, tag: string, inner: string) =>
+      /[א-ת]/.test(inner) ? MARK_OPEN[TAG_KIND[tag]] + inner + MARK_CLOSE : whole)
+    .replace(/<span class="mam-spi-invnun">([^<]*)<\/span>/g, (_, inner: string) =>
+      MARK_OPEN.inverted + inner + MARK_CLOSE);
+}
+
+function extractMarks(marked: string, verse: number): { text: string; marks: SpecialLetterMark[] } {
+  let text = "";
+  const marks: SpecialLetterMark[] = [];
+  let open: { start: number; kind: SpecialLetterKind } | null = null;
+  for (const ch of marked) {
+    if (KIND_BY_OPEN[ch]) open = { start: text.length, kind: KIND_BY_OPEN[ch] };
+    else if (ch === MARK_CLOSE) {
+      if (open) marks.push({ verse, start: open.start, end: text.length, kind: open.kind });
+      open = null;
+    } else text += ch;
+  }
+  return { text, marks };
+}
+
+export async function fetchChapterWithMarks(
   bookId: string,
   chapter: number
-): Promise<string[]> {
+): Promise<{ verses: string[]; specialLetters: SpecialLetterMark[] }> {
   const ref = `${bookId} ${chapter}`;
   const encoded = encodeURIComponent(ref);
   const res = await fetch(
@@ -136,6 +177,17 @@ export async function fetchChapter(
   );
   if (!res.ok) throw new Error("Failed to fetch chapter");
   const data = await res.json();
-  const verses: string[] = Array.isArray(data.he) ? data.he : [];
-  return verses.map(stripHtml);
+  const raw: string[] = Array.isArray(data.he) ? data.he : [];
+  const verses: string[] = [];
+  const specialLetters: SpecialLetterMark[] = [];
+  raw.forEach((html, i) => {
+    const { text, marks } = extractMarks(stripHtml(markSpecialLetters(html)), i + 1);
+    verses.push(text);
+    specialLetters.push(...marks);
+  });
+  return { verses, specialLetters };
+}
+
+export async function fetchChapter(bookId: string, chapter: number): Promise<string[]> {
+  return (await fetchChapterWithMarks(bookId, chapter)).verses;
 }

@@ -1,10 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { useSession } from "next-auth/react";
-import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
+import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral, type SpecialLetterMark } from "@/lib/tanakh";
 import Confetti from "@/app/components/Confetti";
 import HeartIcon from "@/app/components/HeartIcon";
+import SpecialLetterText from "@/app/components/SpecialLetterText";
+
+const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
+const SHOW_SPECIAL_EVENT = "tanakh-special-letters-change";
+
+function subscribeShowSpecial(onChange: () => void) {
+  window.addEventListener(SHOW_SPECIAL_EVENT, onChange);
+  return () => window.removeEventListener(SHOW_SPECIAL_EVENT, onChange);
+}
 
 function playNote(ctx: AudioContext, freq: number, start: number, dur: number, vol = 0.25) {
   const osc = ctx.createOscillator();
@@ -89,6 +98,7 @@ export default function TanakhPage() {
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [verses, setVerses] = useState<string[]>([]);
   const [versesLoadedFor, setVersesLoadedFor] = useState(""); // `${bookId}-${chapter}` the current `verses` array actually belongs to
+  const [specialLetters, setSpecialLetters] = useState<SpecialLetterMark[]>([]);
   const [readVerses, setReadVerses] = useState<Set<number>>(new Set());
   const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
   const [partialChapters, setPartialChapters] = useState<Set<number>>(new Set());
@@ -103,6 +113,17 @@ export default function TanakhPage() {
   const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null);
   const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
   const [pendingVerseParam, setPendingVerseParam] = useState<number | null>(null);
+
+  const showSpecialLetters = useSyncExternalStore(
+    subscribeShowSpecial,
+    () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1",
+    () => false
+  );
+
+  const toggleShowSpecialLetters = (checked: boolean) => {
+    localStorage.setItem(SHOW_SPECIAL_KEY, checked ? "1" : "0");
+    window.dispatchEvent(new Event(SHOW_SPECIAL_EVENT));
+  };
 
   // Restore position — URL params take priority over localStorage
   useEffect(() => {
@@ -152,6 +173,7 @@ export default function TanakhPage() {
       const res = await fetch(`/api/tanakh?book=${encodeURIComponent(bookId)}&chapter=${chapter}`);
       const data = await res.json();
       setVerses(data.verses ?? []);
+      setSpecialLetters(data.specialLetters ?? []);
       setVersesLoadedFor(`${bookId}-${chapter}`);
       setReadVerses(new Set(data.readVerses ?? []));
       setCompletedChapters(new Set(data.completedChapters ?? []));
@@ -540,6 +562,15 @@ export default function TanakhPage() {
             >
               פסוק אקראי מהתנ״ך
             </button>
+            <label className="flex items-center justify-center gap-2 mt-1 text-xs text-stone-500 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showSpecialLetters}
+                onChange={(e) => toggleShowSpecialLetters(e.target.checked)}
+                className="accent-amber-600 w-3.5 h-3.5"
+              />
+              הצג אותיות מיוחדות
+            </label>
           </div>
         </div>
 
@@ -641,6 +672,11 @@ export default function TanakhPage() {
             )}
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
             {!isBookComplete && isChapterComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הפרק הושלם</span>}
+            {showSpecialLetters && specialLetters.length > 0 && (
+              <span className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                {specialLetters.length} אותיות מיוחדות בפרק
+              </span>
+            )}
           </div>
 
           {session && totalVerses > 0 && (
@@ -676,7 +712,9 @@ export default function TanakhPage() {
                     {toHebrewNumeral(i + 1)}
                   </span>
                   <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
-                    {verse}
+                    {showSpecialLetters
+                      ? <SpecialLetterText text={verse} marks={specialLetters.filter((m) => m.verse === i + 1)} />
+                      : verse}
                   </p>
                   {session && (
                     <button

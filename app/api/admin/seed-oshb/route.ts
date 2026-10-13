@@ -65,7 +65,9 @@ function parseXml(xml: string, bookId: string, startVerseIndex: number): { verse
 
     while ((wMatch = wordRegex.exec(content)) !== null) {
       const attrs = wMatch[1];
-      const rawWord = wMatch[2].replace(/\//g, "");
+      // OSHB wraps enlarged/small/suspended letters in <seg type="x-large">…</seg> inside a word;
+      // left in, the tag's inner space split the word (e.g. Deut 6:4 "שמ ע").
+      const rawWord = wMatch[2].replace(/<[^>]+>/g, "").replace(/\//g, "");
       const lemma = attrs.match(/lemma="([^"]*)"/)?.[1] ?? "";
       const morph = attrs.match(/morph="([^"]*)"/)?.[1] ?? "";
 

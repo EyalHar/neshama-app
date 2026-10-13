@@ -52,7 +52,7 @@ export default function FavoritesPage() {
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
       <div className="flex items-center gap-2 mb-1">
         <HeartIcon filled size={24} />
-        <h1 className="text-2xl font-bold text-stone-800">האהובים ביותר עליי</h1>
+        <h1 className="text-2xl font-bold text-stone-800">האהובים עליי ביותר</h1>
       </div>
       <p className="text-stone-400 text-sm mb-6">פרקים ופסוקים ששמרת — כל האהובים ביותר שלך במקום אחד</p>
 
@@ -78,7 +78,7 @@ export default function FavoritesPage() {
           <div className="flex gap-2 mb-6 border-b border-stone-200 pb-0">
             {(
               [
-                { id: "verses", label: "פסוקים אהובים ביותר" },
+                { id: "verses", label: "הפסוקים האהובים ביותר" },
                 { id: "chapters", label: "הפרקים האהובים ביותר" },
               ] as { id: FavTab; label: string }[]
             ).map((t) => (
@@ -134,7 +134,7 @@ export default function FavoritesPage() {
 
           {/* Favorite verses */}
           <section hidden={tab !== "verses"}>
-            <h2 className="text-lg font-bold text-stone-700 mb-3">פסוקים אהובים ביותר</h2>
+            <h2 className="text-lg font-bold text-stone-700 mb-3">הפסוקים האהובים ביותר</h2>
             {verses.length === 0 ? (
               <p className="text-stone-400 text-sm">
                 עדיין לא סימנת פסוקים כאהובים ביותר — עבור עם העכבר על פסוק בדף{" "}

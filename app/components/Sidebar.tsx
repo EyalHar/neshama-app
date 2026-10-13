@@ -4,19 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
+import TempleIcon from "./TempleIcon";
 
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
-  { href: "/favorites", label: "האהובים ביותר עליי", icon: "♥" },
+  { href: "/favorites", label: "האהובים עליי ביותר", icon: "♥" },
   { href: "/letters", label: "אות ראשונה ואחרונה", icon: "א" },
   { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
   { href: "/events", label: "אירועי התנ״ך", icon: "📜" },
   { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },
   { href: "/unique-words", label: "מילים יחידאיות", icon: "1" },
+  { href: "/special-letters", label: "אותיות מיוחדות", icon: "ב" },
   { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },
-  { href: "/jerusalem-names", label: "שמות ירושלים", icon: "🏛" },
+  { href: "/jerusalem-names", label: "שמות ירושלים", icon: <TempleIcon /> },
 ];
 
 export default function Sidebar() {

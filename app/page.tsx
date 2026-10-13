@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TempleIcon from "./components/TempleIcon";
 
 const FEATURES = [
   {
@@ -11,7 +12,7 @@ const FEATURES = [
   },
   {
     href: "/favorites",
-    title: "האהובים ביותר עליי",
+    title: "האהובים עליי ביותר",
     description: "פרקים ופסוקים ששמרת כאהובים ביותר — הכל במקום אחד, מוכן לחזור אליו בכל רגע",
     icon: "♥",
     color: "from-red-50 to-rose-50 border-red-200 hover:border-red-400",
@@ -50,6 +51,14 @@ const FEATURES = [
     labelColor: "text-emerald-700",
   },
   {
+    href: "/special-letters",
+    title: "אותיות מיוחדות",
+    description: "אותיות רבתי, זעירות ותלויות ונוני״ן הפוכות בתנ״ך, עם קישור לכל פרק",
+    icon: "ב",
+    color: "from-orange-50 to-amber-50 border-orange-200 hover:border-orange-400",
+    labelColor: "text-orange-700",
+  },
+  {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",
@@ -69,7 +78,7 @@ const FEATURES = [
     href: "/jerusalem-names",
     title: "שמות ירושלים",
     description: "מבחר שמותיה של ירושלים בתנ״ך — מ׳שלם׳ ו׳ציון׳ ועד ׳עיר הקודש׳ — עם כל המקורות, מקושרים לקורא",
-    icon: "🏛",
+    icon: <TempleIcon className="text-yellow-700" />,
     color: "from-yellow-50 to-yellow-100 border-yellow-300 hover:border-yellow-500",
     labelColor: "text-yellow-800",
   },
