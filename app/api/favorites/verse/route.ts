@@ -23,7 +23,11 @@ export async function POST(request: NextRequest) {
 
   let favorited: boolean;
   if (existing) {
-    await prisma.favoriteVerse.delete({ where: { id: existing.id } });
+    // Notes live only on favorites — the client confirms with the user before unfavoriting a verse with notes
+    await prisma.$transaction([
+      prisma.favoriteVerse.delete({ where: { id: existing.id } }),
+      prisma.verseNote.deleteMany({ where: { userId: user.id, book, chapter, verse } }),
+    ]);
     favorited = false;
   } else {
     await prisma.favoriteVerse.create({ data: { userId: user.id, book, chapter, verse } });

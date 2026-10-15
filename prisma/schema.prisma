@@ -19,6 +19,7 @@ model User {
   completedChapters CompletedChapter[]
   favoriteVerses    FavoriteVerse[]
   favoriteChapters  FavoriteChapter[]
+  verseNotes        VerseNote[]
 }
 
 model Account {
@@ -149,6 +150,22 @@ model FavoriteVerse {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, book, chapter, verse])
+}
+
+// Personal notes on a verse. Keyed by (userId, book, chapter, verse) rather than FavoriteVerse.id,
+// though the API keeps them in step: adding a note favorites the verse, unfavoriting deletes its notes.
+model VerseNote {
+  id        String   @id @default(cuid())
+  userId    String
+  book      String
+  chapter   Int
+  verse     Int
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, book, chapter])
 }
 
 model FavoriteChapter {

@@ -25,6 +25,7 @@ neshama-app/
 │   │   ├── quiz/               ← AI quiz generation endpoint
 │   │   ├── events/             ← AI biblical-event → source verses
 │   │   ├── favorites/          ← Favorite verses/chapters (list, verse/, chapter/ toggles)
+│   │   ├── notes/              ← Verse notes (POST; [id]/ PATCH + DELETE)
 │   │   ├── hapax/              ← Words occurring once in the Tanakh
 │   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
 │   │   ├── unknown-roots/      ← Crowdsourced missing Strong's roots
@@ -45,6 +46,8 @@ neshama-app/
 │   │   ├── SessionWrapper.tsx  ← NextAuth provider
 │   │   ├── Confetti.tsx        ← Milestone celebration animation
 │   │   ├── HeartIcon.tsx       ← Favorite toggle icon
+│   │   ├── NoteIcon.tsx        ← Verse-notes icon
+│   │   ├── VerseNotes.tsx      ← Notes panel (list, add, edit, delete) for a verse
 │   │   ├── SpecialLetterText.tsx ← Renders large/small/suspended letters in a verse
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
 │   ├── admin/seed/page.tsx
@@ -66,6 +69,7 @@ neshama-app/
 │   ├── prisma.ts               ← Singleton PrismaClient
 │   ├── tanakh.ts               ← Book metadata, Hebrew numerals, Sefaria fetch + special-letter marks
 │   ├── favorites.ts            ← Current user + favorite-verse helpers
+│   ├── notes.ts                ← Verse-note type and helpers
 │   ├── hapax.ts                ← Hapax legomena computation
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
 │   ├── rootFamily.ts           ← Strong's family-tree helpers
@@ -111,6 +115,7 @@ neshama-app/
 | `CompletedChapter` | Entire chapters marked complete (userId, book, chapter) |
 | `FavoriteVerse` | Verses marked favorite (userId, book, chapter, verse) |
 | `FavoriteChapter` | Chapters marked favorite (userId, book, chapter) |
+| `VerseNote` | Personal notes on a verse (userId, book, chapter, verse, text); every noted verse is also a favorite |
 | `VerseText` | Full Tanakh with diacritics (`text`), plain text (`plainText`), first/last letter index |
 | `WordEntry` | Morphological analysis per word (lemma, Strong's number, morph code) |
 | `StrongsEntry` | Strong's Hebrew Dictionary (number, lemmaHe, lemmaPlain, xlit, definition, derivedFrom) |
@@ -137,8 +142,13 @@ neshama-app/
 
 ### Favorites
 - `GET /api/favorites` — All favorite chapters and verses (verse text live from Sefaria)
-- `POST /api/favorites/verse` — Toggle a favorite verse
+- `POST /api/favorites/verse` — Toggle a favorite verse (unfavoriting also deletes its notes)
 - `POST /api/favorites/chapter` — Toggle a favorite chapter
+
+### Notes
+- `POST /api/notes` — Add a note `{ book, chapter, verse, text }`; also favorites the verse
+- `PATCH /api/notes/[id]` / `DELETE /api/notes/[id]` — Edit / delete one of the user's notes
+- Notes for a chapter come back from `GET /api/tanakh` (`notes`), and per verse from `GET /api/favorites`
 
 ### Content Pages
 - `GET /api/hapax?section=&page=&mergeSpelling=&mergeDerived=` — Hapax legomena
@@ -187,6 +197,7 @@ neshama-app/
 ### Favorites
 - Heart icons on verses and chapters in the reader (signed-in users)
 - `/favorites` page with verse/chapter tabs, grouped by book
+- Personal notes on verses: a floating panel under the verse in the reader, and inline under each verse on `/favorites`. Adding a note favorites the verse; unfavoriting a verse with notes asks for confirmation and deletes them
 - "Favorites only" filter on all search tabs
 
 ### Biblical Events

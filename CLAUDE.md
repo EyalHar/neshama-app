@@ -14,9 +14,8 @@ npm run dev       # Start dev server (localhost:3000)
 npm run build     # Production build
 npm run lint      # ESLint check
 
+npx prisma db push           # Apply schema.prisma to the DB (there is no prisma/migrations folder)
 npx prisma generate          # Regenerate Prisma client after schema changes
-npx prisma migrate dev       # Apply new migration (creates migration file)
-npx prisma migrate deploy    # Apply migrations in prod
 npx prisma studio            # Open DB browser UI
 ```
 
@@ -57,3 +56,16 @@ Book IDs are English (`"Genesis"`, `"I Samuel"`, etc.) — they must match Sefar
 
 ### Seeding
 The DB must be seeded before search features work. Use `/admin/seed` (UI) or `POST /api/admin/seed-oshb` + `POST /api/admin/seed-strongs`. Seeding is split into Torah/Nevi'im/Ketuvim sections for resumability and to avoid request timeouts.
+
+OSHB word elements can contain markup such as `<seg type="x-large">ע</seg>` (enlarged letters). The seeder strips all tags from a word before deriving `text`/`plainText` — otherwise the tag's inner space splits the word (e.g. "שמ ע" in Deut 6:4) and phrase searches miss the verse.
+
+### Special letters: two sources, one markup
+Large/small/suspended letters and inverted nuns come from Sefaria's markup (`<big>`, `<small>`, bare `<sup>`, `<span class="mam-spi-invnun">`), in two places:
+- **Reader (live):** `fetchChapterWithMarks()` in `lib/tanakh.ts` replaces those tags with private-use sentinel characters before `stripHtml()`, then walks the stripped text to compute `{ verse, start, end, kind }` offsets. `fetchChapter()` is a thin wrapper that drops the marks. `<small>` around a paseq (׀) and tags inside Yemenite-variant footnotes are not counted.
+- **`/special-letters` page (static):** `lib/special-letters.json` is a one-time snapshot built by scanning all 39 books via Sefaria API v3 with the same rules. If the rules change, regenerate it so the two stay consistent.
+
+### Verse notes are always on favorites
+`VerseNote` is keyed by `(userId, book, chapter, verse)`, not by `FavoriteVerse.id`, but the API maintains the invariant that every verse with notes is a favorite: `POST /api/notes` upserts the `FavoriteVerse` in the same transaction, and unfavoriting via `POST /api/favorites/verse` deletes the verse's notes. The client confirms with the user before unfavoriting a verse that has notes. Because of this, `/favorites` is the single place that lists all of a user's notes. The reader gets a chapter's notes from `GET /api/tanakh` (`notes`), and `/favorites` gets them per verse from `GET /api/favorites`. Both pages render the shared `app/components/VerseNotes.tsx` panel.
+
+### Route handler params
+Dynamic route handlers (e.g. `app/api/notes/[id]/route.ts`) receive `params` as a **Promise** in Next.js 16, so they must `await ctx.params`. They type the context explicitly (`{ params: Promise<{ id: string }> }`) rather than with the generated `RouteContext<...>` helper, which only type-checks after `next dev`/`next build` has generated route types.

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/favorites";
+import { toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { TANAKH_BOOKS, fetchChapter } from "@/lib/tanakh";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
@@ -15,10 +16,17 @@ export async function GET() {
   const userId = await getCurrentUserId();
   if (!userId) return NextResponse.json({ chapters: [], verses: [] });
 
-  const [favChapters, favVerses] = await Promise.all([
+  const [favChapters, favVerses, noteRows] = await Promise.all([
     prisma.favoriteChapter.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     prisma.favoriteVerse.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
+    prisma.verseNote.findMany({ where: { userId }, orderBy: { createdAt: "asc" } }),
   ]);
+
+  const notesByVerse = new Map<string, VerseNoteItem[]>();
+  for (const n of noteRows) {
+    const key = `${n.book}|${n.chapter}|${n.verse}`;
+    notesByVerse.set(key, [...(notesByVerse.get(key) ?? []), toNoteItem(n)]);
+  }
 
   const chapters = favChapters
     .map((c) => ({ book: c.book, bookHe: bookHe(c.book), chapter: c.chapter }))
@@ -48,6 +56,7 @@ export async function GET() {
         chapter: v.chapter,
         verse: v.verse,
         text: verseTexts[v.verse - 1] ?? "",
+        notes: notesByVerse.get(`${v.book}|${v.chapter}|${v.verse}`) ?? [],
       };
     })
     .sort((a, b) => (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999) || a.chapter - b.chapter || a.verse - b.verse);

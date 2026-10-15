@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { fetchChapterWithMarks, TANAKH_BOOKS, checkSectionCompletion, checkTanakhCompletion, type Section } from "@/lib/tanakh";
 
 async function getCompletionEvents(
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
     let partialBooks: string[] = [];
     let favoriteVerses: number[] = [];
     let favoriteChapters: number[] = [];
+    let notes: VerseNoteItem[] = [];
 
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({ where: { email: session.user.email } });
@@ -117,6 +119,12 @@ export async function GET(request: NextRequest) {
         });
         favoriteVerses = favVerses.map((v) => v.verse);
 
+        const noteRows = await prisma.verseNote.findMany({
+          where: { userId: user.id, book, chapter },
+          orderBy: { createdAt: "asc" },
+        });
+        notes = noteRows.map(toNoteItem);
+
         // Favorite chapters for this book
         const favChapters = await prisma.favoriteChapter.findMany({
           where: { userId: user.id, book },
@@ -126,7 +134,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ verses, specialLetters, readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters });
+    return NextResponse.json({ verses, specialLetters, readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, notes });
   } catch {
     return NextResponse.json({ error: "Failed to fetch chapter" }, { status: 500 });
   }

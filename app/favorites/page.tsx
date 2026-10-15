@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
+import NoteIcon from "@/app/components/NoteIcon";
+import VerseNotes from "@/app/components/VerseNotes";
+import type { VerseNoteItem } from "@/lib/notes";
 
 type FavoriteChapterItem = { book: string; bookHe: string; chapter: number };
-type FavoriteVerseItem = { book: string; bookHe: string; chapter: number; verse: number; text: string };
+type FavoriteVerseItem = { book: string; bookHe: string; chapter: number; verse: number; text: string; notes: VerseNoteItem[] };
+
+const verseKey = (v: { book: string; chapter: number; verse: number }) => `${v.book}-${v.chapter}-${v.verse}`;
 type FavTab = "verses" | "chapters";
 
 export default function FavoritesPage() {
@@ -16,6 +21,7 @@ export default function FavoritesPage() {
   const [verses, setVerses] = useState<FavoriteVerseItem[]>([]);
   const [fetching, setFetching] = useState(false);
   const [tab, setTab] = useState<FavTab>("verses");
+  const [addingNoteTo, setAddingNoteTo] = useState<string | null>(null);
   const loading = status === "loading" || (!!session && fetching);
 
   useEffect(() => {
@@ -39,8 +45,14 @@ export default function FavoritesPage() {
     });
   }
 
+  function setVerseNotes(item: FavoriteVerseItem, notes: VerseNoteItem[]) {
+    setVerses((prev) => prev.map((v) => (verseKey(v) === verseKey(item) ? { ...v, notes } : v)));
+  }
+
   async function removeVerse(item: FavoriteVerseItem) {
-    setVerses((prev) => prev.filter((v) => !(v.book === item.book && v.chapter === item.chapter && v.verse === item.verse)));
+    const count = item.notes.length;
+    if (count > 0 && !window.confirm(`לפסוק יש ${count === 1 ? "הערה אחת" : `${count} הערות`}. להסיר אותו מהאהובים ולמחוק את ההערות?`)) return;
+    setVerses((prev) => prev.filter((v) => verseKey(v) !== verseKey(item)));
     await fetch("/api/favorites/verse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -144,8 +156,9 @@ export default function FavoritesPage() {
               <div className="space-y-3">
                 {verses.map((v, i) => {
                   const isNewBook = i === 0 || verses[i - 1].book !== v.book;
+                  const showNotes = v.notes.length > 0 || addingNoteTo === verseKey(v);
                   return (
-                    <div key={`${v.book}-${v.chapter}-${v.verse}`}>
+                    <div key={verseKey(v)}>
                       {isNewBook && (
                         <h3 className={`text-sm font-bold text-stone-500 mb-2 ${i === 0 ? "" : "mt-5"}`}>
                           {v.bookHe}
@@ -176,6 +189,28 @@ export default function FavoritesPage() {
                             </Link>
                           </div>
                         </div>
+                        {showNotes ? (
+                          <div className="mt-3">
+                            <VerseNotes
+                              book={v.book}
+                              chapter={v.chapter}
+                              verse={v.verse}
+                              notes={v.notes}
+                              isFavorite
+                              onNotesChange={(notes) => setVerseNotes(v, notes)}
+                              onClose={v.notes.length === 0 ? () => setAddingNoteTo(null) : undefined}
+                            />
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setAddingNoteTo(verseKey(v))}
+                            className="mt-2 flex items-center gap-1.5 text-xs text-stone-400 hover:text-amber-700 transition-colors"
+                          >
+                            <NoteIcon size={14} />
+                            הוסף הערה
+                          </button>
+                        )}
                       </div>
                     </div>
                   );

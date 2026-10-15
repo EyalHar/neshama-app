@@ -6,6 +6,9 @@ import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral, type SpecialL
 import Confetti from "@/app/components/Confetti";
 import HeartIcon from "@/app/components/HeartIcon";
 import SpecialLetterText from "@/app/components/SpecialLetterText";
+import NoteIcon from "@/app/components/NoteIcon";
+import VerseNotes from "@/app/components/VerseNotes";
+import type { VerseNoteItem } from "@/lib/notes";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const SHOW_SPECIAL_EVENT = "tanakh-special-letters-change";
@@ -106,6 +109,8 @@ export default function TanakhPage() {
   const [partialBooks, setPartialBooks] = useState<Set<string>>(new Set());
   const [favoriteVerses, setFavoriteVerses] = useState<Set<number>>(new Set());
   const [favoriteChapters, setFavoriteChapters] = useState<Set<number>>(new Set());
+  const [notes, setNotes] = useState<VerseNoteItem[]>([]);
+  const [openNotesVerse, setOpenNotesVerse] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
@@ -169,6 +174,7 @@ export default function TanakhPage() {
     setLoading(true);
     setVerses([]);
     setReadVerses(new Set());
+    setOpenNotesVerse(null);
     try {
       const res = await fetch(`/api/tanakh?book=${encodeURIComponent(bookId)}&chapter=${chapter}`);
       const data = await res.json();
@@ -182,6 +188,7 @@ export default function TanakhPage() {
       setPartialBooks(new Set(data.partialBooks ?? []));
       setFavoriteVerses(new Set(data.favoriteVerses ?? []));
       setFavoriteChapters(new Set(data.favoriteChapters ?? []));
+      setNotes(data.notes ?? []);
     } finally {
       setLoading(false);
     }
@@ -269,6 +276,12 @@ export default function TanakhPage() {
     e.stopPropagation();
     if (!session) return;
     const wasFav = favoriteVerses.has(verseNum);
+    const noteCount = notes.filter((n) => n.verse === verseNum).length;
+    if (wasFav && noteCount > 0) {
+      if (!window.confirm(`לפסוק יש ${noteCount === 1 ? "הערה אחת" : `${noteCount} הערות`}. להסיר אותו מהאהובים ולמחוק את ההערות?`)) return;
+      setNotes((prev) => prev.filter((n) => n.verse !== verseNum));
+      if (openNotesVerse === verseNum) setOpenNotesVerse(null);
+    }
     setFavoriteVerses((prev) => {
       const s = new Set(prev);
       if (wasFav) s.delete(verseNum); else s.add(verseNum);
@@ -697,9 +710,11 @@ export default function TanakhPage() {
             {verses.map((verse, i) => {
               const isRead = readVerses.has(i + 1);
               const isFav = favoriteVerses.has(i + 1);
+              const verseNotes = notes.filter((n) => n.verse === i + 1);
+              const notesOpen = openNotesVerse === i + 1;
               return (
+                <div key={i} className={`relative ${notesOpen ? "z-20" : ""}`}>
                 <div
-                  key={i}
                   id={`verse-${i + 1}`}
                   onClick={() => toggleVerse(i)}
                   className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
@@ -719,6 +734,24 @@ export default function TanakhPage() {
                   {session && (
                     <button
                       type="button"
+                      onClick={(e) => { e.stopPropagation(); setOpenNotesVerse(notesOpen ? null : i + 1); }}
+                      title={verseNotes.length > 0 ? "הצג הערות" : "הוסף הערה"}
+                      aria-expanded={notesOpen}
+                      className={`relative self-start mt-1 shrink-0 p-0.5 rounded-full text-amber-600 hover:bg-amber-100 transition-opacity ${
+                        verseNotes.length > 0 || notesOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                      }`}
+                    >
+                      <NoteIcon size={17} />
+                      {verseNotes.length > 0 && (
+                        <span className="absolute -top-1 -left-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-amber-600 text-white text-[10px] leading-[15px] text-center font-medium">
+                          {verseNotes.length}
+                        </span>
+                      )}
+                    </button>
+                  )}
+                  {session && (
+                    <button
+                      type="button"
                       onClick={(e) => toggleVerseFavorite(e, i + 1)}
                       title={isFav ? "הסר פסוק מהאהובים ביותר" : "הוסף פסוק לאהובים ביותר"}
                       aria-pressed={isFav}
@@ -730,6 +763,21 @@ export default function TanakhPage() {
                     </button>
                   )}
                   {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
+                </div>
+                {notesOpen && (
+                  <div className="absolute top-full inset-x-2 sm:inset-x-10 mt-1 shadow-xl rounded-xl bg-white">
+                    <VerseNotes
+                      book={selectedBook.id}
+                      chapter={selectedChapter}
+                      verse={i + 1}
+                      notes={verseNotes}
+                      isFavorite={isFav}
+                      onNotesChange={(next) => setNotes((prev) => [...prev.filter((n) => n.verse !== i + 1), ...next])}
+                      onFavorited={() => setFavoriteVerses((prev) => new Set(prev).add(i + 1))}
+                      onClose={() => setOpenNotesVerse(null)}
+                    />
+                  </div>
+                )}
                 </div>
               );
             })}
