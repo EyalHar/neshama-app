@@ -23,6 +23,7 @@ neshama-app/
 │   │   ├── auth/[...nextauth]/ ← NextAuth handler
 │   │   ├── neshama/            ← AI verse-by-emotion endpoint
 │   │   ├── quiz/               ← AI quiz generation endpoint
+│   │   │   └── grammar/        ← Root/binyan quiz from morphology (no AI)
 │   │   ├── events/             ← AI biblical-event → source verses
 │   │   ├── favorites/          ← Favorite verses/chapters (list, verse/, chapter/ toggles)
 │   │   ├── notes/              ← Verse notes (POST; [id]/ PATCH + DELETE)
@@ -48,7 +49,7 @@ neshama-app/
 │   │   ├── HeartIcon.tsx       ← Favorite toggle icon
 │   │   ├── NoteIcon.tsx        ← Verse-notes icon
 │   │   ├── VerseNotes.tsx      ← Notes panel (list, add, edit, delete) for a verse
-│   │   ├── SpecialLetterText.tsx ← Renders large/small/suspended letters in a verse
+│   │   ├── VerseText.tsx       ← Renders a verse with special letters + highlighted words
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
 │   ├── admin/seed/page.tsx
 │   ├── advanced/page.tsx
@@ -58,7 +59,7 @@ neshama-app/
 │   ├── letters/page.tsx
 │   ├── login/page.tsx
 │   ├── neshama/page.tsx
-│   ├── quiz/page.tsx
+│   ├── quiz/                   ← page.tsx (tabs), VerseQuiz, GrammarQuiz, QuizActions, QuizStatus
 │   ├── special-letters/page.tsx
 │   ├── tanakh/page.tsx
 │   ├── unique-words/page.tsx
@@ -71,6 +72,9 @@ neshama-app/
 │   ├── favorites.ts            ← Current user + favorite-verse helpers
 │   ├── notes.ts                ← Verse-note type and helpers
 │   ├── hapax.ts                ← Hapax legomena computation
+│   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per chapter
+│   ├── grammarQuiz.ts          ← Grammar quiz question generator
+│   ├── wordStats.ts            ← WordEntry parsing + Tanakh-wide frequency counts (cached)
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
 │   ├── rootFamily.ts           ← Strong's family-tree helpers
 │   ├── special-letters.ts      ← Special-letter types, labels, styles
@@ -91,7 +95,7 @@ neshama-app/
 | `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti |
 | `/letters` | Search verses by first and/or last Hebrew letter |
 | `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological) |
-| `/quiz` | Fill-in-the-blank verse quiz with 4-choice answers |
+| `/quiz` | Two tabs: fill-in-the-blank verse quiz (AI) and grammar quiz (root/binyan, 3 levels) |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
 | `/favorites` | The user's favorite verses and chapters, grouped by book |
@@ -127,7 +131,7 @@ neshama-app/
 ## API Routes Summary
 
 ### Tanakh Progress
-- `GET /api/tanakh?book=&chapter=` — Fetch chapter from Sefaria + user's read/favorite status; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns)
+- `GET /api/tanakh?book=&chapter=` — Fetch chapter from Sefaria + user's read/favorite status; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
 - `POST /api/tanakh` — Toggle single verse read
 - `POST /api/tanakh/bulk` — Mark/clear entire chapter
 - `DELETE /api/tanakh/reset` — Reset all user progress
@@ -158,6 +162,7 @@ neshama-app/
 ### AI
 - `POST /api/neshama` — Groq: detect emotion → return 2–3 matching verses with message
 - `POST /api/quiz` — Groq: generate fill-in-the-blank quiz from random Tanakh verse
+- `GET /api/quiz/grammar?type=root|binyan|mixed&level=easy|medium|hard` — Root/binyan question generated from OSHB morphology (no AI)
 - `POST /api/events` — Groq: find the source verses of a biblical event
 
 ---
@@ -172,6 +177,7 @@ neshama-app/
 - Random chapter/book/verse jump buttons
 - Favorite verses and chapters (heart icons)
 - "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
+- Leitwords (מילים מנחות) — up to 5 roots the chapter repeats far above their Tanakh-wide rate (log-likelihood vs. corpus frequency); clicking one highlights all its occurrences in the chapter
 
 ### Advanced Search
 - **Basic / Substring** — Hebrew text search with pagination
@@ -185,8 +191,9 @@ neshama-app/
 - Page color theme changes dynamically by detected emotion
 
 ### Quiz
-- AI selects a random verse, blanks one meaningful word, generates 4 options
-- User answers, can mark verse as read, and link to full chapter
+- **Verse tab:** AI selects a random verse, blanks one meaningful word, generates 4 options
+- **Grammar tab:** identify the root or binyan of a highlighted verb in its verse; mixed/root/binyan × easy/medium/hard. Built from OSHB data only (no AI). Harder levels use rarer roots and look-alike distractor roots. After a correct answer, shows the word's full parse (binyan, tense, person/gender/number) and a first-try streak
+- In both: mark the verse as read and jump to it in the reader
 
 ### Unknown Roots Crowdsourcing
 - Table of Strong's entries with no `derivedFrom` parent

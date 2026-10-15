@@ -5,7 +5,8 @@ import { useSession } from "next-auth/react";
 import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral, type SpecialLetterMark } from "@/lib/tanakh";
 import Confetti from "@/app/components/Confetti";
 import HeartIcon from "@/app/components/HeartIcon";
-import SpecialLetterText from "@/app/components/SpecialLetterText";
+import VerseText, { findWordRanges } from "@/app/components/VerseText";
+import type { Leitword } from "@/lib/leitwords";
 import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
 import type { VerseNoteItem } from "@/lib/notes";
@@ -102,6 +103,8 @@ export default function TanakhPage() {
   const [verses, setVerses] = useState<string[]>([]);
   const [versesLoadedFor, setVersesLoadedFor] = useState(""); // `${bookId}-${chapter}` the current `verses` array actually belongs to
   const [specialLetters, setSpecialLetters] = useState<SpecialLetterMark[]>([]);
+  const [leitwords, setLeitwords] = useState<Leitword[]>([]);
+  const [activeLeitword, setActiveLeitword] = useState<string | null>(null);
   const [readVerses, setReadVerses] = useState<Set<number>>(new Set());
   const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
   const [partialChapters, setPartialChapters] = useState<Set<number>>(new Set());
@@ -175,11 +178,13 @@ export default function TanakhPage() {
     setVerses([]);
     setReadVerses(new Set());
     setOpenNotesVerse(null);
+    setActiveLeitword(null);
     try {
       const res = await fetch(`/api/tanakh?book=${encodeURIComponent(bookId)}&chapter=${chapter}`);
       const data = await res.json();
       setVerses(data.verses ?? []);
       setSpecialLetters(data.specialLetters ?? []);
+      setLeitwords(data.leitwords ?? []);
       setVersesLoadedFor(`${bookId}-${chapter}`);
       setReadVerses(new Set(data.readVerses ?? []));
       setCompletedChapters(new Set(data.completedChapters ?? []));
@@ -278,7 +283,7 @@ export default function TanakhPage() {
     const wasFav = favoriteVerses.has(verseNum);
     const noteCount = notes.filter((n) => n.verse === verseNum).length;
     if (wasFav && noteCount > 0) {
-      if (!window.confirm(`לפסוק יש ${noteCount === 1 ? "הערה אחת" : `${noteCount} הערות`}. להסיר אותו מהאהובים ולמחוק את ההערות?`)) return;
+      if (!window.confirm(`לפסוק יש ${noteCount === 1 ? "הערה/ חידוש אחד" : `${noteCount} הערות וחידושים`}. להסיר אותו מהאהובים ולמחוק אותם?`)) return;
       setNotes((prev) => prev.filter((n) => n.verse !== verseNum));
       if (openNotesVerse === verseNum) setOpenNotesVerse(null);
     }
@@ -447,6 +452,7 @@ export default function TanakhPage() {
   const booksInSection = TANAKH_BOOKS.filter((b) => b.section === activeSection);
   const readCount = readVerses.size;
   const totalVerses = verses.length;
+  const activeForms = leitwords.find((l) => l.strongs === activeLeitword)?.forms;
   const isChapterComplete = completedChapters.has(selectedChapter);
   const isBookComplete = completedBooks.has(selectedBook.id);
 
@@ -697,6 +703,36 @@ export default function TanakhPage() {
           )}
         </div>
 
+        {!loading && leitwords.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap mb-4 -mt-1">
+            <span
+              className="text-xs text-stone-500 cursor-help border-b border-dotted border-stone-300"
+              title="מילה מנחה: שורש שחוזר בפרק הרבה יותר מהרגיל בתנ״ך, ומדגיש את הנושא שלו. לחיצה על מילה מדגישה את כל מופעיה בפרק."
+            >
+              מילים מנחות:
+            </span>
+            {leitwords.map((l) => {
+              const active = activeLeitword === l.strongs;
+              return (
+                <button
+                  key={l.strongs}
+                  type="button"
+                  onClick={() => setActiveLeitword(active ? null : l.strongs)}
+                  aria-pressed={active}
+                  title={`${l.count} מופעים בפרק, פי ${l.ratio} מהשכיחות הרגילה בתנ״ך`}
+                  className={`text-sm px-2.5 py-0.5 rounded-full border transition-colors ${
+                    active
+                      ? "bg-yellow-200 border-yellow-400 text-stone-800"
+                      : "bg-white border-stone-200 text-stone-600 hover:border-yellow-400 hover:bg-yellow-50"
+                  }`}
+                >
+                  {l.lemmaHe} <span className="text-xs text-stone-400">×{l.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Verses */}
         {loading ? (
           <div className="flex justify-center py-20">
@@ -727,15 +763,17 @@ export default function TanakhPage() {
                     {toHebrewNumeral(i + 1)}
                   </span>
                   <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
-                    {showSpecialLetters
-                      ? <SpecialLetterText text={verse} marks={specialLetters.filter((m) => m.verse === i + 1)} />
-                      : verse}
+                    <VerseText
+                      text={verse}
+                      marks={showSpecialLetters ? specialLetters.filter((m) => m.verse === i + 1) : undefined}
+                      highlights={activeForms?.[i + 1] ? findWordRanges(verse, new Set(activeForms[i + 1])) : undefined}
+                    />
                   </p>
                   {session && (
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setOpenNotesVerse(notesOpen ? null : i + 1); }}
-                      title={verseNotes.length > 0 ? "הצג הערות" : "הוסף הערה"}
+                      title={verseNotes.length > 0 ? "הצג הערות וחידושים" : "הערה/ חידוש"}
                       aria-expanded={notesOpen}
                       className={`relative self-start mt-1 shrink-0 p-0.5 rounded-full text-amber-600 hover:bg-amber-100 transition-opacity ${
                         verseNotes.length > 0 || notesOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"

@@ -77,7 +77,7 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
   };
 
   const deleteNote = (id: string) => {
-    if (!window.confirm("למחוק את ההערה?")) return;
+    if (!window.confirm("למחוק את ההערה/ החידוש?")) return;
     run(async () => {
       await sendJson(`/api/notes/${id}`, "DELETE");
       onNotesChange(notes.filter((n) => n.id !== id));
@@ -91,7 +91,7 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
     >
       {onClose && (
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-amber-800">ההערות שלי</span>
+          <span className="text-xs font-bold text-amber-800">ההערות והחידושים שלי</span>
           <button
             type="button"
             onClick={onClose}
@@ -167,7 +167,7 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
           maxLength={NOTE_MAX_LENGTH}
           rows={2}
           autoFocus={notes.length === 0}
-          placeholder={notes.length === 0 ? "כתוב הערה לפסוק..." : "הוסף הערה נוספת..."}
+          placeholder={notes.length === 0 ? "כתוב הערה או חידוש לפסוק..." : "הוסף הערה או חידוש נוסף..."}
           className={textareaClass}
         />
         <div className="flex items-center justify-between gap-2">
@@ -177,7 +177,7 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
             disabled={busy || !draft.trim()}
             className="text-xs font-medium bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors"
           >
-            הוסף הערה
+            הערה/ חידוש
           </button>
           {error ? (
             <span className="text-xs text-red-600">{error}</span>

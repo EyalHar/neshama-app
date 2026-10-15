@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { toNoteItem, type VerseNoteItem } from "@/lib/notes";
+import { getChapterLeitwords } from "@/lib/leitwords";
 import { fetchChapterWithMarks, TANAKH_BOOKS, checkSectionCompletion, checkTanakhCompletion, type Section } from "@/lib/tanakh";
 
 async function getCompletionEvents(
@@ -52,7 +53,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { verses, specialLetters } = await fetchChapterWithMarks(book, chapter);
+    const [{ verses, specialLetters }, leitwords] = await Promise.all([
+      fetchChapterWithMarks(book, chapter),
+      getChapterLeitwords(book, chapter),
+    ]);
 
     const session = await auth();
     let readVerses: number[] = [];
@@ -134,7 +138,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ verses, specialLetters, readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, notes });
+    return NextResponse.json({ verses, specialLetters, leitwords, readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, notes });
   } catch {
     return NextResponse.json({ error: "Failed to fetch chapter" }, { status: 500 });
   }

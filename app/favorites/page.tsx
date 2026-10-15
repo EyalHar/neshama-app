@@ -51,7 +51,7 @@ export default function FavoritesPage() {
 
   async function removeVerse(item: FavoriteVerseItem) {
     const count = item.notes.length;
-    if (count > 0 && !window.confirm(`לפסוק יש ${count === 1 ? "הערה אחת" : `${count} הערות`}. להסיר אותו מהאהובים ולמחוק את ההערות?`)) return;
+    if (count > 0 && !window.confirm(`לפסוק יש ${count === 1 ? "הערה/ חידוש אחד" : `${count} הערות וחידושים`}. להסיר אותו מהאהובים ולמחוק אותם?`)) return;
     setVerses((prev) => prev.filter((v) => verseKey(v) !== verseKey(item)));
     await fetch("/api/favorites/verse", {
       method: "POST",
@@ -208,7 +208,7 @@ export default function FavoritesPage() {
                             className="mt-2 flex items-center gap-1.5 text-xs text-stone-400 hover:text-amber-700 transition-colors"
                           >
                             <NoteIcon size={14} />
-                            הוסף הערה
+                            הערה/ חידוש
                           </button>
                         )}
                       </div>

@@ -64,6 +64,19 @@ Large/small/suspended letters and inverted nuns come from Sefaria's markup (`<bi
 - **Reader (live):** `fetchChapterWithMarks()` in `lib/tanakh.ts` replaces those tags with private-use sentinel characters before `stripHtml()`, then walks the stripped text to compute `{ verse, start, end, kind }` offsets. `fetchChapter()` is a thin wrapper that drops the marks. `<small>` around a paseq (׀) and tags inside Yemenite-variant footnotes are not counted.
 - **`/special-letters` page (static):** `lib/special-letters.json` is a one-time snapshot built by scanning all 39 books via Sefaria API v3 with the same rules. If the rules change, regenerate it so the two stay consistent.
 
+### Leitwords: OSHB words matched onto Sefaria text
+`lib/leitwords.ts` scores each chapter's content words (nouns/verbs/adjectives, no proper names) against Tanakh-wide frequency with log-likelihood (G²), merging a word into its single `derivedFrom` parent when both appear in the chapter.
+
+### WordEntry parsing and in-memory caches (`lib/wordStats.ts`)
+`lemma` and `morph` are parallel `/`-separated chains (prefixes + main word), e.g. `c/7200` ↔ `HC/Vqw3ms`. The segment of `lemma` that starts with a digit is the Strong's number, and the `morph` segment at the same index (after the leading language letter `H`/`A`) describes that word: part of speech, then for verbs binyan, tense, person, gender, number (`Vqw3ms`). `parseWord()` does this; use it rather than re-parsing.
+
+Tanakh-wide counts per Strong's number (`getCorpusCounts()`, one `GROUP BY lemma, morph` query) and the grammar quiz's verb pool (`lib/grammarQuiz.ts`) are cached in module-level promises for the life of the server process. They only change on re-seed, so restart the server after seeding.
+
+### Grammar quiz: word position via VerseText
+The quiz shows the verse from `VerseText.text` (not Sefaria) because its words are exactly the OSHB words joined by single spaces, so `text.split(" ")[wordNum - 1]` is the asked word (verified on 400 random verses). Keep that invariant in the seeder. The quiz has no LLM: answers come straight from `morph`/`StrongsEntry`. Difficulty = root frequency bands plus, for root questions, how similar the same-length distractor roots look.
+
+There is no word-level mapping between the reader's Sefaria text and OSHB's words, so highlighting is done by form: the API returns each verse's unpointed surface forms (`WordEntry.plain`), and `findWordRanges()` in `app/components/VerseText.tsx` matches them against the verse's words split on spaces and maqaf, with nikud stripped. Measured at 99.7% of occurrences found; the misses are mostly ketiv/qere. `VerseText` renders special letters and highlights together by cutting the text at every boundary of either.
+
 ### Verse notes are always on favorites
 `VerseNote` is keyed by `(userId, book, chapter, verse)`, not by `FavoriteVerse.id`, but the API maintains the invariant that every verse with notes is a favorite: `POST /api/notes` upserts the `FavoriteVerse` in the same transaction, and unfavoriting via `POST /api/favorites/verse` deletes the verse's notes. The client confirms with the user before unfavoriting a verse that has notes. Because of this, `/favorites` is the single place that lists all of a user's notes. The reader gets a chapter's notes from `GET /api/tanakh` (`notes`), and `/favorites` gets them per verse from `GET /api/favorites`. Both pages render the shared `app/components/VerseNotes.tsx` panel.
 
