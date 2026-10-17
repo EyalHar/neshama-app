@@ -27,7 +27,7 @@ const FEATURES = [
     labelColor: "text-red-700",
   },
   {
-    href: "/letters",
+    href: "/advanced?tab=letters",
     title: "אות ראשונה ואחרונה",
     description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",
     icon: "א",

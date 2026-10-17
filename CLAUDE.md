@@ -49,7 +49,7 @@ When a verse is toggled read, `POST /api/tanakh` checks verse → chapter → bo
 Progress updates dispatch a custom DOM event `tanakh-stats-update` on `window`. The Sidebar listens for it and refetches `/api/tanakh/stats`. Do not replace this with context — the Sidebar is rendered in the root layout outside the page tree.
 
 ### Sidebar layout
-The root `body` is viewport-height with `overflow-hidden`, so the Sidebar can't grow past the screen. Its `nav` is the only scrolling part (`flex-1 min-h-0 overflow-y-auto`), while the title and the sign-in/out footer are `shrink-0`. Keep it that way when adding `NAV_ITEMS`: with 14 items the list already exceeds a laptop screen, and without the nav scroll the footer, including the "התחבר" link, gets clipped off-screen.
+The root `body` is viewport-height with `overflow-hidden`, so the Sidebar can't grow past the screen. Its `nav` is the only scrolling part (`flex-1 min-h-0 overflow-y-auto`), while the title and the sign-in/out footer are `shrink-0`. Links are split into `NAV_ITEMS` (always visible) and `STUDY_ITEMS` (the collapsible "עיון ומחקר" group, auto-open when the current page is in it). There is no "ראשי" item: the site title links home. Keep the scrolling setup when adding items: with 14 items the list already exceeds a laptop screen, and without the nav scroll the footer, including the "התחבר" link, gets clipped off-screen.
 
 ### Root search BFS
 `GET /api/verses/root` resolves a Hebrew root to a Strong's number, then does a BFS through `StrongsEntry.derivedFrom` (comma-separated Strong's numbers) to build a family tree. "Direct" view shows only the queried root's verses; "etymological" view includes all descendants.

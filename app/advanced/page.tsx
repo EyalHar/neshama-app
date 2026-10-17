@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { use, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
+import LetterSearch from "./LetterSearch";
 
 const BINYANIM = [
   { id: "all", label: "כל הבניינים" },
@@ -22,7 +23,15 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root" | "etymology";
+type Tab = "basic" | "substring" | "root" | "etymology" | "letters";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "basic", label: "חיפוש בסיסי" },
+  { id: "substring", label: "חיפוש תת-מחרוזת" },
+  { id: "root", label: "חיפוש לפי שורש ובניין" },
+  { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
+  { id: "letters", label: "אות ראשונה ואחרונה" },
+];
 
 type EtymGroup = { key: string; label: string; rootLabel: string | null; definition: string; total: number };
 
@@ -77,9 +86,11 @@ function NotSeeded() {
   );
 }
 
-export default function AdvancedPage() {
+// ?tab= opens a specific tab directly (e.g. /letters redirects to ?tab=letters)
+export default function AdvancedPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab: tabParam } = use(searchParams);
   const { data: session } = useSession();
-  const [tab, setTab] = useState<Tab>("basic");
+  const [tab, setTab] = useState<Tab>(TABS.find((t) => t.id === tabParam)?.id ?? "basic");
   const [basicQ, setBasicQ] = useState("");
   const [scope, setScope] = useState<typeof SCOPES[number]["id"]>("tanakh");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -255,30 +266,23 @@ export default function AdvancedPage() {
     search(etymologyUrl(lastWordQ, lastScope, key, 1, lastFavoritesOnly), true);
   }
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "basic", label: "חיפוש בסיסי" },
-    { id: "substring", label: "חיפוש תת-מחרוזת" },
-    { id: "root", label: "חיפוש לפי שורש ובניין" },
-    { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
-  ];
-
   const isEmpty = searched && !loading && (
     tab === "root" ? (rootDirectTotal ?? 0) + (rootEtymTotal ?? 0) === 0 : (total ?? 0) === 0
   );
   const showingEtym = tab === "root" && rootView === "etymological";
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
+    <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
       <h1 className="text-2xl font-bold text-stone-800 mb-1">חיפוש בתנ״ך</h1>
       <p className="text-stone-400 text-xs mb-6">Based on <a href="https://github.com/openscriptures/morphhb" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-600">Open Scriptures Hebrew Bible</a></p>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-stone-200 pb-0">
-        {tabs.map((t) => (
+      <div className="flex flex-wrap gap-x-1 gap-y-1 mb-6 border-b border-stone-200 pb-0">
+        {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => { setTab(t.id); setSearched(false); setResults([]); setEtymGroups([]); setActiveGroupKey(null); }}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors -mb-px border-b-2 ${
+            className={`whitespace-nowrap px-4 py-2 text-sm font-medium rounded-t-lg transition-colors -mb-px border-b-2 ${
               tab === t.id
                 ? "border-amber-600 text-amber-700 bg-amber-50"
                 : "border-transparent text-stone-500 hover:text-stone-700"
@@ -289,8 +293,10 @@ export default function AdvancedPage() {
         ))}
       </div>
 
-      {/* Scope filter — shared across all tabs */}
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
+      {tab === "letters" && <LetterSearch />}
+
+      {/* Scope filter — shared across the text/root tabs (the letter search has no scope) */}
+      <div className={`flex items-center gap-2 mb-6 flex-wrap ${tab === "letters" ? "hidden" : ""}`}>
         <span className="text-stone-500 text-sm">חפש ב:</span>
         {SCOPES.map((s) => (
           <button

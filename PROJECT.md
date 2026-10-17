@@ -103,8 +103,8 @@ neshama-app/
 | `/` | Home — feature cards linking to all sections |
 | `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti, notes, leitwords, commentaries |
 | `/community` | Shared notes/insights from all users, with likes and threaded comments (signed-in only) |
-| `/letters` | Search verses by first and/or last Hebrew letter |
-| `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological) |
+| `/letters` | Redirects to `/advanced?tab=letters` (the letter search is now a search tab) |
+| `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological), word family, first/last letter. `?tab=` opens a tab directly |
 | `/quiz` | Two tabs: fill-in-the-blank verse quiz (AI) and grammar quiz (root/binyan, 3 levels) |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
