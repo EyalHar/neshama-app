@@ -14,12 +14,13 @@ function bookHe(id: string): string {
 // with verse text fetched live from Sefaria (nikud + ta'amim intact).
 export async function GET() {
   const userId = await getCurrentUserId();
-  if (!userId) return NextResponse.json({ chapters: [], verses: [] });
+  if (!userId) return NextResponse.json({ chapters: [], verses: [], lists: [] });
 
-  const [favChapters, favVerses, noteRows] = await Promise.all([
+  const [favChapters, favVerses, noteRows, lists] = await Promise.all([
     prisma.favoriteChapter.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     prisma.favoriteVerse.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     prisma.verseNote.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, include: NOTE_INCLUDE }),
+    prisma.favoriteList.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, select: { id: true, name: true } }),
   ]);
 
   const notesByVerse = new Map<string, VerseNoteItem[]>();
@@ -57,9 +58,10 @@ export async function GET() {
         verse: v.verse,
         text: verseTexts[v.verse - 1] ?? "",
         notes: notesByVerse.get(`${v.book}|${v.chapter}|${v.verse}`) ?? [],
+        listId: v.listId,
       };
     })
     .sort((a, b) => (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999) || a.chapter - b.chapter || a.verse - b.verse);
 
-  return NextResponse.json({ chapters, verses });
+  return NextResponse.json({ chapters, verses, lists });
 }

@@ -127,8 +127,9 @@ neshama-app/
 | `Session` | NextAuth sessions |
 | `ReadVerse` | Individual verses marked read (userId, book, chapter, verse) |
 | `CompletedChapter` | Entire chapters marked complete (userId, book, chapter) |
-| `FavoriteVerse` | Verses marked favorite (userId, book, chapter, verse) |
+| `FavoriteVerse` | Verses marked favorite (userId, book, chapter, verse, optional `listId` → FavoriteList, SetNull on delete) |
 | `FavoriteChapter` | Chapters marked favorite (userId, book, chapter) |
+| `FavoriteList` | Named sub-list of favorite verses, shown as its own tab (userId, name unique per user) |
 | `VerseNote` | Personal notes on a verse (userId, book, chapter, verse, text); every noted verse is also a favorite |
 | `Share` | A published item on /community (userId, type="note", noteId → VerseNote, cascade) |
 | `ShareLike` | One like per user per share |
@@ -161,6 +162,9 @@ neshama-app/
 - `GET /api/favorites` — All favorite chapters and verses (verse text live from Sefaria)
 - `POST /api/favorites/verse` — Toggle a favorite verse (unfavoriting also deletes its notes)
 - `POST /api/favorites/chapter` — Toggle a favorite chapter
+- `POST /api/favorites/lists` — Create a named list `{ name }` (409 if the name exists)
+- `PATCH` / `DELETE /api/favorites/lists/[id]` — Rename / delete a list (its verses return to the general tab)
+- `PATCH /api/favorites/verse/list` — Move a favorite verse into a list `{ book, chapter, verse, listId | null }`
 
 ### Notes
 - `POST /api/notes` — Add a note `{ book, chapter, verse, text }`; also favorites the verse
@@ -228,7 +232,7 @@ neshama-app/
 
 ### Favorites
 - Heart icons on verses and chapters in the reader (signed-in users)
-- `/favorites` page with verse/chapter tabs, grouped by book
+- `/favorites` page with verse/chapter tabs plus one tab per user-named list; verses grouped under collapsible book headings. Right-click (or ⋮) on a verse moves it to a list or creates a new one
 - Personal notes on verses: a floating panel under the verse in the reader, and inline under each verse on `/favorites`. Adding a note favorites the verse; unfavoriting a verse with notes asks for confirmation and deletes them
 - "Favorites only" filter on all search tabs
 

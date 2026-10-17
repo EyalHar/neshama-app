@@ -20,6 +20,7 @@ model User {
   completedChapters CompletedChapter[]
   favoriteVerses    FavoriteVerse[]
   favoriteChapters  FavoriteChapter[]
+  favoriteLists     FavoriteList[]
   verseNotes        VerseNote[]
   shares            Share[]
   shareLikes        ShareLike[]
@@ -150,10 +151,26 @@ model FavoriteVerse {
   book      String
   chapter   Int
   verse     Int
+  listId    String?  // null = the general favorites tab
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  list      FavoriteList? @relation(fields: [listId], references: [id], onDelete: SetNull)
 
   @@unique([userId, book, chapter, verse])
+}
+
+// A named sub-list of favorite verses (e.g. "פסוקים שמופיעים בתפילה"), shown as its own tab on
+// /favorites. A verse belongs to at most one list; deleting a list returns its verses to the
+// general tab.
+model FavoriteList {
+  id        String          @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime        @default(now())
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verses    FavoriteVerse[]
+
+  @@unique([userId, name])
 }
 
 // Personal notes on a verse. Keyed by (userId, book, chapter, verse) rather than FavoriteVerse.id,
