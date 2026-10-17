@@ -9,7 +9,8 @@ import VerseText, { findWordRanges } from "@/app/components/VerseText";
 import type { Leitword } from "@/lib/leitwords";
 import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
-import type { VerseNoteItem } from "@/lib/notes";
+import Commentaries, { BookIcon } from "@/app/components/Commentaries";
+import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const SHOW_SPECIAL_EVENT = "tanakh-special-letters-change";
@@ -114,6 +115,7 @@ export default function TanakhPage() {
   const [favoriteChapters, setFavoriteChapters] = useState<Set<number>>(new Set());
   const [notes, setNotes] = useState<VerseNoteItem[]>([]);
   const [openNotesVerse, setOpenNotesVerse] = useState<number | null>(null);
+  const [openCommentaryVerse, setOpenCommentaryVerse] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
@@ -178,6 +180,7 @@ export default function TanakhPage() {
     setVerses([]);
     setReadVerses(new Set());
     setOpenNotesVerse(null);
+    setOpenCommentaryVerse(null);
     setActiveLeitword(null);
     try {
       const res = await fetch(`/api/tanakh?book=${encodeURIComponent(bookId)}&chapter=${chapter}`);
@@ -281,9 +284,9 @@ export default function TanakhPage() {
     e.stopPropagation();
     if (!session) return;
     const wasFav = favoriteVerses.has(verseNum);
-    const noteCount = notes.filter((n) => n.verse === verseNum).length;
-    if (wasFav && noteCount > 0) {
-      if (!window.confirm(`לפסוק יש ${noteCount === 1 ? "הערה/ חידוש אחד" : `${noteCount} הערות וחידושים`}. להסיר אותו מהאהובים ולמחוק אותם?`)) return;
+    const verseNoteItems = notes.filter((n) => n.verse === verseNum);
+    if (wasFav && verseNoteItems.length > 0) {
+      if (!window.confirm(unfavoriteConfirmMessage(verseNoteItems))) return;
       setNotes((prev) => prev.filter((n) => n.verse !== verseNum));
       if (openNotesVerse === verseNum) setOpenNotesVerse(null);
     }
@@ -748,6 +751,7 @@ export default function TanakhPage() {
               const isFav = favoriteVerses.has(i + 1);
               const verseNotes = notes.filter((n) => n.verse === i + 1);
               const notesOpen = openNotesVerse === i + 1;
+              const commentaryOpen = openCommentaryVerse === i + 1;
               return (
                 <div key={i} className={`relative ${notesOpen ? "z-20" : ""}`}>
                 <div
@@ -769,6 +773,17 @@ export default function TanakhPage() {
                       highlights={activeForms?.[i + 1] ? findWordRanges(verse, new Set(activeForms[i + 1])) : undefined}
                     />
                   </p>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setOpenCommentaryVerse(commentaryOpen ? null : i + 1); }}
+                    title="הצג פרשנים"
+                    aria-expanded={commentaryOpen}
+                    className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
+                      commentaryOpen ? "opacity-100 text-amber-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                    }`}
+                  >
+                    <BookIcon />
+                  </button>
                   {session && (
                     <button
                       type="button"
@@ -802,6 +817,16 @@ export default function TanakhPage() {
                   )}
                   {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
                 </div>
+                {commentaryOpen && (
+                  <div className="mx-2 sm:mx-10 mt-1 mb-3">
+                    <Commentaries
+                      book={selectedBook.id}
+                      chapter={selectedChapter}
+                      verse={i + 1}
+                      onClose={() => setOpenCommentaryVerse(null)}
+                    />
+                  </div>
+                )}
                 {notesOpen && (
                   <div className="absolute top-full inset-x-2 sm:inset-x-10 mt-1 shadow-xl rounded-xl bg-white">
                     <VerseNotes

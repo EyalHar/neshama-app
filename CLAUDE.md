@@ -48,6 +48,9 @@ When a verse is toggled read, `POST /api/tanakh` checks verse → chapter → bo
 ### Stats sidebar without prop drilling
 Progress updates dispatch a custom DOM event `tanakh-stats-update` on `window`. The Sidebar listens for it and refetches `/api/tanakh/stats`. Do not replace this with context — the Sidebar is rendered in the root layout outside the page tree.
 
+### Sidebar layout
+The root `body` is viewport-height with `overflow-hidden`, so the Sidebar can't grow past the screen. Its `nav` is the only scrolling part (`flex-1 min-h-0 overflow-y-auto`), while the title and the sign-in/out footer are `shrink-0`. Keep it that way when adding `NAV_ITEMS`: with 14 items the list already exceeds a laptop screen, and without the nav scroll the footer, including the "התחבר" link, gets clipped off-screen.
+
 ### Root search BFS
 `GET /api/verses/root` resolves a Hebrew root to a Strong's number, then does a BFS through `StrongsEntry.derivedFrom` (comma-separated Strong's numbers) to build a family tree. "Direct" view shows only the queried root's verses; "etymological" view includes all descendants.
 
@@ -79,6 +82,15 @@ There is no word-level mapping between the reader's Sefaria text and OSHB's word
 
 ### Verse notes are always on favorites
 `VerseNote` is keyed by `(userId, book, chapter, verse)`, not by `FavoriteVerse.id`, but the API maintains the invariant that every verse with notes is a favorite: `POST /api/notes` upserts the `FavoriteVerse` in the same transaction, and unfavoriting via `POST /api/favorites/verse` deletes the verse's notes. The client confirms with the user before unfavoriting a verse that has notes. Because of this, `/favorites` is the single place that lists all of a user's notes. The reader gets a chapter's notes from `GET /api/tanakh` (`notes`), and `/favorites` gets them per verse from `GET /api/favorites`. Both pages render the shared `app/components/VerseNotes.tsx` panel.
+
+### Commentaries: license-gated third-party text
+`GET /api/commentaries` shows only commentators on the fixed `COMMENTATORS` list (`lib/commentaries.ts`), and only when the Sefaria Hebrew edition's license is in `ALLOWED_LICENSES` (Public Domain, CC0, CC-BY, CC-BY-SA). The check runs on every fetch. Anything else, including Sefaria's `"unknown"`, comes back as `status: "unavailable"` with a Sefaria link and no text. Sefaria also hosts copyrighted modern commentaries (Steinsaltz, Kehot, …), so do not widen the list or the license set without checking. Commentary HTML is sanitized server-side to `b/strong/i/em/br` with no attributes before the client renders it with `dangerouslySetInnerHTML`.
+
+### Community sharing: identity and lifecycle
+- **Identity:** shared content exposes only `User.displayName`, chosen on the first share or comment. Until it is set, `POST /api/shares` and `POST /api/shares/[id]/comments` answer 409 `needDisplayName`. Build author objects with `toAuthor()` in `lib/shares.ts`, never from `user.name`/`email`/`image`. The UI also shows an initial-letter avatar instead of the Google photo.
+- **Lifecycle:** a `Share` of type `"note"` points at a `VerseNote` (`noteId`, unique, cascade). The feed always renders the note's current text, flagged "נערך" when `note.updatedAt` is after `share.createdAt`. Deleting the note, including via unfavoriting, deletes the share with its likes and comments.
+- **Comments:** comments form a tree via `parentId` with no depth limit. The API returns them flat, and `app/community/CommentThread.tsx` builds the tree, indenting up to 4 levels. Deleting a comment that has replies soft-deletes it (`deleted = true`, text cleared). Deleting a leaf removes it and walks up, removing soft-deleted ancestors left without replies.
+- **Permissions:** checked server-side via `getViewer()`. Admins are the emails listed in `ADMIN_EMAILS`.
 
 ### Route handler params
 Dynamic route handlers (e.g. `app/api/notes/[id]/route.ts`) receive `params` as a **Promise** in Next.js 16, so they must `await ctx.params`. They type the context explicitly (`{ params: Promise<{ id: string }> }`) rather than with the generated `RouteContext<...>` helper, which only type-checks after `next dev`/`next build` has generated route types.

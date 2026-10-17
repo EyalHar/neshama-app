@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/favorites";
-import { NOTE_MAX_LENGTH, toNoteItem } from "@/lib/notes";
+import { NOTE_INCLUDE, NOTE_MAX_LENGTH, toNoteItem } from "@/lib/notes";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -25,7 +25,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
     return NextResponse.json({ error: "Invalid note text" }, { status: 400 });
   }
 
-  const updated = await prisma.verseNote.update({ where: { id: note.id }, data: { text: trimmed } });
+  const updated = await prisma.verseNote.update({ where: { id: note.id }, data: { text: trimmed }, include: NOTE_INCLUDE });
   return NextResponse.json({ note: toNoteItem(updated) });
 }
 

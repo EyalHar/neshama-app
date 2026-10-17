@@ -7,7 +7,7 @@ import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
-import type { VerseNoteItem } from "@/lib/notes";
+import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 
 type FavoriteChapterItem = { book: string; bookHe: string; chapter: number };
 type FavoriteVerseItem = { book: string; bookHe: string; chapter: number; verse: number; text: string; notes: VerseNoteItem[] };
@@ -50,8 +50,7 @@ export default function FavoritesPage() {
   }
 
   async function removeVerse(item: FavoriteVerseItem) {
-    const count = item.notes.length;
-    if (count > 0 && !window.confirm(`לפסוק יש ${count === 1 ? "הערה/ חידוש אחד" : `${count} הערות וחידושים`}. להסיר אותו מהאהובים ולמחוק אותם?`)) return;
+    if (item.notes.length > 0 && !window.confirm(unfavoriteConfirmMessage(item.notes))) return;
     setVerses((prev) => prev.filter((v) => verseKey(v) !== verseKey(item)));
     await fetch("/api/favorites/verse", {
       method: "POST",

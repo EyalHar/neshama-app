@@ -11,6 +11,14 @@ const FEATURES = [
     labelColor: "text-stone-700",
   },
   {
+    href: "/community",
+    title: "שיתופים",
+    description: "הערות וחידושים על פסוקים ששיתפו משתמשי האתר — קרא, הגב ועשה לייק, ושתף גם את שלך",
+    icon: "💬",
+    color: "from-sky-50 to-indigo-50 border-sky-200 hover:border-sky-400",
+    labelColor: "text-sky-700",
+  },
+  {
     href: "/favorites",
     title: "האהובים עליי ביותר",
     description: "פרקים ופסוקים ששמרת כאהובים ביותר — הכל במקום אחד, מוכן לחזור אליו בכל רגע",

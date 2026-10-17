@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/favorites";
-import { toNoteItem, type VerseNoteItem } from "@/lib/notes";
+import { NOTE_INCLUDE, toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { TANAKH_BOOKS, fetchChapter } from "@/lib/tanakh";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
@@ -19,7 +19,7 @@ export async function GET() {
   const [favChapters, favVerses, noteRows] = await Promise.all([
     prisma.favoriteChapter.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     prisma.favoriteVerse.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
-    prisma.verseNote.findMany({ where: { userId }, orderBy: { createdAt: "asc" } }),
+    prisma.verseNote.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, include: NOTE_INCLUDE }),
   ]);
 
   const notesByVerse = new Map<string, VerseNoteItem[]>();

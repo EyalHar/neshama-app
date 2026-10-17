@@ -9,6 +9,7 @@ import TempleIcon from "./TempleIcon";
 const NAV_ITEMS = [
   { href: "/", label: "ראשי", icon: "✡" },
   { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
+  { href: "/community", label: "שיתופים", icon: "💬" },
   { href: "/favorites", label: "האהובים עליי ביותר", icon: "♥" },
   { href: "/letters", label: "אות ראשונה ואחרונה", icon: "א" },
   { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
@@ -58,21 +59,21 @@ export default function Sidebar() {
       <aside
         dir="rtl"
         className={`
-          fixed right-0 top-0 h-full md:static md:h-auto z-40 w-64 bg-stone-900 text-amber-100 flex flex-col
+          fixed right-0 top-0 h-full md:static z-40 w-64 bg-stone-900 text-amber-100 flex flex-col
           transition-transform duration-300
           ${open ? "translate-x-0" : "translate-x-full md:translate-x-0"}
         `}
       >
         {/* Site title */}
-        <div className="px-6 py-8 border-b border-stone-700">
+        <div className="shrink-0 px-6 py-8 border-b border-stone-700">
           <h1 className="flame-title text-xl font-bold leading-snug">
             שַׁלְהֶבֶתְ יָֽה
           </h1>
           <p className="text-stone-400 text-xs mt-1">חיבור אישי לתורה נביאים וכתובים</p>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        {/* Nav — scrolls on its own so the sign-in/out footer below always stays visible */}
+        <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-1">
           {NAV_ITEMS.map((item) => {
             const active = pathname === item.href;
             return (
@@ -93,7 +94,7 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="px-6 py-4 border-t border-stone-700 space-y-1">
+        <div className="shrink-0 px-6 py-4 border-t border-stone-700 space-y-1">
           {firstName && (
             <p className="text-stone-300 text-xs">שלום, {firstName}</p>
           )}

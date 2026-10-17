@@ -27,6 +27,10 @@ neshama-app/
 │   │   ├── events/             ← AI biblical-event → source verses
 │   │   ├── favorites/          ← Favorite verses/chapters (list, verse/, chapter/ toggles)
 │   │   ├── notes/              ← Verse notes (POST; [id]/ PATCH + DELETE)
+│   │   ├── shares/             ← Community feed + share (GET/POST); [id]/ DELETE, like/, comments/
+│   │   ├── comments/[id]/      ← Delete a comment (soft if it has replies)
+│   │   ├── profile/            ← Public display name (GET/PATCH)
+│   │   ├── commentaries/       ← Classic commentaries on a verse (from Sefaria, license-filtered)
 │   │   ├── hapax/              ← Words occurring once in the Tanakh
 │   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
 │   │   ├── unknown-roots/      ← Crowdsourced missing Strong's roots
@@ -48,11 +52,14 @@ neshama-app/
 │   │   ├── Confetti.tsx        ← Milestone celebration animation
 │   │   ├── HeartIcon.tsx       ← Favorite toggle icon
 │   │   ├── NoteIcon.tsx        ← Verse-notes icon
-│   │   ├── VerseNotes.tsx      ← Notes panel (list, add, edit, delete) for a verse
+│   │   ├── VerseNotes.tsx      ← Notes panel (list, add, edit, delete, share) for a verse
+│   │   ├── DisplayNameForm.tsx ← Choose public display name before first share/comment
+│   │   ├── Commentaries.tsx    ← Per-verse commentators panel with tabs (+ BookIcon)
 │   │   ├── VerseText.tsx       ← Renders a verse with special letters + highlighted words
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
 │   ├── admin/seed/page.tsx
 │   ├── advanced/page.tsx
+│   ├── community/              ← page.tsx (feed), ShareCard, CommentThread, format (dates/avatar)
 │   ├── events/page.tsx
 │   ├── favorites/page.tsx
 │   ├── jerusalem-names/page.tsx
@@ -71,6 +78,8 @@ neshama-app/
 │   ├── tanakh.ts               ← Book metadata, Hebrew numerals, Sefaria fetch + special-letter marks
 │   ├── favorites.ts            ← Current user + favorite-verse helpers
 │   ├── notes.ts                ← Verse-note type and helpers
+│   ├── shares.ts               ← Viewer/admin, author display, feed + comment types
+│   ├── commentaries.ts         ← Commentator list + allowed licenses
 │   ├── hapax.ts                ← Hapax legomena computation
 │   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per chapter
 │   ├── grammarQuiz.ts          ← Grammar quiz question generator
@@ -92,7 +101,8 @@ neshama-app/
 | Route | Purpose |
 |---|---|
 | `/` | Home — feature cards linking to all sections |
-| `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti |
+| `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti, notes, leitwords, commentaries |
+| `/community` | Shared notes/insights from all users, with likes and threaded comments (signed-in only) |
 | `/letters` | Search verses by first and/or last Hebrew letter |
 | `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological) |
 | `/quiz` | Two tabs: fill-in-the-blank verse quiz (AI) and grammar quiz (root/binyan, 3 levels) |
@@ -112,7 +122,7 @@ neshama-app/
 
 | Model | Purpose |
 |---|---|
-| `User` | NextAuth user (cuid, email, name, image) |
+| `User` | NextAuth user (cuid, email, name, image) + `displayName` shown on shared content |
 | `Account` | OAuth account linking |
 | `Session` | NextAuth sessions |
 | `ReadVerse` | Individual verses marked read (userId, book, chapter, verse) |
@@ -120,6 +130,9 @@ neshama-app/
 | `FavoriteVerse` | Verses marked favorite (userId, book, chapter, verse) |
 | `FavoriteChapter` | Chapters marked favorite (userId, book, chapter) |
 | `VerseNote` | Personal notes on a verse (userId, book, chapter, verse, text); every noted verse is also a favorite |
+| `Share` | A published item on /community (userId, type="note", noteId → VerseNote, cascade) |
+| `ShareLike` | One like per user per share |
+| `ShareComment` | Threaded comment (shareId, userId, parentId self-relation, text, deleted for soft delete) |
 | `VerseText` | Full Tanakh with diacritics (`text`), plain text (`plainText`), first/last letter index |
 | `WordEntry` | Morphological analysis per word (lemma, Strong's number, morph code) |
 | `StrongsEntry` | Strong's Hebrew Dictionary (number, lemmaHe, lemmaPlain, xlit, definition, derivedFrom) |
@@ -158,6 +171,18 @@ neshama-app/
 - `GET /api/hapax?section=&page=&mergeSpelling=&mergeDerived=` — Hapax legomena
 - `GET /api/jerusalem-names` — Names of Jerusalem with source verses
 - `GET /api/unknown-roots` / `PATCH /api/unknown-roots` — List / suggest missing roots
+
+### Community
+- `GET /api/shares?filter=all|mine|liked&book=&cursor=` — Feed, newest first (20/page)
+- `POST /api/shares` — Share a note `{ noteId, displayName? }`; 409 `needDisplayName` until a display name is set
+- `DELETE /api/shares/[id]` — Unshare (author) or remove (admin)
+- `POST /api/shares/[id]/like` — Toggle like
+- `GET` / `POST /api/shares/[id]/comments` — List (flat; tree built client-side) / add `{ text, parentId? }`
+- `DELETE /api/comments/[id]` — Comment author, share author or admin; soft delete when it has replies
+- `GET` / `PATCH /api/profile` — Display name
+
+### Commentaries
+- `GET /api/commentaries?book=&chapter=&verse=` — Classic commentators on a verse from Sefaria; only Public Domain / CC0 / CC-BY / CC-BY-SA editions are returned with text, others as a Sefaria link
 
 ### AI
 - `POST /api/neshama` — Groq: detect emotion → return 2–3 matching verses with message
@@ -212,6 +237,14 @@ neshama-app/
 - "Search more" fetches additional sources, excluding ones already shown
 - Sources can be marked read and opened in the reader
 
+### Community (`/community`)
+- Share any of your notes; the first share/comment asks for a public display name (defaults to the Google name). Only the display name is shown — never the Google name, email or photo
+- Feed with filters (all / mine / liked, by book), likes, and comments threaded to any depth (indent capped at 4 levels, then "בתגובה ל…"); comments with replies are soft-deleted
+- A share always shows its note's current text ("נערך" when edited) and is deleted with the note
+
+### Commentaries
+- "הצג פרשנים" button on every verse in the reader opens a tabbed panel of classic commentators (Rashi, Ramban, Ibn Ezra, …); edition, license and a Sefaria link are shown under each
+
 ### Hapax Legomena (`/unique-words`)
 - Words whose lexeme occurs exactly once in the whole Tanakh, tabbed by Torah / Nevi'im / Ketuvim
 
@@ -242,6 +275,7 @@ AUTH_GOOGLE_ID        # Google OAuth client ID (read automatically by the Google
 AUTH_GOOGLE_SECRET    # Google OAuth client secret
 GROQ_API_KEY          # Groq LLM API key
 ANTHROPIC_API_KEY     # Anthropic API key (installed, reserved for future use)
+ADMIN_EMAILS          # Comma-separated emails allowed to delete any share/comment on /community
 ```
 
 ---

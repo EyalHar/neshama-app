@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { toNoteItem, type VerseNoteItem } from "@/lib/notes";
+import { NOTE_INCLUDE, toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { getChapterLeitwords } from "@/lib/leitwords";
 import { fetchChapterWithMarks, TANAKH_BOOKS, checkSectionCompletion, checkTanakhCompletion, type Section } from "@/lib/tanakh";
 
@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
         const noteRows = await prisma.verseNote.findMany({
           where: { userId: user.id, book, chapter },
           orderBy: { createdAt: "asc" },
+          include: NOTE_INCLUDE,
         });
         notes = noteRows.map(toNoteItem);
 

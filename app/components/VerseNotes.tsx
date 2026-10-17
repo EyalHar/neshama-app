@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type KeyboardEvent } from "react";
+import Link from "next/link";
+import DisplayNameForm from "./DisplayNameForm";
 import { NOTE_MAX_LENGTH, type VerseNoteItem } from "@/lib/notes";
 
 type Props = {
@@ -44,6 +46,7 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
   const [editText, setEditText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [namePrompt, setNamePrompt] = useState<{ noteId: string; suggestedName: string } | null>(null);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -76,11 +79,44 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
     });
   };
 
-  const deleteNote = (id: string) => {
-    if (!window.confirm("למחוק את ההערה/ החידוש?")) return;
+  const deleteNote = (n: VerseNoteItem) => {
+    const msg = n.shareId
+      ? "למחוק את ההערה/ החידוש? היא משותפת, ולכן תוסר גם מדף השיתופים יחד עם התגובות והלייקים."
+      : "למחוק את ההערה/ החידוש?";
+    if (!window.confirm(msg)) return;
     run(async () => {
-      await sendJson(`/api/notes/${id}`, "DELETE");
-      onNotesChange(notes.filter((n) => n.id !== id));
+      await sendJson(`/api/notes/${n.id}`, "DELETE");
+      onNotesChange(notes.filter((x) => x.id !== n.id));
+    });
+  };
+
+  const setShareId = (noteId: string, shareId: string | null) =>
+    onNotesChange(notes.map((x) => (x.id === noteId ? { ...x, shareId } : x)));
+
+  // The first share asks for a display name (the API answers 409 until one is set)
+  const shareNote = (noteId: string, displayName?: string) =>
+    run(async () => {
+      const res = await fetch("/api/shares", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noteId, displayName }),
+      });
+      const data = await res.json();
+      if (res.status === 409 && data.needDisplayName) {
+        setNamePrompt({ noteId, suggestedName: data.suggestedName });
+        return;
+      }
+      if (!res.ok) throw new Error(String(res.status));
+      setNamePrompt(null);
+      setShareId(noteId, data.shareId);
+    });
+
+  const unshareNote = (n: VerseNoteItem) => {
+    if (!n.shareId || !window.confirm("להפסיק לשתף? ההערה תוסר מדף השיתופים, יחד עם התגובות והלייקים שקיבלה.")) return;
+    const shareId = n.shareId;
+    run(async () => {
+      await sendJson(`/api/shares/${shareId}`, "DELETE");
+      setShareId(n.id, null);
     });
   };
 
@@ -136,9 +172,36 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
         ) : (
           <div key={n.id} className="group/note bg-white rounded-lg border border-amber-100 px-3 py-2">
             <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap break-words">{n.text}</p>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-[11px] text-stone-400">{dateFormat.format(new Date(n.updatedAt))}</span>
+            <div className="flex items-center justify-between mt-1 gap-2">
+              <span className="flex items-center gap-2 text-[11px] text-stone-400">
+                {dateFormat.format(new Date(n.updatedAt))}
+                {n.shareId && (
+                  <Link href="/community" className="bg-green-50 text-green-700 border border-green-200 rounded-full px-2 py-px hover:bg-green-100">
+                    משותף
+                  </Link>
+                )}
+              </span>
               <div className="flex gap-1 opacity-60 group-hover/note:opacity-100 transition-opacity">
+                {n.shareId ? (
+                  <button
+                    type="button"
+                    onClick={() => unshareNote(n)}
+                    disabled={busy}
+                    className="text-xs text-stone-500 hover:bg-stone-100 px-2 py-0.5 rounded transition-colors"
+                  >
+                    הפסק לשתף
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => shareNote(n.id)}
+                    disabled={busy}
+                    title="פרסם בדף השיתופים, כך שכל המשתמשים יוכלו לראות, להגיב ולעשות לייק"
+                    className="text-xs text-green-700 hover:bg-green-50 px-2 py-0.5 rounded transition-colors"
+                  >
+                    שתף
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => { setEditingId(n.id); setEditText(n.text); }}
@@ -148,13 +211,23 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteNote(n.id)}
+                  onClick={() => deleteNote(n)}
                   className="text-xs text-red-600 hover:bg-red-50 px-2 py-0.5 rounded transition-colors"
                 >
                   מחק
                 </button>
               </div>
             </div>
+            {namePrompt?.noteId === n.id && (
+              <div className="mt-2">
+                <DisplayNameForm
+                  suggestedName={namePrompt.suggestedName}
+                  submitLabel="שמור ושתף"
+                  onSubmit={(name) => shareNote(n.id, name)}
+                  onCancel={() => setNamePrompt(null)}
+                />
+              </div>
+            )}
           </div>
         )
       )}
