@@ -37,6 +37,20 @@ const refLabel = (r: VerseRef) => `${toHebrewNumeral(r[0])}:${toHebrewNumeral(r[
 
 type UnitsInfo = { kind: DivisionKind | null; units: DivisionUnit[] };
 
+// Open (פ) / closed (ס) section break, as in a Torah scroll; green once the section is read
+function SectionBreak({ type, done }: { type: "פ" | "ס"; done: boolean }) {
+  return (
+    <div className={`flex items-center gap-3 px-4 ${type === "פ" ? "py-4" : "py-1.5"}`} title={type === "פ" ? "פרשה פתוחה" : "פרשה סתומה"}>
+      <span className={`h-px flex-1 ${done ? "bg-green-200" : "bg-stone-200"}`} />
+      <span className={`text-sm font-bold transition-colors ${done ? "text-green-600" : "text-stone-300"}`}>
+        {done && "✓ "}
+        {type}
+      </span>
+      <span className={`h-px flex-1 ${done ? "bg-green-200" : "bg-stone-200"}`} />
+    </div>
+  );
+}
+
 // The unit containing `anchor`; past the end → the last unit, otherwise the first
 function unitFor(units: DivisionUnit[], anchor: VerseRef): DivisionUnit | undefined {
   return units.find((u) => inRef(anchor, u.start, u.end)) ?? (units.length && inRef(units.at(-1)!.end, [0, 0], anchor) ? units.at(-1) : units[0]);
@@ -69,6 +83,8 @@ export default function TanakhPage() {
   const [notes, setNotes] = useState<VerseNoteItem[]>([]);
   const [openNotesVerse, setOpenNotesVerse] = useState<string | null>(null);
   const [openCommentaryVerse, setOpenCommentaryVerse] = useState<string | null>(null);
+  const [selectedSection, setSelectedSection] = useState<number | null>(null); // tinted parashiya
+  const [collapsedSections, setCollapsedSections] = useState<Set<number>>(new Set());
   const chapterHeaderRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
@@ -161,6 +177,8 @@ export default function TanakhPage() {
     setOpenNotesVerse(null);
     setOpenCommentaryVerse(null);
     setActiveLeitword(null);
+    setSelectedSection(null);
+    setCollapsedSections(new Set());
     try {
       const data: PassageResponse = await (await fetch(url)).json();
       setVerses(data.verses ?? []);
@@ -498,10 +516,121 @@ export default function TanakhPage() {
   const activeList: Leitword[] = activeScope === "passage" ? leitwords : sections[Number(activeScope)]?.leitwords ?? [];
   const activeForms = activeList.find((l) => l.strongs === activeStrongs)?.forms;
 
-  // Parashiya boundaries within the passage (shown only when it holds more than one)
+  // A parasha holding several parashiyot is shown as one selectable, collapsible block per
+  // parashiya; a chapter or a single parashiya is a flat list
   const showSections = unitMode && sections.length > 1;
-  const sectionStartingAt = new Map(sections.map((s, i) => [key(...s.start), i]));
-  const sectionEndingAt = new Map(sections.map((s, i) => [key(...s.end), i]));
+  const allSectionsCollapsed = sections.length > 0 && collapsedSections.size === sections.length;
+  const verseIndex = new Map(verses.map((v, i) => [key(v.chapter, v.verse), i]));
+
+  function toggleSectionCollapsed(i: number) {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i); else next.add(i);
+      return next;
+    });
+  }
+
+  function renderVerse(v: PassageVerse) {
+    const k = key(v.chapter, v.verse);
+    const i = verseIndex.get(k) ?? 0;
+    const isRead = readVerses.has(k);
+    const isFav = favoriteVerses.has(k);
+    const verseNotes = notes.filter((n) => n.chapter === v.chapter && n.verse === v.verse);
+    const notesOpen = openNotesVerse === k;
+    const commentaryOpen = openCommentaryVerse === k;
+    const newChapter = unitMode && (i === 0 || verses[i - 1].chapter !== v.chapter);
+    return (
+      <Fragment key={k}>
+        {newChapter && <p className="px-4 pt-2 text-xs font-bold text-stone-400">פרק {toHebrewNumeral(v.chapter)}</p>}
+        <div className={`relative ${notesOpen ? "z-20" : ""}`}>
+          <div
+            id={`verse-${v.chapter}-${v.verse}`}
+            onClick={() => toggleVerse(v)}
+            className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
+              highlightedVerse === k
+                ? "bg-amber-50 ring-1 ring-amber-200"
+                : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
+            } ${session ? "cursor-pointer" : "cursor-default"}`}
+          >
+            <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
+              {toHebrewNumeral(v.verse)}
+            </span>
+            <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
+              <VerseText
+                text={v.text}
+                marks={showSpecialLetters ? specialLetters.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
+                highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
+              />
+            </p>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setOpenCommentaryVerse(commentaryOpen ? null : k); }}
+              title="הצג פרשנים"
+              aria-expanded={commentaryOpen}
+              className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
+                commentaryOpen ? "opacity-100 text-amber-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+              }`}
+            >
+              <BookIcon />
+            </button>
+            {session && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setOpenNotesVerse(notesOpen ? null : k); }}
+                title={verseNotes.length > 0 ? "הצג הערות וחידושים" : "הערה/ חידוש"}
+                aria-expanded={notesOpen}
+                className={`relative self-start mt-1 shrink-0 p-0.5 rounded-full text-amber-600 hover:bg-amber-100 transition-opacity ${
+                  verseNotes.length > 0 || notesOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                }`}
+              >
+                <NoteIcon size={17} />
+                {verseNotes.length > 0 && (
+                  <span className="absolute -top-1 -left-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-amber-600 text-white text-[10px] leading-[15px] text-center font-medium">
+                    {verseNotes.length}
+                  </span>
+                )}
+              </button>
+            )}
+            {session && (
+              <button
+                type="button"
+                onClick={(e) => toggleVerseFavorite(e, v)}
+                title={isFav ? "הסר פסוק מהאהובים ביותר" : "הוסף פסוק לאהובים ביותר"}
+                aria-pressed={isFav}
+                className={`self-start mt-1 shrink-0 p-0.5 rounded-full hover:bg-red-50 transition-opacity ${
+                  isFav ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                }`}
+              >
+                <HeartIcon filled={isFav} size={17} />
+              </button>
+            )}
+            {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
+          </div>
+          {commentaryOpen && (
+            <div className="mx-2 sm:mx-10 mt-1 mb-3">
+              <Commentaries book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenCommentaryVerse(null)} />
+            </div>
+          )}
+          {notesOpen && (
+            <div className="absolute top-full inset-x-2 sm:inset-x-10 mt-1 shadow-xl rounded-xl bg-white">
+              <VerseNotes
+                book={selectedBook.id}
+                chapter={v.chapter}
+                verse={v.verse}
+                notes={verseNotes}
+                isFavorite={isFav}
+                onNotesChange={(next) =>
+                  setNotes((prev) => [...prev.filter((n) => !(n.chapter === v.chapter && n.verse === v.verse)), ...next])
+                }
+                onFavorited={() => setFavoriteVerses((prev) => new Set(prev).add(k))}
+                onClose={() => setOpenNotesVerse(null)}
+              />
+            </div>
+          )}
+        </div>
+      </Fragment>
+    );
+  }
 
   const passageTitle = currentUnit
     ? kind === "parashot"
@@ -743,32 +872,59 @@ export default function TanakhPage() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           </div>
-        ) : (
-          <div className="space-y-1">
-            {verses.map((v, i) => {
-              const k = key(v.chapter, v.verse);
-              const isRead = readVerses.has(k);
-              const isFav = favoriteVerses.has(k);
-              const verseNotes = notes.filter((n) => n.chapter === v.chapter && n.verse === v.verse);
-              const notesOpen = openNotesVerse === k;
-              const commentaryOpen = openCommentaryVerse === k;
-              const newChapter = unitMode && (i === 0 || verses[i - 1].chapter !== v.chapter);
-              const sectionStart = showSections ? sectionStartingAt.get(k) : undefined;
-              const sectionEnd = showSections || unitMode ? sectionEndingAt.get(k) : undefined;
-              const section = sectionStart !== undefined ? sections[sectionStart] : undefined;
-              const endingSection = sectionEnd !== undefined ? sections[sectionEnd] : undefined;
-              const endingDone = endingSection ? isComplete(verseKeysOf(endingSection.start, endingSection.end), readVerses) : false;
+        ) : showSections ? (
+          <div className="space-y-2">
+            {sections.length > 1 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setCollapsedSections(allSectionsCollapsed ? new Set() : new Set(sections.map((_, i) => i)))}
+                  className="text-xs text-stone-500 hover:text-amber-700"
+                >
+                  {allSectionsCollapsed ? "פתח את כל הפרשיות" : "כווץ את כל הפרשיות"}
+                </button>
+              </div>
+            )}
+            {sections.map((s, si) => {
+              const sectionVerses = verses.filter((v) => inRef([v.chapter, v.verse], s.start, s.end));
+              const keys = sectionVerses.map((v) => key(v.chapter, v.verse));
+              const done = isComplete(keys, readVerses);
+              const readInSection = keys.filter((k) => readVerses.has(k)).length;
+              const collapsed = collapsedSections.has(si);
+              const selected = selectedSection === si;
               return (
-                <Fragment key={k}>
-                  {section && (
-                    <div className={`px-4 ${sectionStart === 0 ? "pt-1" : "pt-3"} pb-1 space-y-1.5`}>
-                      <p className="text-xs text-stone-400">
-                        פרשייה ״{section.title}״ · {refLabel(section.start)}–{refLabel(section.end)}
-                      </p>
-                      {section.leitwords && (
+                <section
+                  key={si}
+                  className={`rounded-2xl transition-colors duration-300 ${selected ? "bg-stone-200/60 ring-1 ring-stone-300" : ""}`}
+                >
+                  <div className="flex items-start gap-1 px-2 pt-2 pb-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleSectionCollapsed(si)}
+                      aria-expanded={!collapsed}
+                      title={collapsed ? "פתח פרשייה" : "כווץ פרשייה"}
+                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-200/70 transition-colors"
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className={`w-4 h-4 transition-transform duration-200 ${collapsed ? "rotate-90" : ""}`}>
+                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <div className="flex-1 min-w-0 space-y-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSection(selected ? null : si)}
+                        aria-pressed={selected}
+                        title={selected ? "בטל סימון פרשייה" : "סמן פרשייה, כדי לראות את גבולותיה"}
+                        className={`text-right text-xs transition-colors ${selected ? "text-stone-700 font-medium" : "text-stone-400 hover:text-stone-600"}`}
+                      >
+                        פרשייה ״{s.title}״ · {refLabel(s.start)}–{refLabel(s.end)}
+                        {session && readInSection > 0 && !done && <span className="mr-1.5 text-stone-400">({readInSection}/{keys.length})</span>}
+                        {done && <span className="mr-1.5 text-green-600">✓</span>}
+                      </button>
+                      {!collapsed && s.leitwords && (
                         <LeitwordChips
-                          leitwords={section.leitwords}
-                          scope={String(sectionStart)}
+                          leitwords={s.leitwords}
+                          scope={String(si)}
                           unitNoun="בפרשייה"
                           activeKey={activeLeitword}
                           onToggle={setActiveLeitword}
@@ -776,113 +932,31 @@ export default function TanakhPage() {
                         />
                       )}
                     </div>
-                  )}
-                  {newChapter && (
-                    <p className="px-4 pt-2 text-xs font-bold text-stone-400">פרק {toHebrewNumeral(v.chapter)}</p>
-                  )}
-                  <div className={`relative ${notesOpen ? "z-20" : ""}`}>
-                    <div
-                      id={`verse-${v.chapter}-${v.verse}`}
-                      onClick={() => toggleVerse(v)}
-                      className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
-                        highlightedVerse === k
-                          ? "bg-amber-50 ring-1 ring-amber-200"
-                          : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
-                      } ${session ? "cursor-pointer" : "cursor-default"}`}
-                    >
-                      <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
-                        {toHebrewNumeral(v.verse)}
-                      </span>
-                      <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
-                        <VerseText
-                          text={v.text}
-                          marks={showSpecialLetters ? specialLetters.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
-                          highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
-                        />
-                      </p>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setOpenCommentaryVerse(commentaryOpen ? null : k); }}
-                        title="הצג פרשנים"
-                        aria-expanded={commentaryOpen}
-                        className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
-                          commentaryOpen ? "opacity-100 text-amber-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                        }`}
-                      >
-                        <BookIcon />
-                      </button>
-                      {session && (
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setOpenNotesVerse(notesOpen ? null : k); }}
-                          title={verseNotes.length > 0 ? "הצג הערות וחידושים" : "הערה/ חידוש"}
-                          aria-expanded={notesOpen}
-                          className={`relative self-start mt-1 shrink-0 p-0.5 rounded-full text-amber-600 hover:bg-amber-100 transition-opacity ${
-                            verseNotes.length > 0 || notesOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                          }`}
-                        >
-                          <NoteIcon size={17} />
-                          {verseNotes.length > 0 && (
-                            <span className="absolute -top-1 -left-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-amber-600 text-white text-[10px] leading-[15px] text-center font-medium">
-                              {verseNotes.length}
-                            </span>
-                          )}
-                        </button>
-                      )}
-                      {session && (
-                        <button
-                          type="button"
-                          onClick={(e) => toggleVerseFavorite(e, v)}
-                          title={isFav ? "הסר פסוק מהאהובים ביותר" : "הוסף פסוק לאהובים ביותר"}
-                          aria-pressed={isFav}
-                          className={`self-start mt-1 shrink-0 p-0.5 rounded-full hover:bg-red-50 transition-opacity ${
-                            isFav ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                          }`}
-                        >
-                          <HeartIcon filled={isFav} size={17} />
-                        </button>
-                      )}
-                      {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
-                    </div>
-                    {commentaryOpen && (
-                      <div className="mx-2 sm:mx-10 mt-1 mb-3">
-                        <Commentaries book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenCommentaryVerse(null)} />
-                      </div>
-                    )}
-                    {notesOpen && (
-                      <div className="absolute top-full inset-x-2 sm:inset-x-10 mt-1 shadow-xl rounded-xl bg-white">
-                        <VerseNotes
-                          book={selectedBook.id}
-                          chapter={v.chapter}
-                          verse={v.verse}
-                          notes={verseNotes}
-                          isFavorite={isFav}
-                          onNotesChange={(next) =>
-                            setNotes((prev) => [...prev.filter((n) => !(n.chapter === v.chapter && n.verse === v.verse)), ...next])
-                          }
-                          onFavorited={() => setFavoriteVerses((prev) => new Set(prev).add(k))}
-                          onClose={() => setOpenNotesVerse(null)}
-                        />
-                      </div>
-                    )}
                   </div>
-                  {/* Open (פ) / closed (ס) section break, as in a Torah scroll; green once read */}
-                  {endingSection?.type && (
-                    <div
-                      className={`flex items-center gap-3 px-4 ${endingSection.type === "פ" ? "py-4" : "py-1.5"}`}
-                      title={endingSection.type === "פ" ? "פרשה פתוחה" : "פרשה סתומה"}
+
+                  {collapsed ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleSectionCollapsed(si)}
+                      className="w-full text-right px-11 pb-2 text-xs text-stone-400 hover:text-amber-700"
                     >
-                      <span className={`h-px flex-1 ${endingDone ? "bg-green-200" : "bg-stone-200"}`} />
-                      <span className={`text-sm font-bold transition-colors ${endingDone ? "text-green-600" : "text-stone-300"}`}>
-                        {endingDone && "✓ "}
-                        {endingSection.type}
-                      </span>
-                      <span className={`h-px flex-1 ${endingDone ? "bg-green-200" : "bg-stone-200"}`} />
-                    </div>
+                      {keys.length === 1 ? "פסוק אחד מכווץ" : `${keys.length} פסוקים מכווצים`} — לחץ לפתיחה
+                    </button>
+                  ) : (
+                    <div className="space-y-1 px-1 pb-1">{sectionVerses.map((v) => renderVerse(v))}</div>
                   )}
-                </Fragment>
+
+                  {s.type && <SectionBreak type={s.type} done={done} />}
+                </section>
               );
             })}
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {verses.map((v) => renderVerse(v))}
+            {unitMode && sections[0]?.type && (
+              <SectionBreak type={sections[0].type} done={passageComplete} />
+            )}
           </div>
         )}
 
