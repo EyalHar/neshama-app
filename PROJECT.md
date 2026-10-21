@@ -35,7 +35,8 @@ neshama-app/
 │   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
 │   │   ├── unknown-roots/      ← Crowdsourced missing Strong's roots
 │   │   ├── tanakh/             ← Reading progress CRUD + stats
-│   │   │   ├── bulk/           ← Batch chapter complete/clear
+│   │   │   ├── bulk/           ← Batch complete/clear (chapter or verse range)
+│   │   │   ├── units/          ← A book's parashot / parashiyot
 │   │   │   ├── reset/          ← Delete all user progress
 │   │   │   └── stats/          ← Completed chapters count
 │   │   ├── verses/
@@ -81,7 +82,12 @@ neshama-app/
 │   ├── shares.ts               ← Viewer/admin, author display, feed + comment types
 │   ├── commentaries.ts         ← Commentator list + allowed licenses
 │   ├── hapax.ts                ← Hapax legomena computation
-│   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per chapter
+│   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per passage and per parashiya
+│   ├── divisions.ts            ← Parashot / parashiyot: units, sections in a range
+│   ├── parashot.json           ← 54 Torah portions (snapshot from Sefaria)
+│   ├── parashiyot.json         ← 3,482 open/closed sections in the Tanakh (from MAM {פ}/{ס})
+│   ├── passage.ts              ← Reader passage response types
+│   ├── progress.ts             ← Book/section/Tanakh completion events
 │   ├── grammarQuiz.ts          ← Grammar quiz question generator
 │   ├── wordStats.ts            ← WordEntry parsing + Tanakh-wide frequency counts (cached)
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
@@ -145,9 +151,10 @@ neshama-app/
 ## API Routes Summary
 
 ### Tanakh Progress
-- `GET /api/tanakh?book=&chapter=` — Fetch chapter from Sefaria + user's read/favorite status; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
+- `GET /api/tanakh?book=&chapter=` or `?book=&from=c:v&to=c:v` — Fetch a chapter or a verse range (parasha/parashiya) from Sefaria + user's read/favorite status, all keyed by chapter:verse; a range also returns `sections` (parashiyot with per-section leitwords) and `chapterVerseCounts`; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
 - `POST /api/tanakh` — Toggle single verse read
-- `POST /api/tanakh/bulk` — Mark/clear entire chapter
+- `POST /api/tanakh/bulk` — Mark/clear a chapter, or a verse range (`completeRange` / `clearRange`)
+- `GET /api/tanakh/units?book=` — Parashot (Torah) or parashiyot (other books) for division mode
 - `DELETE /api/tanakh/reset` — Reset all user progress
 - `GET /api/tanakh/stats` — Total completed chapters count
 
@@ -204,6 +211,7 @@ neshama-app/
 - Celebration modals with confetti animations and Web Audio API sounds
 - Resume from last position (localStorage + URL params)
 - Random chapter/book/verse jump buttons
+- Division toggle: chapters ↔ parashot with parashiyot (Torah) or parashiyot (Nevi'im/Ketuvim; Psalms stays by chapter). Parashiyot shown with פ/ס breaks, per-parashiya leitwords (≥4 verses), a small toast + chime on finishing a parashiya, and a confetti modal for a finished parasha
 - Favorite verses and chapters (heart icons)
 - "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
 - Leitwords (מילים מנחות) — up to 5 roots the chapter repeats far above their Tanakh-wide rate (log-likelihood vs. corpus frequency); clicking one highlights all its occurrences in the chapter
@@ -263,7 +271,7 @@ neshama-app/
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; division mode as `tanakh-division`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)

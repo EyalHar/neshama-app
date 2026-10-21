@@ -2,81 +2,79 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NOTE_INCLUDE, toNoteItem, type VerseNoteItem } from "@/lib/notes";
-import { getChapterLeitwords } from "@/lib/leitwords";
-import { fetchChapterWithMarks, TANAKH_BOOKS, checkSectionCompletion, checkTanakhCompletion, type Section } from "@/lib/tanakh";
+import { getPassageLeitwords } from "@/lib/leitwords";
+import type { PassageMark, PassageSection, PassageVerse } from "@/lib/passage";
+import { compareRefs, getParashiyot, parseRef, refKey, type VerseRef } from "@/lib/divisions";
+import { getCompletionEvents } from "@/lib/progress";
+import { fetchChapterWithMarks, TANAKH_BOOKS, type Section } from "@/lib/tanakh";
 
-async function getCompletionEvents(
-  userId: string,
-  bookId: string
-): Promise<{ bookJustCompleted: boolean; sectionJustCompleted: Section | null; tanakhJustCompleted: boolean; completedBooksCount: number; completedChaptersTotal: number }> {
-  const allCompleted = await prisma.completedChapter.findMany({
-    where: { userId },
-    select: { book: true, chapter: true },
-  });
 
-  const completedChaptersTotal = allCompleted.length;
+// First three words, without ta'amim — how an unnamed parashiya is referred to
+const firstWords = (text: string) => text.replace(/[֑-֯׀׃׆ֽ]/g, "").replace(/\s+/g, " ").trim().split(" ").slice(0, 3).join(" ");
 
-  const completedBooksSet = new Set<string>();
-  for (const b of TANAKH_BOOKS) {
-    if (allCompleted.filter((c) => c.book === b.id).length >= b.chapters)
-      completedBooksSet.add(b.id);
-  }
-  const completedBooksCount = completedBooksSet.size;
-  const bookJustCompleted = completedBooksSet.has(bookId);
-
-  let sectionJustCompleted: Section | null = null;
-  let tanakhJustCompleted = false;
-
-  if (bookJustCompleted) {
-    const bookData = TANAKH_BOOKS.find((b) => b.id === bookId);
-    if (bookData) {
-      const section = bookData.section as Section;
-      if (checkTanakhCompletion(allCompleted)) {
-        tanakhJustCompleted = true;
-      } else if (checkSectionCompletion(allCompleted, section)) {
-        sectionJustCompleted = section;
-      }
-    }
-  }
-
-  return { bookJustCompleted, sectionJustCompleted, tanakhJustCompleted, completedBooksCount, completedChaptersTotal };
-}
-
-// GET /api/tanakh?book=Genesis&chapter=1
+// GET /api/tanakh?book=Genesis&chapter=1            — one chapter
+// GET /api/tanakh?book=Genesis&from=1:1&to=6:8      — a verse range (parasha / parashiya), which
+//   also returns its parashiyot (`sections`) with per-section leitwords.
+// Verses, marks, read/favorite status and notes are all keyed by chapter + verse, since a range
+// can span chapters. `chapterVerseCounts` gives each touched chapter's full length, which the
+// client needs to report chapter completion.
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const book = searchParams.get("book");
-  const chapter = parseInt(searchParams.get("chapter") ?? "");
+  const chapterParam = parseInt(searchParams.get("chapter") ?? "");
+  const rangeFrom = parseRef(searchParams.get("from"));
+  const rangeTo = parseRef(searchParams.get("to"));
+  const isRange = !!(rangeFrom && rangeTo);
 
-  if (!book || isNaN(chapter)) {
-    return NextResponse.json({ error: "Missing book or chapter" }, { status: 400 });
+  if (!book || !TANAKH_BOOKS.some((b) => b.id === book) || (!isRange && isNaN(chapterParam))) {
+    return NextResponse.json({ error: "Missing book, chapter or range" }, { status: 400 });
   }
 
   try {
-    const [{ verses, specialLetters }, leitwords] = await Promise.all([
-      fetchChapterWithMarks(book, chapter),
-      getChapterLeitwords(book, chapter),
-    ]);
+    const firstChapter = isRange ? rangeFrom![0] : chapterParam;
+    const lastChapter = isRange ? rangeTo![0] : chapterParam;
+    const chapterNums = Array.from({ length: lastChapter - firstChapter + 1 }, (_, i) => firstChapter + i);
+    const chapters = await Promise.all(chapterNums.map((c) => fetchChapterWithMarks(book, c)));
+
+    const chapterVerseCounts: Record<number, number> = {};
+    chapterNums.forEach((c, i) => { chapterVerseCounts[c] = chapters[i].verses.length; });
+    const from: VerseRef = isRange ? rangeFrom! : [chapterParam, 1];
+    const to: VerseRef = isRange ? rangeTo! : [chapterParam, chapterVerseCounts[chapterParam]];
+    const inRange = (c: number, v: number) => compareRefs([c, v], from) >= 0 && compareRefs([c, v], to) <= 0;
+
+    const verses: PassageVerse[] = [];
+    const specialLetters: PassageMark[] = [];
+    chapterNums.forEach((c, i) => {
+      chapters[i].verses.forEach((text, vi) => { if (inRange(c, vi + 1)) verses.push({ chapter: c, verse: vi + 1, text }); });
+      for (const m of chapters[i].specialLetters) if (inRange(c, m.verse)) specialLetters.push({ ...m, chapter: c });
+    });
+
+    const parashiyot = isRange ? getParashiyot(book, from, to) : [];
+    const leit = await getPassageLeitwords(book, from, to, parashiyot);
+    const sections: PassageSection[] = parashiyot.map((p, i) => {
+      const firstVerse = verses.find((v) => v.chapter === p.start[0] && v.verse === p.start[1]);
+      const title = p.clipped && firstVerse ? firstWords(firstVerse.text) : p.title;
+      return { ...p, title, leitwords: leit.sections[i] };
+    });
 
     const session = await auth();
-    let readVerses: number[] = [];
+    let readVerses: string[] = [];
     let completedChapters: number[] = [];
     let partialChapters: number[] = [];
-    let completedBooks: string[] = [];
-    let partialBooks: string[] = [];
-    let favoriteVerses: number[] = [];
+    const completedBooks: string[] = [];
+    const partialBooks: string[] = [];
+    let favoriteVerses: string[] = [];
     let favoriteChapters: number[] = [];
     let notes: VerseNoteItem[] = [];
 
     if (session?.user?.email) {
       const user = await prisma.user.findUnique({ where: { email: session.user.email } });
       if (user) {
-        // Read verses for this chapter
-        const read = await prisma.readVerse.findMany({
-          where: { userId: user.id, book, chapter },
-          select: { verse: true },
-        });
-        readVerses = read.map((r) => r.verse);
+        const chapterFilter = { userId: user.id, book, chapter: { gte: firstChapter, lte: lastChapter } };
+        const keep = (r: { chapter: number; verse: number }) => inRange(r.chapter, r.verse);
+
+        const read = await prisma.readVerse.findMany({ where: chapterFilter, select: { chapter: true, verse: true } });
+        readVerses = read.filter(keep).map((r) => refKey(r.chapter, r.verse));
 
         // Completed chapters for this book
         const completed = await prisma.completedChapter.findMany({
@@ -116,19 +114,15 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // Favorite verses for this chapter
-        const favVerses = await prisma.favoriteVerse.findMany({
-          where: { userId: user.id, book, chapter },
-          select: { verse: true },
-        });
-        favoriteVerses = favVerses.map((v) => v.verse);
+        const favVerses = await prisma.favoriteVerse.findMany({ where: chapterFilter, select: { chapter: true, verse: true } });
+        favoriteVerses = favVerses.filter(keep).map((v) => refKey(v.chapter, v.verse));
 
         const noteRows = await prisma.verseNote.findMany({
-          where: { userId: user.id, book, chapter },
+          where: chapterFilter,
           orderBy: { createdAt: "asc" },
           include: NOTE_INCLUDE,
         });
-        notes = noteRows.map(toNoteItem);
+        notes = noteRows.filter(keep).map(toNoteItem);
 
         // Favorite chapters for this book
         const favChapters = await prisma.favoriteChapter.findMany({
@@ -139,9 +133,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ verses, specialLetters, leitwords, readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, notes });
+    return NextResponse.json({
+      verses, chapterVerseCounts, specialLetters, leitwords: leit.passage, sections,
+      readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, notes,
+    });
   } catch {
-    return NextResponse.json({ error: "Failed to fetch chapter" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch passage" }, { status: 500 });
   }
 }
 

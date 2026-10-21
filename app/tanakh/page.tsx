@@ -1,181 +1,160 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore, Fragment } from "react";
 import { useSession } from "next-auth/react";
-import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral, type SpecialLetterMark } from "@/lib/tanakh";
-import Confetti from "@/app/components/Confetti";
+import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import VerseText, { findWordRanges } from "@/app/components/VerseText";
-import type { Leitword } from "@/lib/leitwords";
 import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
 import Commentaries, { BookIcon } from "@/app/components/Commentaries";
 import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
+import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
+import { inRef, type PassageMark, type PassageResponse, type PassageSection, type PassageVerse } from "@/lib/passage";
+import type { Leitword } from "@/lib/leitwords";
+import CelebrationModal, { type CelebrationData } from "./CelebrationModal";
+import LeitwordChips from "./LeitwordChips";
+import { playCelebrationSound } from "./sound";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
-const SHOW_SPECIAL_EVENT = "tanakh-special-letters-change";
+const DIVISION_KEY = "tanakh-division";
+const PREFS_EVENT = "tanakh-prefs-change";
 
-function subscribeShowSpecial(onChange: () => void) {
-  window.addEventListener(SHOW_SPECIAL_EVENT, onChange);
-  return () => window.removeEventListener(SHOW_SPECIAL_EVENT, onChange);
+// Reader preferences live in localStorage; useSyncExternalStore keeps SSR (no localStorage) consistent
+function subscribePrefs(onChange: () => void) {
+  window.addEventListener(PREFS_EVENT, onChange);
+  return () => window.removeEventListener(PREFS_EVENT, onChange);
 }
-
-function playNote(ctx: AudioContext, freq: number, start: number, dur: number, vol = 0.25) {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = "sine";
-  osc.frequency.value = freq;
-  gain.gain.setValueAtTime(vol, ctx.currentTime + start);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-  osc.start(ctx.currentTime + start);
-  osc.stop(ctx.currentTime + start + dur + 0.05);
-}
-
-function playCelebrationSound(type: "chapter" | "book" | "section" | "tanakh") {
-  try {
-    const ctx = new AudioContext();
-    if (type === "chapter") {
-      playNote(ctx, 523.25, 0,    0.25);
-      playNote(ctx, 659.25, 0.18, 0.3);
-    } else if (type === "book") {
-      playNote(ctx, 523.25, 0,    0.25);
-      playNote(ctx, 659.25, 0.15, 0.25);
-      playNote(ctx, 783.99, 0.3,  0.4);
-    } else if (type === "section") {
-      playNote(ctx, 523.25, 0,    0.2);
-      playNote(ctx, 659.25, 0.15, 0.2);
-      playNote(ctx, 783.99, 0.3,  0.2);
-      playNote(ctx, 1046.5, 0.48, 0.55, 0.3);
-    } else {
-      playNote(ctx, 523.25, 0,    0.2);
-      playNote(ctx, 659.25, 0.12, 0.2);
-      playNote(ctx, 783.99, 0.24, 0.2);
-      playNote(ctx, 1046.5, 0.36, 0.2);
-      playNote(ctx, 1318.5, 0.5,  0.7, 0.3);
-      playNote(ctx, 1046.5, 0.5,  0.7, 0.15);
-      playNote(ctx, 783.99, 0.5,  0.7, 0.1);
-    }
-  } catch { /* AudioContext not available */ }
+function setPref(key: string, value: string) {
+  localStorage.setItem(key, value);
+  window.dispatchEvent(new Event(PREFS_EVENT));
 }
 
 const SECTIONS = ["תורה", "נביאים", "כתובים"] as const;
 
-const CHAPTER_ENCOURAGEMENTS = [
-  "כל הכבוד! המשך כך — כל פרק מקרב אותך יותר לתנ״ך שלך.",
-  "יישר כח! הדרך של אלף מיל מתחילה בצעד אחד.",
-  "מדהים! הידע שלך גדל עם כל פרק שאתה קורא.",
-  "כל הכבוד! ״ולמדתם אותם ושמרתם לעשותם״ — אתה חי את זה.",
-  "עוד פרק, עוד חיבור. המשך בדרך הזאת!",
-];
+const key = (c: number, v: number) => `${c}:${v}`;
+const refLabel = (r: VerseRef) => `${toHebrewNumeral(r[0])}:${toHebrewNumeral(r[1])}`;
 
-const BOOK_ENCOURAGEMENTS = [
-  "הישג עצום! סיימת ספר שלם — זו עבודה של אמת.",
-  "כל הכבוד! ״בכל לבבך ובכל נפשך״ — ניכר שאתה קורא עם הלב.",
-  "מדהים! ספר שלם מאחוריך — המשך לכבוש את התנ״ך פרק אחרי פרק.",
-  "יישר כח ענק! לא כולם מגיעים לכאן — אתה כן.",
-];
+type UnitsInfo = { kind: DivisionKind | null; units: DivisionUnit[] };
 
-const SECTION_ENCOURAGEMENTS: Record<string, string> = {
-  "תורה": "סיימת את חמישה חומשי תורה! זה לא פחות מיוצא דופן. ״תורת ה׳ תמימה משיבת נפש״.",
-  "נביאים": "סיימת את ספר הנביאים! קולם של הנביאים מהדהד בך. ״וְחָזוֹן רָב חָזָה יְשַׁעְיָהוּ״.",
-  "כתובים": "סיימת את הכתובים! חכמה, שירה ותפילה — כולם שלך. ״אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים״.",
-};
-
-function randomItem<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-interface CelebrationData {
-  type: "chapter" | "book" | "section" | "tanakh";
-  bookName?: string;
-  chapterNum?: number;
-  sectionName?: string;
-  count: number;
-  nextUnreadChapter?: number;
+// The unit containing `anchor`; past the end → the last unit, otherwise the first
+function unitFor(units: DivisionUnit[], anchor: VerseRef): DivisionUnit | undefined {
+  return units.find((u) => inRef(anchor, u.start, u.end)) ?? (units.length && inRef(units.at(-1)!.end, [0, 0], anchor) ? units.at(-1) : units[0]);
 }
 
 export default function TanakhPage() {
   const { data: session } = useSession();
 
+  // Position: book + an anchor verse. Chapter mode shows the anchor's chapter; division mode
+  // shows the parasha / parashiya containing it — so switching modes keeps the reader's place.
   const [selectedBook, setSelectedBook] = useState(TANAKH_BOOKS[0]);
   const [selectedChapter, setSelectedChapter] = useState(1);
-  const [verses, setVerses] = useState<string[]>([]);
-  const [versesLoadedFor, setVersesLoadedFor] = useState(""); // `${bookId}-${chapter}` the current `verses` array actually belongs to
-  const [specialLetters, setSpecialLetters] = useState<SpecialLetterMark[]>([]);
+  const [anchorVerse, setAnchorVerse] = useState(1);
+  const [unitsByBook, setUnitsByBook] = useState<Record<string, UnitsInfo>>({});
+
+  const [verses, setVerses] = useState<PassageVerse[]>([]);
+  const [versesLoadedFor, setVersesLoadedFor] = useState(""); // passage key the current `verses` belong to
+  const [chapterVerseCounts, setChapterVerseCounts] = useState<Record<number, number>>({});
+  const [sections, setSections] = useState<PassageSection[]>([]);
+  const [specialLetters, setSpecialLetters] = useState<PassageMark[]>([]);
   const [leitwords, setLeitwords] = useState<Leitword[]>([]);
-  const [activeLeitword, setActiveLeitword] = useState<string | null>(null);
-  const [readVerses, setReadVerses] = useState<Set<number>>(new Set());
+  const [activeLeitword, setActiveLeitword] = useState<string | null>(null); // `${scope}|${strongs}`
+  const [readVerses, setReadVerses] = useState<Set<string>>(new Set());
   const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
   const [partialChapters, setPartialChapters] = useState<Set<number>>(new Set());
   const [completedBooks, setCompletedBooks] = useState<Set<string>>(new Set());
   const [partialBooks, setPartialBooks] = useState<Set<string>>(new Set());
-  const [favoriteVerses, setFavoriteVerses] = useState<Set<number>>(new Set());
+  const [favoriteVerses, setFavoriteVerses] = useState<Set<string>>(new Set());
   const [favoriteChapters, setFavoriteChapters] = useState<Set<number>>(new Set());
   const [notes, setNotes] = useState<VerseNoteItem[]>([]);
-  const [openNotesVerse, setOpenNotesVerse] = useState<number | null>(null);
-  const [openCommentaryVerse, setOpenCommentaryVerse] = useState<number | null>(null);
+  const [openNotesVerse, setOpenNotesVerse] = useState<string | null>(null);
+  const [openCommentaryVerse, setOpenCommentaryVerse] = useState<string | null>(null);
+  const chapterHeaderRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("תורה");
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [restored, setRestored] = useState(false);
-  const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null);
+  const [highlightedVerse, setHighlightedVerse] = useState<string | null>(null);
   const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
-  const [pendingVerseParam, setPendingVerseParam] = useState<number | null>(null);
+  const [pendingVerseParam, setPendingVerseParam] = useState<VerseRef | null>(null);
 
-  const showSpecialLetters = useSyncExternalStore(
-    subscribeShowSpecial,
-    () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1",
-    () => false
-  );
+  const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
+  const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
 
-  const toggleShowSpecialLetters = (checked: boolean) => {
-    localStorage.setItem(SHOW_SPECIAL_KEY, checked ? "1" : "0");
-    window.dispatchEvent(new Event(SHOW_SPECIAL_EVENT));
-  };
+  // ── Current passage ────────────────────────────────────────────────────────────────
+  const bookUnits = unitsByBook[selectedBook.id];
+  const divisionAvailable = selectedBook.id !== "Psalms";
+  const wantUnits = divisionPref && divisionAvailable;
+  const unitsLoaded = !!bookUnits;
+  const unitMode = wantUnits && unitsLoaded && bookUnits.kind !== null && bookUnits.units.length > 0;
+  const units = unitMode ? bookUnits.units : [];
+  const currentUnit = unitMode ? unitFor(units, [selectedChapter, anchorVerse]) : undefined;
+  const unitIndex = currentUnit ? units.indexOf(currentUnit) : -1;
+  const kind = unitMode ? bookUnits.kind : null;
+  const unitNoun = kind === "parashot" ? "בפרשה" : kind === "parashiyot" ? "בפרשייה" : "בפרק";
+  const unitName = kind === "parashot" ? "פרשה" : kind === "parashiyot" ? "פרשייה" : "פרק";
+
+  const passageKey = currentUnit
+    ? `${selectedBook.id}|${currentUnit.start.join(":")}-${currentUnit.end.join(":")}`
+    : `${selectedBook.id}|${selectedChapter}`;
+  const passageUrl = currentUnit
+    ? `/api/tanakh?book=${encodeURIComponent(selectedBook.id)}&from=${currentUnit.start.join(":")}&to=${currentUnit.end.join(":")}`
+    : `/api/tanakh?book=${encodeURIComponent(selectedBook.id)}&chapter=${selectedChapter}`;
+  // In division mode wait for the book's units before loading anything
+  const passageReady = restored && (!wantUnits || unitsLoaded);
+
+  function showToast(text: string) {
+    setToast(text);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2800);
+  }
 
   // Restore position — URL params take priority over localStorage
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const urlBookId = urlParams.get("book");
-    const urlChapter = urlParams.get("chapter");
-    const urlVerse = urlParams.get("verse");
-
-    if (urlBookId) {
-      const book = TANAKH_BOOKS.find((b) => b.id === urlBookId);
+    const urlBook = TANAKH_BOOKS.find((b) => b.id === urlParams.get("book"));
+    if (urlBook) {
+      const chapter = parseInt(urlParams.get("chapter") ?? "1") || 1;
+      const verse = parseInt(urlParams.get("verse") ?? "");
+      setSelectedBook(urlBook);
+      setSelectedChapter(chapter);
+      setAnchorVerse(verse || 1);
+      setActiveSection(urlBook.section);
+      if (verse) setPendingVerseParam([chapter, verse]);
+      setRestored(true);
+      return;
+    }
+    try {
+      const { bookId, chapter, verse } = JSON.parse(localStorage.getItem("tanakh-position") ?? "{}");
+      const book = TANAKH_BOOKS.find((b) => b.id === bookId);
       if (book) {
         setSelectedBook(book);
-        setSelectedChapter(urlChapter ? parseInt(urlChapter) : 1);
+        setSelectedChapter(chapter);
+        setAnchorVerse(verse ?? 1);
         setActiveSection(book.section);
-        setRestored(true);
-        if (urlVerse) setPendingVerseParam(parseInt(urlVerse));
-        return;
       }
-    }
-
-    const saved = localStorage.getItem("tanakh-position");
-    if (saved) {
-      try {
-        const { bookId, chapter } = JSON.parse(saved);
-        const book = TANAKH_BOOKS.find((b) => b.id === bookId);
-        if (book) {
-          setSelectedBook(book);
-          setSelectedChapter(chapter);
-          setActiveSection(book.section);
-        }
-      } catch {}
-    }
+    } catch {}
     setRestored(true);
   }, []);
 
-  // Save position to localStorage on change
   useEffect(() => {
     if (!restored) return;
-    localStorage.setItem("tanakh-position", JSON.stringify({ bookId: selectedBook.id, chapter: selectedChapter }));
-  }, [selectedBook, selectedChapter, restored]);
+    localStorage.setItem("tanakh-position", JSON.stringify({ bookId: selectedBook.id, chapter: selectedChapter, verse: anchorVerse }));
+  }, [selectedBook, selectedChapter, anchorVerse, restored]);
 
-  const loadChapter = useCallback(async (bookId: string, chapter: number) => {
+  // Fetch the book's parashot / parashiyot when reading by division (state set in the callback)
+  useEffect(() => {
+    if (!wantUnits || unitsByBook[selectedBook.id]) return;
+    const bookId = selectedBook.id;
+    fetch(`/api/tanakh/units?book=${encodeURIComponent(bookId)}`)
+      .then((r) => r.json())
+      .then((info: UnitsInfo) => setUnitsByBook((prev) => ({ ...prev, [bookId]: info })))
+      .catch(() => setUnitsByBook((prev) => ({ ...prev, [bookId]: { kind: null, units: [] } })));
+  }, [wantUnits, selectedBook, unitsByBook]);
+
+  const loadPassage = useCallback(async (url: string, loadedKey: string) => {
     setLoading(true);
     setVerses([]);
     setReadVerses(new Set());
@@ -183,12 +162,13 @@ export default function TanakhPage() {
     setOpenCommentaryVerse(null);
     setActiveLeitword(null);
     try {
-      const res = await fetch(`/api/tanakh?book=${encodeURIComponent(bookId)}&chapter=${chapter}`);
-      const data = await res.json();
+      const data: PassageResponse = await (await fetch(url)).json();
       setVerses(data.verses ?? []);
+      setChapterVerseCounts(data.chapterVerseCounts ?? {});
+      setSections(data.sections ?? []);
       setSpecialLetters(data.specialLetters ?? []);
       setLeitwords(data.leitwords ?? []);
-      setVersesLoadedFor(`${bookId}-${chapter}`);
+      setVersesLoadedFor(loadedKey);
       setReadVerses(new Set(data.readVerses ?? []));
       setCompletedChapters(new Set(data.completedChapters ?? []));
       setPartialChapters(new Set(data.partialChapters ?? []));
@@ -203,179 +183,253 @@ export default function TanakhPage() {
   }, []);
 
   useEffect(() => {
-    if (!restored) return;
-    loadChapter(selectedBook.id, selectedChapter);
-  }, [selectedBook, selectedChapter, loadChapter, restored]);
+    if (!passageReady) return;
+    loadPassage(passageUrl, passageKey);
+  }, [passageReady, passageUrl, passageKey, loadPassage]);
 
-  // `verses` briefly still holds the PREVIOUS chapter's data after selectedBook/
-  // selectedChapter change (loadChapter clears/repopulates it asynchronously) — so
-  // both effects below must wait for versesLoadedFor to catch up to the current
-  // selection before trusting `verses`, or they'd compute against stale data.
-  const versesReady = verses.length > 0 && versesLoadedFor === `${selectedBook.id}-${selectedChapter}`;
+  // `verses` briefly still holds the PREVIOUS passage's data after the selection changes
+  // (loadPassage clears/repopulates it asynchronously) — so both effects below must wait for
+  // versesLoadedFor to catch up to the current selection before trusting `verses`.
+  const versesReady = verses.length > 0 && versesLoadedFor === passageKey;
 
-  // Random-verse jump and arriving via a verse-specific link (search results,
-  // favorites, the quiz, etc.) both scroll to the verse and briefly highlight it,
-  // the same subtle way, for 1 second.
+  function flashVerse(k: string) {
+    setHighlightedVerse(k);
+    setTimeout(() => {
+      document.getElementById(`verse-${k.replace(":", "-")}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+    setTimeout(() => setHighlightedVerse(null), 1000);
+  }
+
+  // Random-verse jump and arriving via a verse-specific link (search results, favorites, the
+  // quiz, etc.) both scroll to the verse and briefly highlight it, the same subtle way.
   useEffect(() => {
     if (!pendingRandomVerse || !versesReady) return;
     setPendingRandomVerse(false);
-    const verseNum = Math.floor(Math.random() * verses.length) + 1;
-    setHighlightedVerse(verseNum);
-    setTimeout(() => {
-      document.getElementById(`verse-${verseNum}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 150);
-    setTimeout(() => setHighlightedVerse(null), 1000);
+    const v = verses[Math.floor(Math.random() * verses.length)];
+    flashVerse(key(v.chapter, v.verse));
   }, [verses, versesReady, pendingRandomVerse]);
 
   useEffect(() => {
     if (!pendingVerseParam || !versesReady) return;
-    const verseNum = pendingVerseParam;
     setPendingVerseParam(null);
-    setHighlightedVerse(verseNum);
-    setTimeout(() => {
-      document.getElementById(`verse-${verseNum}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 150);
-    setTimeout(() => setHighlightedVerse(null), 1000);
-  }, [verses, versesReady, pendingVerseParam]);
+    flashVerse(key(...pendingVerseParam));
+  }, [versesReady, pendingVerseParam]);
 
-  async function toggleVerse(verseIndex: number) {
+  // ── Navigation ─────────────────────────────────────────────────────────────────────
+  function goTo(book: typeof TANAKH_BOOKS[0], chapter: number, verse = 1) {
+    setSelectedBook(book);
+    setSelectedChapter(chapter);
+    setAnchorVerse(verse);
+    setActiveSection(book.section);
+  }
+
+  // Prev/next are clicked at the bottom of the passage. Without this, the old verses are
+  // cleared and the new ones load *above* the buttons, and the browser's scroll anchoring
+  // keeps the buttons in view, which lands the reader at the bottom of the new passage.
+  // Jumping to the passage header first means the new verses load below the viewport anchor.
+  function scrollToChapterHeader() {
+    chapterHeaderRef.current?.scrollIntoView({ block: "start" });
+  }
+
+  const currentBookIndex = TANAKH_BOOKS.findIndex((b) => b.id === selectedBook.id);
+  const nextBook = TANAKH_BOOKS[currentBookIndex + 1];
+  const prevBook = TANAKH_BOOKS[currentBookIndex - 1];
+  const hasNext = unitMode ? unitIndex < units.length - 1 || !!nextBook : selectedChapter < selectedBook.chapters || !!nextBook;
+  const hasPrev = unitMode ? unitIndex > 0 || !!prevBook : selectedChapter > 1 || !!prevBook;
+
+  function goNext() {
+    scrollToChapterHeader();
+    if (unitMode && unitIndex < units.length - 1) {
+      const u = units[unitIndex + 1];
+      goTo(selectedBook, u.start[0], u.start[1]);
+    } else if (!unitMode && selectedChapter < selectedBook.chapters) {
+      goTo(selectedBook, selectedChapter + 1);
+    } else if (nextBook) {
+      goTo(nextBook, 1);
+    }
+  }
+
+  function goPrev() {
+    scrollToChapterHeader();
+    if (unitMode && unitIndex > 0) {
+      const u = units[unitIndex - 1];
+      goTo(selectedBook, u.start[0], u.start[1]);
+    } else if (!unitMode && selectedChapter > 1) {
+      goTo(selectedBook, selectedChapter - 1);
+    } else if (prevBook) {
+      // An anchor past the book's end resolves to its last parasha / parashiya
+      goTo(prevBook, prevBook.chapters, unitMode ? 999 : 1);
+    }
+  }
+
+  function selectBook(book: typeof TANAKH_BOOKS[0]) {
+    goTo(book, 1);
+  }
+
+  function handleRandomTanakh() {
+    const book = randomBook();
+    goTo(book, randomChapter(book));
+  }
+
+  function handleRandomInBook() {
+    goTo(selectedBook, randomChapter(selectedBook));
+  }
+
+  function handleRandomVerse() {
+    const book = randomBook();
+    goTo(book, randomChapter(book));
+    setPendingRandomVerse(true);
+  }
+
+  // ── Progress & celebrations ────────────────────────────────────────────────────────
+  const verseKeysOf = (start: VerseRef, end: VerseRef) =>
+    verses.filter((v) => inRef([v.chapter, v.verse], start, end)).map((v) => key(v.chapter, v.verse));
+  const isComplete = (keys: string[], read: Set<string>) => keys.length > 0 && keys.every((k) => read.has(k));
+
+  function findNextUnreadChapter(afterChapter: number, completed: Set<number>): number | undefined {
+    for (let ch = afterChapter + 1; ch <= selectedBook.chapters; ch++) {
+      if (!completed.has(ch)) return ch;
+    }
+    return undefined;
+  }
+
+  type BigEvents = {
+    tanakhJustCompleted?: boolean;
+    sectionJustCompleted?: string | null;
+    bookJustCompleted?: boolean;
+    completedBooksCount?: number;
+  };
+
+  // Book / section / Tanakh completion → the big modal. Returns whether one was shown.
+  function celebrateBig(data: BigEvents): boolean {
+    if (!data.tanakhJustCompleted && !data.sectionJustCompleted && !data.bookJustCompleted) return false;
+    setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
+    if (data.tanakhJustCompleted) {
+      playCelebrationSound("tanakh");
+      setCelebration({ type: "tanakh", count: data.completedBooksCount ?? 0 });
+    } else if (data.sectionJustCompleted) {
+      playCelebrationSound("section");
+      setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount ?? 0 });
+    } else {
+      playCelebrationSound("book");
+      setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount ?? 0 });
+    }
+    return true;
+  }
+
+  // After marking verses read in division mode: a finished parasha gets the modal, a finished
+  // parashiya (or chapter) a small toast. `before`/`after` are the read sets around the change.
+  function celebrateDivision(before: Set<string>, after: Set<string>, chaptersDone: number[]) {
+    const allKeys = verses.map((v) => key(v.chapter, v.verse));
+    if (kind === "parashot" && currentUnit && !isComplete(allKeys, before) && isComplete(allKeys, after)) {
+      playCelebrationSound("book");
+      setCelebration({ type: "parasha", parashaName: currentUnit.label, count: 0 });
+      return;
+    }
+    const finished = sections.filter((s) => {
+      const keys = verseKeysOf(s.start, s.end);
+      return !isComplete(keys, before) && isComplete(keys, after);
+    });
+    if (finished.length === 1) {
+      playCelebrationSound("small");
+      showToast(`✓ סיימת את הפרשייה ״${finished[0].title}״`);
+    } else if (finished.length > 1) {
+      playCelebrationSound("small");
+      showToast(`✓ סיימת ${finished.length} פרשיות`);
+    } else if (chaptersDone.length) {
+      playCelebrationSound("small");
+      showToast(`✓ סיימת את פרק ${toHebrewNumeral(chaptersDone[0])}`);
+    }
+  }
+
+  async function toggleVerse(v: PassageVerse) {
     if (!session) return;
-    const verseNum = verseIndex + 1;
-    const newSet = new Set(readVerses);
-    const wasRead = newSet.has(verseNum);
-    if (wasRead) newSet.delete(verseNum); else newSet.add(verseNum);
-    setReadVerses(newSet);
+    const k = key(v.chapter, v.verse);
+    const before = readVerses;
+    const after = new Set(readVerses);
+    const wasRead = after.has(k);
+    if (wasRead) after.delete(k); else after.add(k);
+    setReadVerses(after);
     if (!wasRead) {
-      setCompletedChapters((prev) => { const s = new Set(prev); s.delete(selectedChapter); return s; });
-      setPartialChapters((prev) => new Set([...prev, selectedChapter]));
+      setCompletedChapters((prev) => { const s = new Set(prev); s.delete(v.chapter); return s; });
+      setPartialChapters((prev) => new Set([...prev, v.chapter]));
     }
 
     const res = await fetch("/api/tanakh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ book: selectedBook.id, chapter: selectedChapter, verse: verseNum, totalVerses: verses.length }),
+      body: JSON.stringify({ book: selectedBook.id, chapter: v.chapter, verse: v.verse, totalVerses: chapterVerseCounts[v.chapter] }),
     });
     const data = await res.json();
 
     if (data.chapterJustCompleted) {
       window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
-      setCompletedChapters((prev) => new Set([...prev, selectedChapter]));
-      if (data.tanakhJustCompleted) {
-        setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
-        playCelebrationSound("tanakh");
-        setCelebration({ type: "tanakh", count: data.completedBooksCount });
-      } else if (data.sectionJustCompleted) {
-        setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
-        playCelebrationSound("section");
-        setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount });
-      } else if (data.bookJustCompleted) {
-        setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
-        playCelebrationSound("book");
-        setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
-      } else {
-        const newCompleted = new Set([...completedChapters, selectedChapter]);
-        playCelebrationSound("chapter");
-        setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
-      }
+      setCompletedChapters((prev) => new Set([...prev, v.chapter]));
+    }
+    if (celebrateBig(data)) return;
+    if (unitMode) {
+      if (!wasRead) celebrateDivision(before, after, data.chapterJustCompleted ? [v.chapter] : []);
+    } else if (data.chapterJustCompleted) {
+      const newCompleted = new Set([...completedChapters, v.chapter]);
+      playCelebrationSound("chapter");
+      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: v.chapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(v.chapter, newCompleted) });
     }
   }
 
-  async function toggleVerseFavorite(e: React.MouseEvent, verseNum: number) {
-    e.stopPropagation();
-    if (!session) return;
-    const wasFav = favoriteVerses.has(verseNum);
-    const verseNoteItems = notes.filter((n) => n.verse === verseNum);
-    if (wasFav && verseNoteItems.length > 0) {
-      if (!window.confirm(unfavoriteConfirmMessage(verseNoteItems))) return;
-      setNotes((prev) => prev.filter((n) => n.verse !== verseNum));
-      if (openNotesVerse === verseNum) setOpenNotesVerse(null);
-    }
-    setFavoriteVerses((prev) => {
-      const s = new Set(prev);
-      if (wasFav) s.delete(verseNum); else s.add(verseNum);
-      return s;
-    });
-    try {
-      await fetch("/api/favorites/verse", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ book: selectedBook.id, chapter: selectedChapter, verse: verseNum }),
-      });
-    } catch {
-      // revert on network failure
-      setFavoriteVerses((prev) => {
-        const s = new Set(prev);
-        if (wasFav) s.add(verseNum); else s.delete(verseNum);
-        return s;
-      });
-    }
-  }
-
-  async function toggleChapterFavorite() {
-    if (!session) return;
-    const wasFav = favoriteChapters.has(selectedChapter);
-    setFavoriteChapters((prev) => {
-      const s = new Set(prev);
-      if (wasFav) s.delete(selectedChapter); else s.add(selectedChapter);
-      return s;
-    });
-    try {
-      await fetch("/api/favorites/chapter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ book: selectedBook.id, chapter: selectedChapter }),
-      });
-    } catch {
-      setFavoriteChapters((prev) => {
-        const s = new Set(prev);
-        if (wasFav) s.add(selectedChapter); else s.delete(selectedChapter);
-        return s;
-      });
-    }
-  }
-
-  async function markChapterComplete() {
+  async function markPassageComplete() {
     if (!session || verses.length === 0) return;
-    const allVerses = new Set(Array.from({ length: verses.length }, (_, i) => i + 1));
-    setReadVerses(allVerses);
-    setCompletedChapters((prev) => new Set([...prev, selectedChapter]));
+    const before = readVerses;
+    const after = new Set(verses.map((v) => key(v.chapter, v.verse)));
+    setReadVerses(after);
+
+    if (!unitMode) {
+      setCompletedChapters((prev) => new Set([...prev, selectedChapter]));
+      const res = await fetch("/api/tanakh/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "complete", book: selectedBook.id, chapter: selectedChapter, verseCount: verses.length }),
+      });
+      const data = await res.json();
+      window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
+      if (celebrateBig(data)) return;
+      const newCompleted = new Set([...completedChapters, selectedChapter]);
+      playCelebrationSound("chapter");
+      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
+      return;
+    }
 
     const res = await fetch("/api/tanakh/bulk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "complete", book: selectedBook.id, chapter: selectedChapter, verseCount: verses.length }),
+      body: JSON.stringify({
+        action: "completeRange",
+        book: selectedBook.id,
+        verses: verses.map((v) => [v.chapter, v.verse]),
+        chapterVerseCounts,
+      }),
     });
     const data = await res.json();
-    window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
-
-    if (data.tanakhJustCompleted) {
-      setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
-      playCelebrationSound("tanakh");
-      setCelebration({ type: "tanakh", count: data.completedBooksCount });
-    } else if (data.sectionJustCompleted) {
-      setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
-      playCelebrationSound("section");
-      setCelebration({ type: "section", sectionName: data.sectionJustCompleted, count: data.completedBooksCount });
-    } else if (data.bookJustCompleted) {
-      setCompletedBooks((prev) => new Set([...prev, selectedBook.id]));
-      playCelebrationSound("book");
-      setCelebration({ type: "book", bookName: selectedBook.he, count: data.completedBooksCount });
-    } else {
-      const newCompleted = new Set([...completedChapters, selectedChapter]);
-      playCelebrationSound("chapter");
-      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
+    if (data.chaptersJustCompleted?.length) {
+      setCompletedChapters((prev) => new Set([...prev, ...data.chaptersJustCompleted]));
+      window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
     }
+    if (celebrateBig(data)) return;
+    celebrateDivision(before, after, data.chaptersJustCompleted ?? []);
   }
 
-  async function clearChapter() {
+  async function clearPassage() {
     if (!session) return;
     setReadVerses(new Set());
-    setCompletedChapters((prev) => { const s = new Set(prev); s.delete(selectedChapter); return s; });
-
+    const chapters = [...new Set(verses.map((v) => v.chapter))];
+    setCompletedChapters((prev) => { const s = new Set(prev); chapters.forEach((c) => s.delete(c)); return s; });
     await fetch("/api/tanakh/bulk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "clear", book: selectedBook.id, chapter: selectedChapter }),
+      body: JSON.stringify(
+        unitMode
+          ? { action: "clearRange", book: selectedBook.id, verses: verses.map((v) => [v.chapter, v.verse]) }
+          : { action: "clear", book: selectedBook.id, chapter: selectedChapter }
+      ),
     });
     window.dispatchEvent(new CustomEvent("tanakh-stats-update"));
   }
@@ -390,169 +444,85 @@ export default function TanakhPage() {
     setCelebration(null);
   }
 
-  function findNextUnreadChapter(afterChapter: number, completed: Set<number>): number | undefined {
-    for (let ch = afterChapter + 1; ch <= selectedBook.chapters; ch++) {
-      if (!completed.has(ch)) return ch;
+  // ── Favorites ──────────────────────────────────────────────────────────────────────
+  async function toggleVerseFavorite(e: React.MouseEvent, v: PassageVerse) {
+    e.stopPropagation();
+    if (!session) return;
+    const k = key(v.chapter, v.verse);
+    const wasFav = favoriteVerses.has(k);
+    const verseNoteItems = notes.filter((n) => n.chapter === v.chapter && n.verse === v.verse);
+    if (wasFav && verseNoteItems.length > 0) {
+      if (!window.confirm(unfavoriteConfirmMessage(verseNoteItems))) return;
+      setNotes((prev) => prev.filter((n) => !(n.chapter === v.chapter && n.verse === v.verse)));
+      if (openNotesVerse === k) setOpenNotesVerse(null);
     }
-    return undefined;
-  }
-
-  function handleRandomTanakh() {
-    const book = randomBook();
-    const chapter = randomChapter(book);
-    setSelectedBook(book);
-    setSelectedChapter(chapter);
-    setActiveSection(book.section);
-  }
-
-  const currentBookIndex = TANAKH_BOOKS.findIndex((b) => b.id === selectedBook.id);
-  const hasNextChapter = selectedChapter < selectedBook.chapters || currentBookIndex + 1 < TANAKH_BOOKS.length;
-  const hasPrevChapter = selectedChapter > 1 || currentBookIndex > 0;
-
-  function goToNextChapter() {
-    if (selectedChapter < selectedBook.chapters) {
-      setSelectedChapter(selectedChapter + 1);
-      return;
+    const flip = (s: Set<string>, on: boolean) => { const n = new Set(s); if (on) n.add(k); else n.delete(k); return n; };
+    setFavoriteVerses((prev) => flip(prev, !wasFav));
+    try {
+      await fetch("/api/favorites/verse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ book: selectedBook.id, chapter: v.chapter, verse: v.verse }),
+      });
+    } catch {
+      setFavoriteVerses((prev) => flip(prev, wasFav)); // revert on network failure
     }
-    const nextBook = TANAKH_BOOKS[currentBookIndex + 1];
-    if (!nextBook) return; // end of the Tanakh (II Chronicles 36)
-    setSelectedBook(nextBook);
-    setSelectedChapter(1);
-    setActiveSection(nextBook.section);
   }
 
-  function goToPrevChapter() {
-    if (selectedChapter > 1) {
-      setSelectedChapter(selectedChapter - 1);
-      return;
+  async function toggleChapterFavorite() {
+    if (!session) return;
+    const wasFav = favoriteChapters.has(selectedChapter);
+    const flip = (on: boolean) => setFavoriteChapters((prev) => { const s = new Set(prev); if (on) s.add(selectedChapter); else s.delete(selectedChapter); return s; });
+    flip(!wasFav);
+    try {
+      await fetch("/api/favorites/chapter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ book: selectedBook.id, chapter: selectedChapter }),
+      });
+    } catch {
+      flip(wasFav);
     }
-    const prevBook = TANAKH_BOOKS[currentBookIndex - 1];
-    if (!prevBook) return; // start of the Tanakh (Genesis 1)
-    setSelectedBook(prevBook);
-    setSelectedChapter(prevBook.chapters);
-    setActiveSection(prevBook.section);
   }
 
-  function handleRandomInBook() {
-    const chapter = randomChapter(selectedBook);
-    setSelectedChapter(chapter);
-  }
-
-  function handleRandomVerse() {
-    const book = randomBook();
-    const chapter = randomChapter(book);
-    setSelectedBook(book);
-    setSelectedChapter(chapter);
-    setActiveSection(book.section);
-    setPendingRandomVerse(true);
-  }
-
-  function selectBook(book: typeof TANAKH_BOOKS[0]) {
-    setSelectedBook(book);
-    setSelectedChapter(1);
-  }
-
+  // ── Render helpers ─────────────────────────────────────────────────────────────────
   const booksInSection = TANAKH_BOOKS.filter((b) => b.section === activeSection);
-  const readCount = readVerses.size;
+  const allKeys = verses.map((v) => key(v.chapter, v.verse));
+  const readCount = allKeys.filter((k) => readVerses.has(k)).length;
   const totalVerses = verses.length;
-  const activeForms = leitwords.find((l) => l.strongs === activeLeitword)?.forms;
-  const isChapterComplete = completedChapters.has(selectedChapter);
+  const passageComplete = isComplete(allKeys, readVerses);
   const isBookComplete = completedBooks.has(selectedBook.id);
+
+  // Highlight forms for the active leitword, which may belong to the passage or to one parashiya
+  const [activeScope, activeStrongs] = activeLeitword?.split("|") ?? [];
+  const activeList: Leitword[] = activeScope === "passage" ? leitwords : sections[Number(activeScope)]?.leitwords ?? [];
+  const activeForms = activeList.find((l) => l.strongs === activeStrongs)?.forms;
+
+  // Parashiya boundaries within the passage (shown only when it holds more than one)
+  const showSections = unitMode && sections.length > 1;
+  const sectionStartingAt = new Map(sections.map((s, i) => [key(...s.start), i]));
+  const sectionEndingAt = new Map(sections.map((s, i) => [key(...s.end), i]));
+
+  const passageTitle = currentUnit
+    ? kind === "parashot"
+      ? `פרשת ${currentUnit.label}`
+      : `${selectedBook.he} · פרשייה ${toHebrewNumeral(unitIndex + 1)}`
+    : `${selectedBook.he} פרק ${toHebrewNumeral(selectedChapter)}`;
 
   return (
     <div className="min-h-screen bg-stone-50" dir="rtl">
-      {/* Celebration modal */}
       {celebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-modal-enter overflow-hidden">
-            <Confetti type={celebration.type} />
-            {celebration.type === "tanakh" ? (
-              <>
-                <div className="text-6xl mb-4 animate-emoji-tada inline-block">🎉</div>
-                <h2 className="text-2xl font-bold text-stone-800 mb-3">כל הכבוד!</h2>
-                <p className="text-stone-700 font-semibold text-lg mb-2">סיימת את כל התנ״ך!</p>
-                <p className="text-stone-500 text-sm italic mb-6">
-                  ״תּוֹרַת ה׳ תְּמִימָה מְשִׁיבַת נָפֶשׁ״ — הגעת למשהו שרוב בני האדם לא מגיעים אליו.
-                </p>
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => setCelebration(null)}
-                    className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
-                  >
-                    תודה! 🙏
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    className="border-2 border-stone-300 hover:bg-stone-50 text-stone-600 font-medium px-8 py-3 rounded-xl transition-colors"
-                  >
-                    התחל מחדש
-                  </button>
-                </div>
-              </>
-            ) : celebration.type === "section" ? (
-              <>
-                <div className="text-5xl mb-4 animate-emoji-spin inline-block">🌟</div>
-                <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
-                <p className="text-stone-600 mb-2">
-                  סיימת את <span className="font-bold text-amber-700">{celebration.sectionName}</span>!
-                </p>
-                <p className="text-stone-500 text-sm italic mb-6">
-                  {SECTION_ENCOURAGEMENTS[celebration.sectionName ?? ""] ?? ""}
-                </p>
-                <button
-                  onClick={() => setCelebration(null)}
-                  className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
-                >
-                  תודה!
-                </button>
-              </>
-            ) : celebration.type === "book" ? (
-              <>
-                <div className="text-5xl mb-4 animate-emoji-bounce inline-block">🏆</div>
-                <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
-                <p className="text-stone-600 mb-2">
-                  סיימת את ספר {celebration.bookName}!<br />
-                  <span className="font-semibold text-amber-700">{celebration.count} ספרים הושלמו עד כה</span>
-                </p>
-                <p className="text-stone-500 text-sm italic mb-6">{randomItem(BOOK_ENCOURAGEMENTS)}</p>
-                <button
-                  onClick={() => setCelebration(null)}
-                  className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
-                >
-                  תודה!
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="text-5xl mb-4 animate-emoji-pulse-glow inline-block">⭐</div>
-                <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
-                <p className="text-stone-600 mb-2">
-                  סיימת את פרק {toHebrewNumeral(celebration.chapterNum!)} ב{celebration.bookName}!<br />
-                  <span className="font-semibold text-amber-700">{celebration.count} פרקים הושלמו עד כה</span>
-                </p>
-                <p className="text-stone-500 text-sm italic mb-6">{randomItem(CHAPTER_ENCOURAGEMENTS)}</p>
-                <div className="flex flex-col gap-3">
-                  {celebration.nextUnreadChapter && (
-                    <button
-                      onClick={() => {
-                        setSelectedChapter(celebration.nextUnreadChapter!);
-                        setCelebration(null);
-                      }}
-                      className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-8 py-3 rounded-xl transition-colors"
-                    >
-                      לפרק הבא שלא נקרא ({toHebrewNumeral(celebration.nextUnreadChapter!)})
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setCelebration(null)}
-                    className={`font-medium px-8 py-3 rounded-xl transition-colors ${celebration.nextUnreadChapter ? "border border-stone-300 hover:bg-stone-50 text-stone-600" : "bg-amber-700 hover:bg-amber-800 text-white"}`}
-                  >
-                    תודה!
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+        <CelebrationModal
+          celebration={celebration}
+          onClose={() => setCelebration(null)}
+          onReset={handleReset}
+          onGoToChapter={(ch) => { goTo(selectedBook, ch); setCelebration(null); }}
+        />
+      )}
+
+      {toast && (
+        <div className="fixed bottom-6 inset-x-0 z-40 flex justify-center pointer-events-none px-4">
+          <div className="bg-stone-800 text-amber-50 text-sm px-4 py-2.5 rounded-full shadow-lg animate-modal-enter">{toast}</div>
         </div>
       )}
 
@@ -588,7 +558,7 @@ export default function TanakhPage() {
               <input
                 type="checkbox"
                 checked={showSpecialLetters}
-                onChange={(e) => toggleShowSpecialLetters(e.target.checked)}
+                onChange={(e) => setPref(SHOW_SPECIAL_KEY, e.target.checked ? "1" : "0")}
                 className="accent-amber-600 w-3.5 h-3.5"
               />
               הצג אותיות מיוחדות
@@ -603,11 +573,7 @@ export default function TanakhPage() {
             {SECTIONS.map((s) => (
               <button
                 key={s}
-                onClick={() => {
-                  setActiveSection(s);
-                  const first = TANAKH_BOOKS.find((b) => b.section === s)!;
-                  selectBook(first);
-                }}
+                onClick={() => selectBook(TANAKH_BOOKS.find((b) => b.section === s)!)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   activeSection === s ? "bg-amber-700 text-white" : "text-stone-600 hover:bg-stone-100"
                 }`}
@@ -645,43 +611,94 @@ export default function TanakhPage() {
             })}
           </div>
 
-          {/* Chapter selector */}
-          <div className="flex items-start gap-2">
-            <span className="text-stone-500 text-sm mt-1.5">פרק:</span>
-            <div className="flex gap-1 flex-wrap">
-              {Array.from({ length: selectedBook.chapters }, (_, i) => i + 1).map((ch) => {
-                const isComplete = completedChapters.has(ch);
-                const isPartial = !isComplete && partialChapters.has(ch);
-                const isSelected = selectedChapter === ch;
-                return (
+          {/* Division toggle: chapters ↔ parashot (Torah) / parashiyot (Nevi'im, Ketuvim) */}
+          {divisionAvailable && (
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-stone-500 text-sm">חלוקה:</span>
+              <div className="inline-flex bg-stone-100 rounded-lg p-0.5">
+                {[
+                  { units: false, label: "פרקים" },
+                  { units: true, label: selectedBook.section === "תורה" ? "פרשות" : "פרשיות" },
+                ].map((o) => (
                   <button
-                    key={ch}
-                    onClick={() => setSelectedChapter(ch)}
-                    className={`min-w-8 h-8 px-1.5 rounded-lg text-sm transition-colors ${
-                      isSelected
-                        ? "bg-amber-700 text-white font-medium"
-                        : isComplete
-                        ? "bg-green-100 text-green-700 font-medium"
-                        : isPartial
-                        ? "bg-orange-100 text-orange-700 font-medium"
-                        : "text-stone-600 hover:bg-stone-100"
+                    key={o.label}
+                    type="button"
+                    onClick={() => setPref(DIVISION_KEY, o.units ? "units" : "chapters")}
+                    aria-pressed={divisionPref === o.units}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      divisionPref === o.units ? "bg-white text-amber-800 font-medium shadow-sm" : "text-stone-500 hover:text-stone-700"
                     }`}
                   >
-                    {toHebrewNumeral(ch)}
+                    {o.label}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Chapter / unit selector */}
+          {unitMode ? (
+            <div className="flex items-start gap-2">
+              <span className="text-stone-500 text-sm mt-1.5">{kind === "parashot" ? "פרשה:" : "פרשייה:"}</span>
+              <div className="flex gap-1 flex-wrap">
+                {units.map((u, i) => (
+                  <button
+                    key={u.id}
+                    onClick={() => goTo(selectedBook, u.start[0], u.start[1])}
+                    title={`${u.title ? `״${u.title}״ · ` : ""}${refLabel(u.start)}–${refLabel(u.end)}`}
+                    className={`min-w-8 h-8 px-2 rounded-lg text-sm transition-colors ${
+                      currentUnit === u ? "bg-amber-700 text-white font-medium" : "text-stone-600 hover:bg-stone-100"
+                    }`}
+                  >
+                    {kind === "parashot" ? u.label : toHebrewNumeral(i + 1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : wantUnits && !unitsLoaded ? (
+            <p className="text-sm text-stone-400">טוען חלוקה...</p>
+          ) : (
+            <div className="flex items-start gap-2">
+              <span className="text-stone-500 text-sm mt-1.5">פרק:</span>
+              <div className="flex gap-1 flex-wrap">
+                {Array.from({ length: selectedBook.chapters }, (_, i) => i + 1).map((ch) => {
+                  const isComplete = completedChapters.has(ch);
+                  const isPartial = !isComplete && partialChapters.has(ch);
+                  const isSelected = selectedChapter === ch;
+                  return (
+                    <button
+                      key={ch}
+                      onClick={() => goTo(selectedBook, ch)}
+                      className={`min-w-8 h-8 px-1.5 rounded-lg text-sm transition-colors ${
+                        isSelected
+                          ? "bg-amber-700 text-white font-medium"
+                          : isComplete
+                          ? "bg-green-100 text-green-700 font-medium"
+                          : isPartial
+                          ? "bg-orange-100 text-orange-700 font-medium"
+                          : "text-stone-600 hover:bg-stone-100"
+                      }`}
+                    >
+                      {toHebrewNumeral(ch)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Chapter header */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-stone-700">
-              {selectedBook.he} פרק {toHebrewNumeral(selectedChapter)}
-            </h2>
-            {session && (
+        {/* Passage header */}
+        <div ref={chapterHeaderRef} className="flex items-center justify-between mb-4 flex-wrap gap-2 scroll-mt-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-xl font-bold text-stone-700">{passageTitle}</h2>
+            {currentUnit && (
+              <span className="text-sm text-stone-400">
+                {kind === "parashiyot" && currentUnit.title && <>״{currentUnit.title}״ · </>}
+                {refLabel(currentUnit.start)}–{refLabel(currentUnit.end)}
+              </span>
+            )}
+            {session && !unitMode && (
               <button
                 type="button"
                 onClick={toggleChapterFavorite}
@@ -693,10 +710,12 @@ export default function TanakhPage() {
               </button>
             )}
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
-            {!isBookComplete && isChapterComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הפרק הושלם</span>}
+            {!isBookComplete && (unitMode ? passageComplete : completedChapters.has(selectedChapter)) && (
+              <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ ה{unitName} הושלם{unitName === "פרק" ? "" : "ה"}</span>
+            )}
             {showSpecialLetters && specialLetters.length > 0 && (
               <span className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                {specialLetters.length} אותיות מיוחדות בפרק
+                {specialLetters.length} אותיות מיוחדות {unitNoun}
               </span>
             )}
           </div>
@@ -706,38 +725,18 @@ export default function TanakhPage() {
           )}
         </div>
 
-        {!loading && leitwords.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap mb-4 -mt-1">
-            <span
-              className="text-xs text-stone-500 cursor-help border-b border-dotted border-stone-300"
-              title="מילה מנחה: שורש שחוזר בפרק הרבה יותר מהרגיל בתנ״ך, ומדגיש את הנושא שלו. לחיצה על מילה מדגישה את כל מופעיה בפרק."
-            >
-              מילים מנחות:
-            </span>
-            {leitwords.map((l) => {
-              const active = activeLeitword === l.strongs;
-              return (
-                <button
-                  key={l.strongs}
-                  type="button"
-                  onClick={() => setActiveLeitword(active ? null : l.strongs)}
-                  aria-pressed={active}
-                  title={`${l.count} מופעים בפרק, פי ${l.ratio} מהשכיחות הרגילה בתנ״ך`}
-                  className={`text-sm px-2.5 py-0.5 rounded-full border transition-colors ${
-                    active
-                      ? "bg-yellow-200 border-yellow-400 text-stone-800"
-                      : "bg-white border-stone-200 text-stone-600 hover:border-yellow-400 hover:bg-yellow-50"
-                  }`}
-                >
-                  {l.lemmaHe} <span className="text-xs text-stone-400">×{l.count}</span>
-                </button>
-              );
-            })}
-          </div>
+        {!loading && (
+          <LeitwordChips
+            leitwords={leitwords}
+            scope="passage"
+            unitNoun={unitNoun}
+            activeKey={activeLeitword}
+            onToggle={setActiveLeitword}
+          />
         )}
 
         {/* Verses */}
-        {loading ? (
+        {loading || !passageReady ? (
           <div className="flex justify-center py-20">
             <svg className="animate-spin h-8 w-8 text-amber-600" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -746,128 +745,168 @@ export default function TanakhPage() {
           </div>
         ) : (
           <div className="space-y-1">
-            {verses.map((verse, i) => {
-              const isRead = readVerses.has(i + 1);
-              const isFav = favoriteVerses.has(i + 1);
-              const verseNotes = notes.filter((n) => n.verse === i + 1);
-              const notesOpen = openNotesVerse === i + 1;
-              const commentaryOpen = openCommentaryVerse === i + 1;
+            {verses.map((v, i) => {
+              const k = key(v.chapter, v.verse);
+              const isRead = readVerses.has(k);
+              const isFav = favoriteVerses.has(k);
+              const verseNotes = notes.filter((n) => n.chapter === v.chapter && n.verse === v.verse);
+              const notesOpen = openNotesVerse === k;
+              const commentaryOpen = openCommentaryVerse === k;
+              const newChapter = unitMode && (i === 0 || verses[i - 1].chapter !== v.chapter);
+              const sectionStart = showSections ? sectionStartingAt.get(k) : undefined;
+              const sectionEnd = showSections || unitMode ? sectionEndingAt.get(k) : undefined;
+              const section = sectionStart !== undefined ? sections[sectionStart] : undefined;
+              const endingSection = sectionEnd !== undefined ? sections[sectionEnd] : undefined;
+              const endingDone = endingSection ? isComplete(verseKeysOf(endingSection.start, endingSection.end), readVerses) : false;
               return (
-                <div key={i} className={`relative ${notesOpen ? "z-20" : ""}`}>
-                <div
-                  id={`verse-${i + 1}`}
-                  onClick={() => toggleVerse(i)}
-                  className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
-                    highlightedVerse === i + 1
-                      ? "bg-amber-50 ring-1 ring-amber-200"
-                      : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
-                  } ${session ? "cursor-pointer" : "cursor-default"}`}
-                >
-                  <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
-                    {toHebrewNumeral(i + 1)}
-                  </span>
-                  <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
-                    <VerseText
-                      text={verse}
-                      marks={showSpecialLetters ? specialLetters.filter((m) => m.verse === i + 1) : undefined}
-                      highlights={activeForms?.[i + 1] ? findWordRanges(verse, new Set(activeForms[i + 1])) : undefined}
-                    />
-                  </p>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setOpenCommentaryVerse(commentaryOpen ? null : i + 1); }}
-                    title="הצג פרשנים"
-                    aria-expanded={commentaryOpen}
-                    className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
-                      commentaryOpen ? "opacity-100 text-amber-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                    }`}
-                  >
-                    <BookIcon />
-                  </button>
-                  {session && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setOpenNotesVerse(notesOpen ? null : i + 1); }}
-                      title={verseNotes.length > 0 ? "הצג הערות וחידושים" : "הערה/ חידוש"}
-                      aria-expanded={notesOpen}
-                      className={`relative self-start mt-1 shrink-0 p-0.5 rounded-full text-amber-600 hover:bg-amber-100 transition-opacity ${
-                        verseNotes.length > 0 || notesOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                      }`}
-                    >
-                      <NoteIcon size={17} />
-                      {verseNotes.length > 0 && (
-                        <span className="absolute -top-1 -left-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-amber-600 text-white text-[10px] leading-[15px] text-center font-medium">
-                          {verseNotes.length}
-                        </span>
+                <Fragment key={k}>
+                  {section && (
+                    <div className={`px-4 ${sectionStart === 0 ? "pt-1" : "pt-3"} pb-1 space-y-1.5`}>
+                      <p className="text-xs text-stone-400">
+                        פרשייה ״{section.title}״ · {refLabel(section.start)}–{refLabel(section.end)}
+                      </p>
+                      {section.leitwords && (
+                        <LeitwordChips
+                          leitwords={section.leitwords}
+                          scope={String(sectionStart)}
+                          unitNoun="בפרשייה"
+                          activeKey={activeLeitword}
+                          onToggle={setActiveLeitword}
+                          small
+                        />
                       )}
-                    </button>
+                    </div>
                   )}
-                  {session && (
-                    <button
-                      type="button"
-                      onClick={(e) => toggleVerseFavorite(e, i + 1)}
-                      title={isFav ? "הסר פסוק מהאהובים ביותר" : "הוסף פסוק לאהובים ביותר"}
-                      aria-pressed={isFav}
-                      className={`self-start mt-1 shrink-0 p-0.5 rounded-full hover:bg-red-50 transition-opacity ${
-                        isFav ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                      }`}
+                  {newChapter && (
+                    <p className="px-4 pt-2 text-xs font-bold text-stone-400">פרק {toHebrewNumeral(v.chapter)}</p>
+                  )}
+                  <div className={`relative ${notesOpen ? "z-20" : ""}`}>
+                    <div
+                      id={`verse-${v.chapter}-${v.verse}`}
+                      onClick={() => toggleVerse(v)}
+                      className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
+                        highlightedVerse === k
+                          ? "bg-amber-50 ring-1 ring-amber-200"
+                          : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
+                      } ${session ? "cursor-pointer" : "cursor-default"}`}
                     >
-                      <HeartIcon filled={isFav} size={17} />
-                    </button>
+                      <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
+                        {toHebrewNumeral(v.verse)}
+                      </span>
+                      <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
+                        <VerseText
+                          text={v.text}
+                          marks={showSpecialLetters ? specialLetters.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
+                          highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
+                        />
+                      </p>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setOpenCommentaryVerse(commentaryOpen ? null : k); }}
+                        title="הצג פרשנים"
+                        aria-expanded={commentaryOpen}
+                        className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
+                          commentaryOpen ? "opacity-100 text-amber-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                        }`}
+                      >
+                        <BookIcon />
+                      </button>
+                      {session && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setOpenNotesVerse(notesOpen ? null : k); }}
+                          title={verseNotes.length > 0 ? "הצג הערות וחידושים" : "הערה/ חידוש"}
+                          aria-expanded={notesOpen}
+                          className={`relative self-start mt-1 shrink-0 p-0.5 rounded-full text-amber-600 hover:bg-amber-100 transition-opacity ${
+                            verseNotes.length > 0 || notesOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                          }`}
+                        >
+                          <NoteIcon size={17} />
+                          {verseNotes.length > 0 && (
+                            <span className="absolute -top-1 -left-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-amber-600 text-white text-[10px] leading-[15px] text-center font-medium">
+                              {verseNotes.length}
+                            </span>
+                          )}
+                        </button>
+                      )}
+                      {session && (
+                        <button
+                          type="button"
+                          onClick={(e) => toggleVerseFavorite(e, v)}
+                          title={isFav ? "הסר פסוק מהאהובים ביותר" : "הוסף פסוק לאהובים ביותר"}
+                          aria-pressed={isFav}
+                          className={`self-start mt-1 shrink-0 p-0.5 rounded-full hover:bg-red-50 transition-opacity ${
+                            isFav ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                          }`}
+                        >
+                          <HeartIcon filled={isFav} size={17} />
+                        </button>
+                      )}
+                      {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
+                    </div>
+                    {commentaryOpen && (
+                      <div className="mx-2 sm:mx-10 mt-1 mb-3">
+                        <Commentaries book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenCommentaryVerse(null)} />
+                      </div>
+                    )}
+                    {notesOpen && (
+                      <div className="absolute top-full inset-x-2 sm:inset-x-10 mt-1 shadow-xl rounded-xl bg-white">
+                        <VerseNotes
+                          book={selectedBook.id}
+                          chapter={v.chapter}
+                          verse={v.verse}
+                          notes={verseNotes}
+                          isFavorite={isFav}
+                          onNotesChange={(next) =>
+                            setNotes((prev) => [...prev.filter((n) => !(n.chapter === v.chapter && n.verse === v.verse)), ...next])
+                          }
+                          onFavorited={() => setFavoriteVerses((prev) => new Set(prev).add(k))}
+                          onClose={() => setOpenNotesVerse(null)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {/* Open (פ) / closed (ס) section break, as in a Torah scroll; green once read */}
+                  {endingSection?.type && (
+                    <div
+                      className={`flex items-center gap-3 px-4 ${endingSection.type === "פ" ? "py-4" : "py-1.5"}`}
+                      title={endingSection.type === "פ" ? "פרשה פתוחה" : "פרשה סתומה"}
+                    >
+                      <span className={`h-px flex-1 ${endingDone ? "bg-green-200" : "bg-stone-200"}`} />
+                      <span className={`text-sm font-bold transition-colors ${endingDone ? "text-green-600" : "text-stone-300"}`}>
+                        {endingDone && "✓ "}
+                        {endingSection.type}
+                      </span>
+                      <span className={`h-px flex-1 ${endingDone ? "bg-green-200" : "bg-stone-200"}`} />
+                    </div>
                   )}
-                  {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
-                </div>
-                {commentaryOpen && (
-                  <div className="mx-2 sm:mx-10 mt-1 mb-3">
-                    <Commentaries
-                      book={selectedBook.id}
-                      chapter={selectedChapter}
-                      verse={i + 1}
-                      onClose={() => setOpenCommentaryVerse(null)}
-                    />
-                  </div>
-                )}
-                {notesOpen && (
-                  <div className="absolute top-full inset-x-2 sm:inset-x-10 mt-1 shadow-xl rounded-xl bg-white">
-                    <VerseNotes
-                      book={selectedBook.id}
-                      chapter={selectedChapter}
-                      verse={i + 1}
-                      notes={verseNotes}
-                      isFavorite={isFav}
-                      onNotesChange={(next) => setNotes((prev) => [...prev.filter((n) => n.verse !== i + 1), ...next])}
-                      onFavorited={() => setFavoriteVerses((prev) => new Set(prev).add(i + 1))}
-                      onClose={() => setOpenNotesVerse(null)}
-                    />
-                  </div>
-                )}
-                </div>
+                </Fragment>
               );
             })}
           </div>
         )}
 
-        {!loading && verses.length > 0 && (hasPrevChapter || hasNextChapter) && (
+        {!loading && verses.length > 0 && (hasPrev || hasNext) && (
           <div className="flex justify-between items-center mt-6">
             <div>
-              {hasPrevChapter && (
+              {hasPrev && (
                 <button
                   type="button"
-                  onClick={goToPrevChapter}
+                  onClick={goPrev}
                   className="text-sm text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-4 py-2 rounded-lg transition-colors"
                 >
-                  → לפרק הקודם
+                  → ל{unitName} הקודם{unitName === "פרק" ? "" : "ת"}
                 </button>
               )}
             </div>
             <div>
-              {hasNextChapter && (
+              {hasNext && (
                 <button
                   type="button"
-                  onClick={goToNextChapter}
+                  onClick={goNext}
                   className="text-sm text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-4 py-2 rounded-lg transition-colors"
                 >
-                  לפרק הבא ←
+                  ל{unitName} הבא{unitName === "פרק" ? "" : "ה"} ←
                 </button>
               )}
             </div>
@@ -877,13 +916,13 @@ export default function TanakhPage() {
         {session && verses.length > 0 && (
           <div className="flex gap-3 mt-6 pt-6 border-t border-stone-200">
             <button
-              onClick={markChapterComplete}
+              onClick={markPassageComplete}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition-colors"
             >
-              סיימתי את הפרק
+              סיימתי את ה{unitName}
             </button>
             <button
-              onClick={clearChapter}
+              onClick={clearPassage}
               className="border border-stone-300 hover:bg-stone-100 text-stone-600 font-medium px-5 py-3 rounded-xl transition-colors"
             >
               נקה

@@ -1,6 +1,6 @@
 export const NOTE_MAX_LENGTH = 5000;
 
-export type VerseNoteItem = { id: string; verse: number; text: string; updatedAt: string; shareId: string | null };
+export type VerseNoteItem = { id: string; chapter: number; verse: number; text: string; updatedAt: string; shareId: string | null };
 
 // Prisma `include` that brings in what toNoteItem needs
 export const NOTE_INCLUDE = { share: { select: { id: true } } } as const;
@@ -15,10 +15,11 @@ export function unfavoriteConfirmMessage(notes: VerseNoteItem[]): string {
 
 export function toNoteItem(n: {
   id: string;
+  chapter: number;
   verse: number;
   text: string;
   updatedAt: Date;
   share?: { id: string } | null;
 }): VerseNoteItem {
-  return { id: n.id, verse: n.verse, text: n.text, updatedAt: n.updatedAt.toISOString(), shareId: n.share?.id ?? null };
+  return { id: n.id, chapter: n.chapter, verse: n.verse, text: n.text, updatedAt: n.updatedAt.toISOString(), shareId: n.share?.id ?? null };
 }
