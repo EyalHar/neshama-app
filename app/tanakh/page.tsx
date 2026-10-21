@@ -34,6 +34,7 @@ const SECTIONS = ["תורה", "נביאים", "כתובים"] as const;
 
 const key = (c: number, v: number) => `${c}:${v}`;
 const refLabel = (r: VerseRef) => `${toHebrewNumeral(r[0])}:${toHebrewNumeral(r[1])}`;
+const verseCountLabel = (n: number) => (n === 1 ? "פסוק אחד" : `${n} פסוקים`);
 
 type UnitsInfo = { kind: DivisionKind | null; units: DivisionUnit[] };
 
@@ -825,6 +826,7 @@ export default function TanakhPage() {
               <span className="text-sm text-stone-400">
                 {kind === "parashiyot" && currentUnit.title && <>״{currentUnit.title}״ · </>}
                 {refLabel(currentUnit.start)}–{refLabel(currentUnit.end)}
+                {kind === "parashiyot" && totalVerses > 0 && ` (${verseCountLabel(totalVerses)})`}
               </span>
             )}
             {session && !unitMode && (
@@ -917,8 +919,8 @@ export default function TanakhPage() {
                         title={selected ? "בטל סימון פרשייה" : "סמן פרשייה, כדי לראות את גבולותיה"}
                         className={`text-right text-xs transition-colors ${selected ? "text-stone-700 font-medium" : "text-stone-400 hover:text-stone-600"}`}
                       >
-                        פרשייה ״{s.title}״ · {refLabel(s.start)}–{refLabel(s.end)}
-                        {session && readInSection > 0 && !done && <span className="mr-1.5 text-stone-400">({readInSection}/{keys.length})</span>}
+                        פרשייה ״{s.title}״ · {refLabel(s.start)}–{refLabel(s.end)} ({verseCountLabel(keys.length)}
+                        {session && readInSection > 0 && !done && ` · נקראו ${readInSection}`})
                         {done && <span className="mr-1.5 text-green-600">✓</span>}
                       </button>
                       {!collapsed && s.leitwords && (
