@@ -90,6 +90,7 @@ neshama-app/
 │   ├── progress.ts             ← Book/section/Tanakh completion events
 │   ├── grammarQuiz.ts          ← Grammar quiz question generator
 │   ├── wordStats.ts            ← WordEntry parsing + Tanakh-wide frequency counts (cached)
+│   ├── gematria.ts             ← Gematria methods (standard, gadol, katan, ordinal)
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
 │   ├── rootFamily.ts           ← Strong's family-tree helpers
 │   ├── special-letters.ts      ← Special-letter types, labels, styles
@@ -214,6 +215,7 @@ neshama-app/
 - Division toggle: chapters ↔ parashot with parashiyot (Torah) or parashiyot (Nevi'im/Ketuvim; Psalms stays by chapter). Parashiyot shown with פ/ס breaks, per-parashiya leitwords (≥4 verses), a small toast + chime on finishing a parashiya, and a confetti modal for a finished parasha
 - Favorite verses and chapters (heart icons)
 - "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
+- "חישוב גימטריה" checkbox — hovering a word (tapping, on touch screens) shows its gematria; selecting letters, even across verses, shows their sum while selecting. A settings popover picks the methods shown: standard, gadol (final letters 500–900), katan, ordinal (`lib/gematria.ts`). Words joined by maqaf count separately; verse numbers in a selection are ignored
 - Leitwords (מילים מנחות) — up to 5 roots the chapter repeats far above their Tanakh-wide rate (log-likelihood vs. corpus frequency); clicking one highlights all its occurrences in the chapter
 
 ### Advanced Search
@@ -271,7 +273,7 @@ neshama-app/
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; division mode as `tanakh-division`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)

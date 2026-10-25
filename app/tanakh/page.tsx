@@ -14,9 +14,14 @@ import { inRef, type PassageMark, type PassageResponse, type PassageSection, typ
 import type { Leitword } from "@/lib/leitwords";
 import CelebrationModal, { type CelebrationData } from "./CelebrationModal";
 import LeitwordChips from "./LeitwordChips";
+import GematriaSettings from "./GematriaSettings";
+import GematriaOverlay, { hasTextSelection, isTouchWordTap } from "./GematriaOverlay";
+import { parseGematriaMethods } from "@/lib/gematria";
 import { playCelebrationSound } from "./sound";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
+const GEMATRIA_KEY = "tanakh-show-gematria";
+const GEMATRIA_METHODS_KEY = "tanakh-gematria-methods";
 const DIVISION_KEY = "tanakh-division";
 const PREFS_EVENT = "tanakh-prefs-change";
 
@@ -99,6 +104,10 @@ export default function TanakhPage() {
 
   const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
+  const showGematria = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_KEY) === "1", () => false);
+  const gematriaMethods = parseGematriaMethods(
+    useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_METHODS_KEY) ?? "", () => "")
+  );
 
   // ── Current passage ────────────────────────────────────────────────────────────────
   const bookUnits = unitsByBook[selectedBook.id];
@@ -546,7 +555,10 @@ export default function TanakhPage() {
         <div className={`relative ${notesOpen ? "z-20" : ""}`}>
           <div
             id={`verse-${v.chapter}-${v.verse}`}
-            onClick={() => toggleVerse(v)}
+            onClick={(e) => {
+              if (hasTextSelection() || (showGematria && isTouchWordTap(e.target))) return;
+              toggleVerse(v);
+            }}
             className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
               highlightedVerse === k
                 ? "bg-amber-50 ring-1 ring-amber-200"
@@ -556,9 +568,10 @@ export default function TanakhPage() {
             <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
               {toHebrewNumeral(v.verse)}
             </span>
-            <p className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
+            <p data-gtext="" className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
               <VerseText
                 text={v.text}
+                words={showGematria}
                 marks={showSpecialLetters ? specialLetters.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
                 highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
               />
@@ -650,6 +663,8 @@ export default function TanakhPage() {
         />
       )}
 
+      {showGematria && <GematriaOverlay methods={gematriaMethods} />}
+
       {toast && (
         <div className="fixed bottom-6 inset-x-0 z-40 flex justify-center pointer-events-none px-4">
           <div className="bg-stone-800 text-amber-50 text-sm px-4 py-2.5 rounded-full shadow-lg animate-modal-enter">{toast}</div>
@@ -693,6 +708,12 @@ export default function TanakhPage() {
               />
               הצג אותיות מיוחדות
             </label>
+            <GematriaSettings
+              enabled={showGematria}
+              methods={gematriaMethods}
+              onToggle={(on) => setPref(GEMATRIA_KEY, on ? "1" : "0")}
+              onMethodsChange={(methods) => setPref(GEMATRIA_METHODS_KEY, methods.join(","))}
+            />
           </div>
         </div>
 
@@ -842,11 +863,16 @@ export default function TanakhPage() {
             )}
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
             {!isBookComplete && (unitMode ? passageComplete : completedChapters.has(selectedChapter)) && (
-              <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ ה{unitName} הושלם{unitName === "פרק" ? "" : "ה"}</span>
+              <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ ה{unitName} {unitName === "פרק" ? "הושלם" : "הושלמה"}</span>
             )}
             {showSpecialLetters && specialLetters.length > 0 && (
               <span className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
                 {specialLetters.length} אותיות מיוחדות {unitNoun}
+              </span>
+            )}
+            {showGematria && (
+              <span className="bg-stone-200 text-stone-600 text-xs font-medium px-2 py-0.5 rounded-full">
+                גימטריה: הצביעו על מילה או סמנו אותיות
               </span>
             )}
           </div>
@@ -971,7 +997,7 @@ export default function TanakhPage() {
                   onClick={goPrev}
                   className="text-sm text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-4 py-2 rounded-lg transition-colors"
                 >
-                  → ל{unitName} הקודם{unitName === "פרק" ? "" : "ת"}
+                  → ל{unitName} {unitName === "פרק" ? "הקודם" : "הקודמת"}
                 </button>
               )}
             </div>
