@@ -5,6 +5,7 @@ import { getCurrentUserId, getFavoriteVerseKeySet } from "@/lib/favorites";
 import {
   stripDiacritics,
   collectRootFamily,
+  findLemmaEntries,
   fetchWordRows,
   fetchWordRowsByMorph,
   groupByVerse,
@@ -51,10 +52,7 @@ export async function GET(req: NextRequest) {
 
   // Step 1: find seed Strong's numbers by lemmaPlain match
   type LemmaRow = { number: string };
-  const seedRows = await prisma.$queryRawUnsafe<LemmaRow[]>(
-    `SELECT number FROM "StrongsEntry" WHERE lemmaPlain LIKE ?`,
-    `%${root}%`
-  );
+  const seedRows = await findLemmaEntries<LemmaRow>("number", root);
 
   // Fallback: old method via WordEntry.plain if Strong's not seeded — direct match only, no etymological expansion
   if (seedRows.length === 0) {

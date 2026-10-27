@@ -12,6 +12,20 @@ export function stripDiacritics(text: string): string {
   return text.replace(/[^א-ת]/g, "");
 }
 
+// Resolves typed Hebrew (no nikud) to Strong's entries. An exact lemma match comes first:
+// a substring match alone would make "ירה" also hit unrelated words that merely contain those
+// letters (בְּכִירָה from בכר, בִּירָה, גְּבִירָה). The substring match is kept only as a fallback
+// for text that isn't any lemma. `columns` is always a fixed string from the caller, not input.
+export async function findLemmaEntries<T>(columns: string, plain: string): Promise<T[]> {
+  const exact = await prisma.$queryRawUnsafe<T[]>(
+    `SELECT ${columns} FROM "StrongsEntry" WHERE lemmaPlain = ?`, plain
+  );
+  if (exact.length > 0) return exact;
+  return prisma.$queryRawUnsafe<T[]>(
+    `SELECT ${columns} FROM "StrongsEntry" WHERE lemmaPlain LIKE ?`, `%${plain}%`
+  );
+}
+
 export type StrongsRow = { number: string; derivedFrom: string };
 export type WordRow = { book: string; chapter: number; verse: number; word: string };
 export type VerseGroup = { book: string; chapter: number; verse: number; forms: Set<string> };

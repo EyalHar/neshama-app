@@ -5,6 +5,7 @@ import { getCurrentUserId, getFavoriteVerseKeySet } from "@/lib/favorites";
 import {
   stripDiacritics,
   collectRootFamily,
+  findLemmaEntries,
   resolveUltimateRoots,
   fetchStrongsMeta,
   fetchWordRows,
@@ -54,10 +55,7 @@ export async function GET(req: NextRequest) {
 
   // Step 1: resolve the typed word to seed Strong's number(s) — same lookup as /api/verses/root
   type SeedRow = { number: string; lemmaHe: string; definition: string };
-  const seedRows = await prisma.$queryRawUnsafe<SeedRow[]>(
-    `SELECT number, lemmaHe, definition FROM "StrongsEntry" WHERE lemmaPlain LIKE ?`,
-    `%${word}%`
-  );
+  const seedRows = await findLemmaEntries<SeedRow>("number, lemmaHe, definition", word);
 
   // Fallback: Strong's dictionary not seeded — degrade to a plain WordEntry.plain match with
   // no etymological expansion, same fallback /api/verses/root uses in this situation.
