@@ -90,6 +90,14 @@ const FEATURES = [
     color: "from-yellow-50 to-yellow-100 border-yellow-300 hover:border-yellow-500",
     labelColor: "text-yellow-800",
   },
+  {
+    href: "/biblical-places",
+    title: "ערים ויישובים במקרא",
+    description: "יישובים של היום ששמם מופיע בתנ״ך, ולצידם ערים מקראיות שחרבו — כל שם מקושר לפסוק",
+    icon: "📍",
+    color: "from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-400",
+    labelColor: "text-emerald-800",
+  },
 ];
 
 export default function HomePage() {

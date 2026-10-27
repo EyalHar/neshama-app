@@ -24,6 +24,7 @@ const STUDY_ITEMS: NavItem[] = [
   { href: "/unique-words", label: "מילים יחידאיות", icon: "1" },
   { href: "/special-letters", label: "אותיות מיוחדות", icon: "ב" },
   { href: "/jerusalem-names", label: "שמות ירושלים", icon: <TempleIcon /> },
+  { href: "/biblical-places", label: "ערים ויישובים במקרא", icon: "📍" },
   { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },
 ];
 
