@@ -70,18 +70,34 @@ export function extractStrongsNumber(lemma: string): string | null {
 // match must not be anchored to the start. GLOB (not LIKE) is required because SQLite's LIKE
 // is case-insensitive by default, which would conflate Piel/Pual ("p"/"P") and Hiphil/Hophal
 // ("h"/"H").
-export function stemGlob(stem: string): string {
-  return `*V${stem}*`;
+// The letter after the binyan is the verb form; each search form groups the OSHB codes below.
+// "w" (vav-consecutive imperfect) counts as imperfect and "q" (vav-consecutive perfect) as
+// perfect, following their form rather than their meaning.
+export const VERB_FORMS = {
+  perfect: "pq",
+  imperfect: "iwhj",
+  imperative: "v",
+  participle: "rs",
+  infinitive: "c",
+  infAbsolute: "a",
+} as const;
+export type VerbForm = keyof typeof VERB_FORMS;
+
+export const parseVerbForm = (v: string | null): VerbForm | null =>
+  v && Object.hasOwn(VERB_FORMS, v) ? (v as VerbForm) : null;
+
+export function verbGlob(stem: string | null, form: VerbForm | null): string {
+  return `*V${stem ?? "?"}${form ? `[${VERB_FORMS[form]}]` : ""}*`;
 }
 
-export async function fetchWordRows(numbers: string[], stem: string | null): Promise<WordRow[]> {
+export async function fetchWordRows(numbers: string[], morphGlob: string | null): Promise<WordRow[]> {
   if (numbers.length === 0) return [];
   const plain = numbers.map((n) => n.replace(/^H/, ""));
-  const stemFilter = stem ? ` AND morph GLOB ?` : "";
+  const morphFilter = morphGlob ? ` AND morph GLOB ?` : "";
   const rows = await prisma.$queryRawUnsafe<(WordRow & { lemma: string })[]>(
     `SELECT book, chapter, verse, word, lemma FROM "WordEntry"
-     WHERE (${plain.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
-    ...plain.map((n) => `%${n}%`), ...(stem ? [stemGlob(stem)] : [])
+     WHERE (${plain.map(() => `lemma LIKE ?`).join(" OR ")})${morphFilter}`,
+    ...plain.map((n) => `%${n}%`), ...(morphGlob ? [morphGlob] : [])
   );
   const numSet = new Set(plain);
   return rows.filter((r) => {
@@ -90,11 +106,11 @@ export async function fetchWordRows(numbers: string[], stem: string | null): Pro
   });
 }
 
-// Binyan-only search (no root given) — filters WordEntry by morph alone.
-export async function fetchWordRowsByStem(stem: string): Promise<WordRow[]> {
+// Binyan/form-only search (no root given) — filters WordEntry by morph alone.
+export async function fetchWordRowsByMorph(morphGlob: string): Promise<WordRow[]> {
   return prisma.$queryRawUnsafe<WordRow[]>(
     `SELECT book, chapter, verse, word FROM "WordEntry" WHERE morph GLOB ?`,
-    stemGlob(stem)
+    morphGlob
   );
 }
 

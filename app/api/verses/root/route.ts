@@ -6,11 +6,12 @@ import {
   stripDiacritics,
   collectRootFamily,
   fetchWordRows,
-  fetchWordRowsByStem,
+  fetchWordRowsByMorph,
   groupByVerse,
   filterToFavorites,
   resolveVerseGroup,
-  stemGlob,
+  parseVerbForm,
+  verbGlob,
   PAGE_SIZE,
   type WordRow,
 } from "@/lib/rootFamily";
@@ -19,11 +20,13 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const root = stripDiacritics(searchParams.get("root")?.trim() ?? "");
   const stem = searchParams.get("stem")?.trim() || null;
+  const form = parseVerbForm(searchParams.get("form"));
+  const morphGlob = stem || form ? verbGlob(stem, form) : null;
   const scope = searchParams.get("scope") ?? "tanakh";
   const view = searchParams.get("view") === "etymological" ? "etymological" : "direct";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1") || 1);
   const hasRoot = root.length >= 2;
-  if (!hasRoot && !stem) return NextResponse.json({ results: [] });
+  if (!hasRoot && !morphGlob) return NextResponse.json({ results: [] });
 
   const bookIds = scopeBookIds(scope);
 
@@ -36,10 +39,10 @@ export async function GET(req: NextRequest) {
     favoriteKeys = await getFavoriteVerseKeySet(userId);
   }
 
-  // Binyan-only search: no root given, filter by verb stem alone — no root family, so no
-  // etymological view is possible.
+  // Binyan/form-only search: no root given, filter by the verb morph alone — no root family,
+  // so no etymological view is possible.
   if (!hasRoot) {
-    const wordRows = await fetchWordRowsByStem(stem!);
+    const wordRows = await fetchWordRowsByMorph(morphGlob!);
     const grouped = groupByVerse(wordRows, bookIds, new Set());
     const { map: verseMap, occurrences } = filterToFavorites(grouped.verseMap, grouped.occurrences, favoriteKeys);
     const { results, total, pages } = await resolveVerseGroup(verseMap, page);
@@ -64,10 +67,10 @@ export async function GET(req: NextRequest) {
     }
 
     const nums = [...new Set(lemmaRows.map((r) => r.lemma.replace(/^[a-z/]+/, "").trim()).filter(Boolean))];
-    const stemFilter = stem ? ` AND morph GLOB ?` : "";
+    const morphFilter = morphGlob ? ` AND morph GLOB ?` : "";
     const wordRows = await prisma.$queryRawUnsafe<WordRow[]>(
-      `SELECT book, chapter, verse, word FROM "WordEntry" WHERE (${nums.map(() => `lemma LIKE ?`).join(" OR ")})${stemFilter}`,
-      ...nums.map((n) => `%${n}`), ...(stem ? [stemGlob(stem)] : [])
+      `SELECT book, chapter, verse, word FROM "WordEntry" WHERE (${nums.map(() => `lemma LIKE ?`).join(" OR ")})${morphFilter}`,
+      ...nums.map((n) => `%${n}`), ...(morphGlob ? [morphGlob] : [])
     );
     const grouped = groupByVerse(wordRows, bookIds, new Set());
     const { map: verseMap, occurrences } = filterToFavorites(grouped.verseMap, grouped.occurrences, favoriteKeys);
@@ -84,8 +87,8 @@ export async function GET(req: NextRequest) {
 
   // Step 3: fetch direct matches and etymologically-expanded matches separately
   const [directWordRows, etymWordRows] = await Promise.all([
-    fetchWordRows(seedNumbers, stem),
-    fetchWordRows(etymNumbers, stem),
+    fetchWordRows(seedNumbers, morphGlob),
+    fetchWordRows(etymNumbers, morphGlob),
   ]);
 
   const directGrouped = groupByVerse(directWordRows, bookIds, new Set());

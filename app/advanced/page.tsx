@@ -18,6 +18,17 @@ const BINYANIM = [
   { id: "t", label: "הִתְפַּעֵל (Hitpael)" },
 ];
 
+// Ids match VERB_FORMS in lib/rootFamily.ts
+const VERB_FORM_OPTIONS = [
+  { id: "all", label: "כל הצורות" },
+  { id: "perfect", label: "עבר" },
+  { id: "imperfect", label: "עתיד" },
+  { id: "imperative", label: "ציווי" },
+  { id: "participle", label: "בינוני" },
+  { id: "infinitive", label: "שם הפועל (מקור נטוי)" },
+  { id: "infAbsolute", label: "מקור מוחלט" },
+];
+
 type Result = {
   book: string; bookHe: string; chapter: number; verse: number;
   text: string; forms?: string[];
@@ -100,6 +111,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
   const [stem, setStem] = useState("all");
+  const [verbForm, setVerbForm] = useState("all");
   const [wordQ, setWordQ] = useState("");
   const [results, setResults] = useState<Result[]>([]);
   const [total, setTotal] = useState<number | null>(null);
@@ -120,6 +132,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [lastSubstringQ, setLastSubstringQ] = useState("");
   const [lastRootQ, setLastRootQ] = useState("");
   const [lastStem, setLastStem] = useState("all");
+  const [lastVerbForm, setLastVerbForm] = useState("all");
   const [lastWordQ, setLastWordQ] = useState("");
   const abortRef = useRef<AbortController | null>(null);
 
@@ -179,10 +192,11 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     return n ? "&nikud=1" : "";
   }
 
-  function rootUrl(rootValue: string, stemValue: string, scopeValue: string, view: "direct" | "etymological", p: number, fav: boolean) {
+  function rootUrl(rootValue: string, stemValue: string, formValue: string, scopeValue: string, view: "direct" | "etymological", p: number, fav: boolean) {
     const params = new URLSearchParams({ scope: scopeValue, view, page: String(p) });
     if (rootValue) params.set("root", rootValue);
     if (stemValue && stemValue !== "all") params.set("stem", stemValue);
+    if (formValue && formValue !== "all") params.set("form", formValue);
     if (fav) params.set("favoritesOnly", "1");
     return `/api/verses/root?${params.toString()}`;
   }
@@ -223,7 +237,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
       const whole = tab === "basic" ? "&whole=1" : "";
       search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}${nikudParam(lastNikudMode)}`, false);
     } else if (tab === "root") {
-      search(rootUrl(lastRootQ, lastStem, lastScope, rootView, p, lastFavoritesOnly), false);
+      search(rootUrl(lastRootQ, lastStem, lastVerbForm, lastScope, rootView, p, lastFavoritesOnly), false);
     } else if (tab === "etymology") {
       search(etymologyUrl(lastWordQ, lastScope, lastActiveGroupKey, p, lastFavoritesOnly), false);
     }
@@ -232,21 +246,21 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   function handleRoot(e: React.FormEvent, p = 1) {
     e.preventDefault();
     const hasRoot = rootQ.trim().length > 0;
-    const hasStem = stem !== "all";
-    if (!hasRoot && !hasStem) return;
+    if (!hasRoot && stem === "all" && verbForm === "all") return;
     setLastRootQ(rootQ.trim());
     setLastStem(stem);
+    setLastVerbForm(verbForm);
     setLastScope(scope);
     setLastFavoritesOnly(favoritesOnly);
     setRootView("direct");
     setPage(p);
-    search(rootUrl(rootQ.trim(), stem, scope, "direct", p, favoritesOnly), p === 1);
+    search(rootUrl(rootQ.trim(), stem, verbForm, scope, "direct", p, favoritesOnly), p === 1);
   }
 
   function switchRootView(view: "direct" | "etymological") {
     if (view === rootView) return;
     setRootView(view);
-    search(rootUrl(lastRootQ, lastStem, lastScope, view, 1, lastFavoritesOnly), true);
+    search(rootUrl(lastRootQ, lastStem, lastVerbForm, lastScope, view, 1, lastFavoritesOnly), true);
   }
 
   function handleEtymology(e: React.FormEvent, p = 1) {
@@ -405,7 +419,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
       {tab === "root" && (
         <div>
           <p className="text-stone-500 text-sm mb-4">
-            הקלד שורש (ללא ניקוד) ו/או בחר בניין — אפשר להשתמש בשניהם יחד כדי לצמצם לתוצאות שהן גם מהשורש וגם מהבניין המבוקשים.
+            הקלד שורש (ללא ניקוד) ו/או בחר בניין וצורה — אפשר לשלב ביניהם כדי לצמצם לתוצאות שמתאימות לכל מה שנבחר.
           </p>
           <form onSubmit={handleRoot} className="flex gap-2 mb-4">
             <input
@@ -418,7 +432,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
             />
             <button
               type="submit"
-              disabled={(!rootQ.trim() && stem === "all") || loading}
+              disabled={(!rootQ.trim() && stem === "all" && verbForm === "all") || loading}
               className="bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
             >
               חפש
@@ -437,6 +451,23 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
                 }`}
               >
                 {b.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="text-stone-500 text-sm">צורה:</span>
+            {VERB_FORM_OPTIONS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setVerbForm(f.id)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  verbForm === f.id
+                    ? "bg-amber-700 text-white"
+                    : "bg-white border border-stone-200 text-stone-700 hover:border-amber-400"
+                }`}
+              >
+                {f.label}
               </button>
             ))}
           </div>

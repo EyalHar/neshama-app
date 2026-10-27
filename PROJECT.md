@@ -161,7 +161,7 @@ neshama-app/
 
 ### Verse Search
 - `GET /api/verses/substring?q=&scope=&whole=&page=` — Word/substring search (500/page)
-- `GET /api/verses/root?root=&stem=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) filter; `root` and `stem` are each optional but at least one is required (200/page)
+- `GET /api/verses/root?root=&stem=&form=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) and/or verb form filter (`form`: perfect, imperfect, imperative, participle, infinitive, infAbsolute — see `VERB_FORMS` in `lib/rootFamily.ts`); `root`, `stem` and `form` are each optional but at least one is required (200/page)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
 - `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
@@ -220,7 +220,7 @@ neshama-app/
 
 ### Advanced Search
 - **Basic / Substring** — Hebrew text search with pagination
-- **Root + Binyan Search** — Enter a Hebrew root and/or filter by verb stem (Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael); when both are set, results are intersected (word must match the root family *and* the chosen binyan). Root alone maps to a Strong's number and BFS-expands to the full family tree with a direct vs. etymological view toggle; binyan alone (no root) is a plain morph-code filter with no etymological view. Scope filter (All / Torah / Nevi'im / Ketuvim)
+- **Root + Binyan Search** — Enter a Hebrew root and/or filter by verb stem (Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael) and/or verb form (perfect, imperfect, imperative, participle, infinitive construct, infinitive absolute); when several are set, results are intersected (word must match the root family *and* the chosen binyan). Root alone maps to a Strong's number and BFS-expands to the full family tree with a direct vs. etymological view toggle; binyan alone (no root) is a plain morph-code filter with no etymological view. Scope filter (All / Torah / Nevi'im / Ketuvim)
 - **Letter Search** — Verses starting and/or ending with chosen Hebrew letters
 
 ### Neshama (Soul)
