@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
@@ -34,17 +34,35 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root" | "etymology" | "letters";
+type Tab = "basic" | "substring" | "root" | "etymology" | "mishkal" | "letters";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "basic", label: "חיפוש בסיסי" },
   { id: "substring", label: "חיפוש תת-מחרוזת" },
   { id: "root", label: "חיפוש לפי שורש ובניין" },
   { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
+  { id: "mishkal", label: "חיפוש לפי משקל" },
   { id: "letters", label: "אות ראשונה ואחרונה" },
 ];
 
 type EtymGroup = { key: string; label: string; rootLabel: string | null; definition: string; total: number };
+
+type MishkalOption = { mishkal: string; translit: string; gesenius: string; nouns: number; adjectives: number; tokens: number };
+type MishkalWord = { strongs: string; form: string; kind: "noun" | "adjective"; tokens: number; uncertainRoot: boolean };
+
+const MISHKAL_KINDS = [
+  { id: "all", label: "שמות עצם ותארים" },
+  { id: "noun", label: "שמות עצם" },
+  { id: "adjective", label: "שמות תואר" },
+];
+
+// Gesenius' sections, in his order, for grouping the mishkal picker
+const MISHKAL_SECTIONS = [
+  { prefix: "§84a", label: "§84a — משקלים פשוטים" },
+  { prefix: "§84b", label: "§84b — ע׳ הפועל כפולה" },
+  { prefix: "§85", label: "§85 — תחיליות וסיומות" },
+  { prefix: "§86", label: "§86 — סיומות של שמות מן השם" },
+];
 
 // Hebrew points/cantillation block — used to auto-toggle "חפש עם ניקוד מדויק" based on
 // whether the typed query itself contains nikud, so the user doesn't have to remember
@@ -113,6 +131,11 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [stem, setStem] = useState("all");
   const [verbForm, setVerbForm] = useState("all");
   const [wordQ, setWordQ] = useState("");
+  const [mishkalList, setMishkalList] = useState<MishkalOption[] | null>(null);
+  const [mishkalQ, setMishkalQ] = useState("");
+  const [mishkalKind, setMishkalKind] = useState("all");
+  const [mishkalRoot, setMishkalRoot] = useState("");
+  const [mishkalWords, setMishkalWords] = useState<MishkalWord[]>([]);
   const [results, setResults] = useState<Result[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [occurrences, setOccurrences] = useState<number | null>(null);
@@ -134,6 +157,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [lastStem, setLastStem] = useState("all");
   const [lastVerbForm, setLastVerbForm] = useState("all");
   const [lastWordQ, setLastWordQ] = useState("");
+  const [lastMishkal, setLastMishkal] = useState({ mishkal: "", kind: "all", root: "" });
   const abortRef = useRef<AbortController | null>(null);
 
   async function search(url: string, resetPage = true) {
@@ -142,6 +166,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     abortRef.current = controller;
     const isRoot = url.includes("/api/verses/root");
     const isEtymology = url.includes("/api/verses/etymology");
+    const isMishkal = url.includes("/api/verses/mishkal");
 
     if (resetPage) setPage(1);
     setLoading(true);
@@ -161,6 +186,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
       setPageSize(data.pageSize ?? 500);
       setRootDirectTotal(isRoot ? (data.directTotal ?? data.total ?? 0) : null);
       setRootEtymTotal(isRoot ? (data.etymologicalTotal ?? 0) : null);
+      setMishkalWords(isMishkal ? (data.words ?? []) : []);
       if (isEtymology) {
         setEtymGroups(data.groups ?? []);
         const active = data.activeGroup ?? null;
@@ -184,6 +210,14 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     abortRef.current?.abort();
   }
 
+  useEffect(() => {
+    if (tab !== "mishkal" || mishkalList) return;
+    fetch("/api/verses/mishkal")
+      .then((r) => r.json())
+      .then((d) => setMishkalList(d.mishkalim ?? []))
+      .catch(() => setMishkalList([]));
+  }, [tab, mishkalList]);
+
   function favParam(fav: boolean) {
     return fav ? "&favoritesOnly=1" : "";
   }
@@ -199,6 +233,14 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     if (formValue && formValue !== "all") params.set("form", formValue);
     if (fav) params.set("favoritesOnly", "1");
     return `/api/verses/root?${params.toString()}`;
+  }
+
+  function mishkalUrl(m: typeof lastMishkal, scopeValue: string, p: number, fav: boolean) {
+    const params = new URLSearchParams({ mishkal: m.mishkal, scope: scopeValue, page: String(p) });
+    if (m.kind !== "all") params.set("kind", m.kind);
+    if (m.root) params.set("root", m.root);
+    if (fav) params.set("favoritesOnly", "1");
+    return `/api/verses/mishkal?${params.toString()}`;
   }
 
   function etymologyUrl(wordValue: string, scopeValue: string, groupKey: string | null, p: number, fav: boolean) {
@@ -240,6 +282,8 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
       search(rootUrl(lastRootQ, lastStem, lastVerbForm, lastScope, rootView, p, lastFavoritesOnly), false);
     } else if (tab === "etymology") {
       search(etymologyUrl(lastWordQ, lastScope, lastActiveGroupKey, p, lastFavoritesOnly), false);
+    } else if (tab === "mishkal") {
+      search(mishkalUrl(lastMishkal, lastScope, p, lastFavoritesOnly), false);
     }
   }
 
@@ -271,6 +315,17 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     setLastFavoritesOnly(favoritesOnly);
     setPage(p);
     search(etymologyUrl(wordQ.trim(), scope, null, p, favoritesOnly), p === 1);
+  }
+
+  function handleMishkal(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mishkalQ) return;
+    const m = { mishkal: mishkalQ, kind: mishkalKind, root: mishkalRoot.trim() };
+    setLastMishkal(m);
+    setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
+    setPage(1);
+    search(mishkalUrl(m, scope, 1, favoritesOnly), true);
   }
 
   function switchGroup(key: string) {
@@ -500,6 +555,71 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
         </div>
       )}
 
+      {/* Mishkal (noun/adjective pattern) */}
+      {tab === "mishkal" && (
+        <div>
+          <p className="text-stone-500 text-sm mb-4">
+            בחר משקל ותקבל את כל הפסוקים שיש בהם שם עצם או שם תואר במשקל הזה. אפשר לצמצם לשמות עצם או לתארים בלבד, ולשורש מסוים.
+          </p>
+          <form onSubmit={handleMishkal} className="space-y-3 mb-4">
+            <div className="flex gap-2">
+              <select
+                value={mishkalQ}
+                onChange={(e) => setMishkalQ(e.target.value)}
+                disabled={!mishkalList}
+                className="flex-1 min-w-0 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 bg-white focus:outline-none focus:ring-2 focus:ring-amber-400"
+              >
+                <option value="">{mishkalList ? "בחר משקל…" : "טוען משקלים…"}</option>
+                {MISHKAL_SECTIONS.map((section) => (
+                  <optgroup key={section.prefix} label={section.label}>
+                    {(mishkalList ?? [])
+                      .filter((m) => m.gesenius.startsWith(section.prefix))
+                      .map((m) => (
+                        <option key={m.mishkal} value={m.mishkal}>
+                          {m.mishkal} · {m.translit} · {(m.nouns + m.adjectives).toLocaleString()} מילים
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+              <button
+                type="submit"
+                disabled={!mishkalQ || loading}
+                className="bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
+              >
+                חפש
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {MISHKAL_KINDS.map((k) => (
+                <button
+                  key={k.id}
+                  type="button"
+                  onClick={() => setMishkalKind(k.id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    mishkalKind === k.id
+                      ? "bg-amber-700 text-white"
+                      : "bg-white border border-stone-200 text-stone-700 hover:border-amber-400"
+                  }`}
+                >
+                  {k.label}
+                </button>
+              ))}
+              <input
+                type="text"
+                value={mishkalRoot}
+                onChange={(e) => setMishkalRoot(e.target.value)}
+                placeholder="שורש (אופציונלי), למשל שפט"
+                className="w-56 max-w-full border border-stone-300 rounded-lg px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
+              />
+            </div>
+          </form>
+          <p className="text-stone-400 text-xs mb-4">
+            הסיווג אוטומטי, לפי הדקדוק של גזניוס (§84–86), ומכסה כ־68% משמות העצם וכ־62% משמות התואר בתנ״ך.
+          </p>
+        </div>
+      )}
+
       {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center gap-3 py-10">
@@ -520,7 +640,11 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
       {/* Results */}
       {!loading && searched && (
         isEmpty ? (
-          <NotSeeded />
+          tab === "mishkal" ? (
+            <p className="text-stone-500 text-center py-6">לא נמצאו מילים במשקל הזה בסינון שנבחר</p>
+          ) : (
+            <NotSeeded />
+          )
         ) : (
           <>
             {/* Sub-tabs: direct vs. etymologically-related results (root search only) */}
@@ -566,6 +690,31 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
                     <span className="opacity-75"> · {g.total.toLocaleString()}</span>
                   </button>
                 ))}
+              </div>
+            )}
+
+            {tab === "mishkal" && mishkalWords.length > 0 && (
+              <div className="bg-white border border-stone-200 rounded-xl p-4 mb-4">
+                <p className="text-stone-600 text-sm font-medium mb-2">
+                  {mishkalWords.length.toLocaleString()} מילים במשקל {lastMishkal.mishkal}
+                </p>
+                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+                  {mishkalWords.map((w) => (
+                    <span
+                      key={w.strongs}
+                      title={w.uncertainRoot ? "השורש משוער, ולכן הסיווג פחות ודאי" : undefined}
+                      className={`text-sm rounded-lg px-2 py-0.5 ${
+                        w.uncertainRoot ? "bg-stone-50 text-stone-500 border border-dashed border-stone-300" : "bg-amber-50 text-stone-700"
+                      }`}
+                    >
+                      {w.form}
+                      <span className="text-xs text-stone-400 ms-1">{w.tokens}</span>
+                    </span>
+                  ))}
+                </div>
+                {mishkalWords.some((w) => w.uncertainRoot) && (
+                  <p className="text-stone-400 text-xs mt-2">מילים במסגרת מקווקוות: השורש שלהן משוער, ולכן הסיווג פחות ודאי.</p>
+                )}
               </div>
             )}
 

@@ -72,6 +72,9 @@ The reader (`app/tanakh/page.tsx`) shows a *passage*: either a chapter or, in di
 
 Chapter completion stays chapter-based: the client sends each verse's own chapter length (`chapterVerseCounts`) with `POST /api/tanakh`, and `completeRange` completes every chapter the range covers to its end. Parasha and parashiya completion are detected client-side from the read set. Division data is static (`lib/parashot.json`, `lib/parashiyot.json`, built once from Sefaria); `lib/divisions.ts` clips parashiyot to a range (a parasha can start mid-parashiya — Vayechi).
 
+### Mishkal search: snapshot files, built by scripts
+The "חיפוש לפי משקל" tab (`/api/verses/mishkal`, `lib/mishkal.ts`) reads `data/noun-patterns/noun-patterns.json` and `noun-adjective-patterns-extended.json`. They are one-time snapshots built by `node scripts/build-noun-patterns.mjs` and then `node scripts/build-noun-patterns-extended.mjs` (shared code in `scripts/lib/mishkal.mjs`), classifying nouns and adjectives by Gesenius §84–86. The second file only adds words the first leaves without a mishkal, so they never overlap. `lib/mishkal.ts` caches both files and the matching `WordEntry` rows per server process: restart the server after regenerating.
+
 ### Leitwords: OSHB words matched onto Sefaria text
 `lib/leitwords.ts` (`getPassageLeitwords()`) scores a passage's content words (nouns/verbs/adjectives, no proper names, minus a small `STOPLIST` of very general words) against Tanakh-wide frequency with log-likelihood (G²), merging a word into its single `derivedFrom` parent when both appear in the passage. It also scores each parashiya of at least `MIN_SECTION_VERSES` (4) verses — below that, measured over the Torah, results are mostly list structure rather than leitwords.
 

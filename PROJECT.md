@@ -43,6 +43,7 @@ neshama-app/
 │   │   │   ├── etymology/      ← Word-family (etymological) search
 │   │   │   ├── letters/        ← Search by first/last letter
 │   │   │   ├── root/           ← Search by Hebrew root and/or verb stem (+ etymological)
+│   │   │   ├── mishkal/        ← Nouns/adjectives by mishkal (Gesenius), from data/noun-patterns
 │   │   │   └── substring/      ← Substring / basic word search
 │   │   └── admin/
 │   │       ├── seed-oshb/      ← Seed morphology data
@@ -162,6 +163,7 @@ neshama-app/
 ### Verse Search
 - `GET /api/verses/substring?q=&scope=&whole=&page=` — Word/substring search (500/page)
 - `GET /api/verses/root?root=&stem=&form=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) and/or verb form filter (`form`: perfect, imperfect, imperative, participle, infinitive, infAbsolute — see `VERB_FORMS` in `lib/rootFamily.ts`); `root`, `stem` and `form` are each optional but at least one is required (200/page)
+- `GET /api/verses/mishkal?mishkal=&kind=noun|adjective&root=&scope=&page=` — Verses containing nouns/adjectives of a mishkal (per Gesenius §84–86), from the `data/noun-patterns/` snapshots; without `mishkal`, the list of mishkalim with counts (200/page)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
 - `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
