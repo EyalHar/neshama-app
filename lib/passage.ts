@@ -21,6 +21,7 @@ export type PassageResponse = {
   completedBooks: string[];
   partialBooks: string[];
   favoriteChapters: number[];
+  favoriteParashiyot: string[]; // "chapter:verse" each starts on
   notes: import("./notes").VerseNoteItem[];
 };
 

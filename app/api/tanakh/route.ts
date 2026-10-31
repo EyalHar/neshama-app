@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
     const partialBooks: string[] = [];
     let favoriteVerses: string[] = [];
     let favoriteChapters: number[] = [];
+    let favoriteParashiyot: string[] = [];
     let notes: VerseNoteItem[] = [];
 
     if (session?.user?.email) {
@@ -130,12 +131,19 @@ export async function GET(request: NextRequest) {
           select: { chapter: true },
         });
         favoriteChapters = favChapters.map((c) => c.chapter);
+
+        // Favorite parashiyot for this book, as the "chapter:verse" each starts on
+        const favParashiyot = await prisma.favoriteParashiya.findMany({
+          where: { userId: user.id, book },
+          select: { chapter: true, verse: true },
+        });
+        favoriteParashiyot = favParashiyot.map((p) => refKey(p.chapter, p.verse));
       }
     }
 
     return NextResponse.json({
       verses, chapterVerseCounts, specialLetters, leitwords: leit.passage, sections,
-      readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, notes,
+      readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, favoriteParashiyot, notes,
     });
   } catch {
     return NextResponse.json({ error: "Failed to fetch passage" }, { status: 500 });

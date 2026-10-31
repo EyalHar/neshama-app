@@ -20,6 +20,7 @@ model User {
   completedChapters CompletedChapter[]
   favoriteVerses    FavoriteVerse[]
   favoriteChapters  FavoriteChapter[]
+  favoriteParashiyot FavoriteParashiya[]
   favoriteLists     FavoriteList[]
   verseNotes        VerseNote[]
   shares            Share[]
@@ -246,4 +247,17 @@ model FavoriteChapter {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, book, chapter])
+}
+
+// A favorite parashiya (open/closed section), keyed by the verse it starts on (lib/parashiyot.json)
+model FavoriteParashiya {
+  id        String   @id @default(cuid())
+  userId    String
+  book      String
+  chapter   Int
+  verse     Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, book, chapter, verse])
 }

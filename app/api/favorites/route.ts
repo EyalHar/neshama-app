@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/favorites";
 import { NOTE_INCLUDE, toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { TANAKH_BOOKS, fetchChapter } from "@/lib/tanakh";
+import { getParashiyaAt } from "@/lib/divisions";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
@@ -10,14 +11,15 @@ function bookHe(id: string): string {
   return TANAKH_BOOKS.find((b) => b.id === id)?.he ?? id;
 }
 
-// GET /api/favorites — all of the current user's favorite chapters and verses,
+// GET /api/favorites — all of the current user's favorite chapters, parashiyot and verses,
 // with verse text fetched live from Sefaria (nikud + ta'amim intact).
 export async function GET() {
   const userId = await getCurrentUserId();
-  if (!userId) return NextResponse.json({ chapters: [], verses: [], lists: [] });
+  if (!userId) return NextResponse.json({ chapters: [], parashiyot: [], verses: [], lists: [] });
 
-  const [favChapters, favVerses, noteRows, lists] = await Promise.all([
+  const [favChapters, favParashiyot, favVerses, noteRows, lists] = await Promise.all([
     prisma.favoriteChapter.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
+    prisma.favoriteParashiya.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     prisma.favoriteVerse.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     prisma.verseNote.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, include: NOTE_INCLUDE }),
     prisma.favoriteList.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, select: { id: true, name: true } }),
@@ -32,6 +34,13 @@ export async function GET() {
   const chapters = favChapters
     .map((c) => ({ book: c.book, bookHe: bookHe(c.book), chapter: c.chapter }))
     .sort((a, b) => (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999) || a.chapter - b.chapter);
+
+  const parashiyot = favParashiyot
+    .flatMap((p) => {
+      const found = getParashiyaAt(p.book, [p.chapter, p.verse]);
+      return found ? [{ book: p.book, bookHe: bookHe(p.book), start: found.start, end: found.end, title: found.title }] : [];
+    })
+    .sort((a, b) => (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999) || a.start[0] - b.start[0] || a.start[1] - b.start[1]);
 
   // Fetch each distinct (book, chapter) once from Sefaria, then pick out the favorited verses.
   const uniqueChapterKeys = [...new Set(favVerses.map((v) => `${v.book}|${v.chapter}`))];
@@ -63,5 +72,5 @@ export async function GET() {
     })
     .sort((a, b) => (bookOrder[a.book] ?? 999) - (bookOrder[b.book] ?? 999) || a.chapter - b.chapter || a.verse - b.verse);
 
-  return NextResponse.json({ chapters, verses, lists });
+  return NextResponse.json({ chapters, parashiyot, verses, lists });
 }

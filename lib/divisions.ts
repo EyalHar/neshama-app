@@ -9,8 +9,8 @@ import parashiyotData from "./parashiyot.json";
 export type VerseRef = [number, number]; // [chapter, verse]
 
 // `clipped`: the range cut into this parashiya, so `title` (its original first words) doesn't
-// match its first verse here
-export type Parashiya = { start: VerseRef; end: VerseRef; type: "פ" | "ס" | ""; title: string; clipped?: boolean };
+// match its first verse here. `origin` is its unclipped first verse, which identifies it.
+export type Parashiya = { start: VerseRef; end: VerseRef; origin: VerseRef; type: "פ" | "ס" | ""; title: string; clipped?: boolean };
 
 // A reading unit in division mode: a parasha (Torah) or a parashiya (Nevi'im/Ketuvim)
 export type DivisionUnit = { id: string; label: string; title: string; start: VerseRef; end: VerseRef };
@@ -37,7 +37,13 @@ export function divisionKind(book: string): DivisionKind | null {
   return PARASHOT.some((p) => p.book === book) ? "parashot" : PARASHIYOT[book] ? "parashiyot" : null;
 }
 
-const toParashiya = (r: ParashiyaRow): Parashiya => ({ start: [r[0], r[1]], end: [r[2], r[3]], type: r[4], title: r[5] });
+const toParashiya = (r: ParashiyaRow): Parashiya => ({ start: [r[0], r[1]], end: [r[2], r[3]], origin: [r[0], r[1]], type: r[4], title: r[5] });
+
+// The parashiya starting at `start`, or undefined if none does
+export function getParashiyaAt(book: string, start: VerseRef): Parashiya | undefined {
+  const row = PARASHIYOT[book]?.find((r) => r[0] === start[0] && r[1] === start[1]);
+  return row && toParashiya(row);
+}
 
 export function getUnits(book: string): DivisionUnit[] {
   const kind = divisionKind(book);

@@ -86,6 +86,7 @@ export default function TanakhPage() {
   const [partialBooks, setPartialBooks] = useState<Set<string>>(new Set());
   const [favoriteVerses, setFavoriteVerses] = useState<Set<string>>(new Set());
   const [favoriteChapters, setFavoriteChapters] = useState<Set<number>>(new Set());
+  const [favoriteParashiyot, setFavoriteParashiyot] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState<VerseNoteItem[]>([]);
   const [openNotesVerse, setOpenNotesVerse] = useState<string | null>(null);
   const [openCommentaryVerse, setOpenCommentaryVerse] = useState<string | null>(null);
@@ -204,6 +205,7 @@ export default function TanakhPage() {
       setPartialBooks(new Set(data.partialBooks ?? []));
       setFavoriteVerses(new Set(data.favoriteVerses ?? []));
       setFavoriteChapters(new Set(data.favoriteChapters ?? []));
+      setFavoriteParashiyot(new Set(data.favoriteParashiyot ?? []));
       setNotes(data.notes ?? []);
     } finally {
       setLoading(false);
@@ -511,6 +513,38 @@ export default function TanakhPage() {
     } catch {
       flip(wasFav);
     }
+  }
+
+  async function toggleParashiyaFavorite(origin: VerseRef) {
+    if (!session) return;
+    const k = key(origin[0], origin[1]);
+    const wasFav = favoriteParashiyot.has(k);
+    const flip = (on: boolean) => setFavoriteParashiyot((prev) => { const s = new Set(prev); if (on) s.add(k); else s.delete(k); return s; });
+    flip(!wasFav);
+    try {
+      await fetch("/api/favorites/parashiya", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ book: selectedBook.id, chapter: origin[0], verse: origin[1] }),
+      });
+    } catch {
+      flip(wasFav);
+    }
+  }
+
+  function parashiyaHeart(origin: VerseRef, size: number) {
+    const fav = favoriteParashiyot.has(key(origin[0], origin[1]));
+    return (
+      <button
+        type="button"
+        onClick={() => toggleParashiyaFavorite(origin)}
+        title={fav ? "הסר פרשייה מהאהובות ביותר" : "הוסף פרשייה לאהובות ביותר"}
+        aria-pressed={fav}
+        className="shrink-0 p-1 rounded-full hover:bg-red-50 transition-colors"
+      >
+        <HeartIcon filled={fav} size={size} />
+      </button>
+    );
   }
 
   // ── Render helpers ─────────────────────────────────────────────────────────────────
@@ -861,6 +895,7 @@ export default function TanakhPage() {
                 <HeartIcon filled={favoriteChapters.has(selectedChapter)} size={22} />
               </button>
             )}
+            {session && kind === "parashiyot" && sections[0] && parashiyaHeart(sections[0].origin, 22)}
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
             {!isBookComplete && (unitMode ? passageComplete : completedChapters.has(selectedChapter)) && (
               <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ ה{unitName} {unitName === "פרק" ? "הושלם" : "הושלמה"}</span>
@@ -938,17 +973,20 @@ export default function TanakhPage() {
                       </svg>
                     </button>
                     <div className="flex-1 min-w-0 space-y-1.5 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSection(selected ? null : si)}
-                        aria-pressed={selected}
-                        title={selected ? "בטל סימון פרשייה" : "סמן פרשייה, כדי לראות את גבולותיה"}
-                        className={`text-right text-xs transition-colors ${selected ? "text-stone-700 font-medium" : "text-stone-400 hover:text-stone-600"}`}
-                      >
-                        פרשייה ״{s.title}״ · {refLabel(s.start)}–{refLabel(s.end)} ({verseCountLabel(keys.length)}
-                        {session && readInSection > 0 && !done && ` · נקראו ${readInSection}`})
-                        {done && <span className="mr-1.5 text-green-600">✓</span>}
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSection(selected ? null : si)}
+                          aria-pressed={selected}
+                          title={selected ? "בטל סימון פרשייה" : "סמן פרשייה, כדי לראות את גבולותיה"}
+                          className={`text-right text-xs transition-colors ${selected ? "text-stone-700 font-medium" : "text-stone-400 hover:text-stone-600"}`}
+                        >
+                          פרשייה ״{s.title}״ · {refLabel(s.start)}–{refLabel(s.end)} ({verseCountLabel(keys.length)}
+                          {session && readInSection > 0 && !done && ` · נקראו ${readInSection}`})
+                          {done && <span className="mr-1.5 text-green-600">✓</span>}
+                        </button>
+                        {session && parashiyaHeart(s.origin, 15)}
+                      </div>
                       {!collapsed && s.leitwords && (
                         <LeitwordChips
                           leitwords={s.leitwords}

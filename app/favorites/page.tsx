@@ -4,6 +4,7 @@ import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
+import type { VerseRef } from "@/lib/divisions";
 import HeartIcon from "@/app/components/HeartIcon";
 import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
@@ -13,15 +14,18 @@ import BookGroups from "./BookGroups";
 import MoveMenu from "./MoveMenu";
 
 type FavoriteChapterItem = { book: string; bookHe: string; chapter: number };
+type FavoriteParashiyaItem = { book: string; bookHe: string; start: VerseRef; end: VerseRef; title: string };
 type FavoriteVerseItem = {
   book: string; bookHe: string; chapter: number; verse: number; text: string;
   notes: VerseNoteItem[]; listId: string | null;
 };
 
 const verseKey = (v: { book: string; chapter: number; verse: number }) => `${v.book}-${v.chapter}-${v.verse}`;
+const parashiyaKey = (p: FavoriteParashiyaItem) => `${p.book}-${p.start.join(":")}`;
+const refLabel = (r: VerseRef) => `${toHebrewNumeral(r[0])}:${toHebrewNumeral(r[1])}`;
 
-// "verses" = general tab (verses in no list), "chapters", or the id of a named list
-type FavTab = "verses" | "chapters" | string;
+// "verses" = general tab (verses in no list), "chapters", "parashiyot", or the id of a named list
+type FavTab = "verses" | "chapters" | "parashiyot" | string;
 
 async function sendJson(url: string, method: string, body?: object) {
   const res = await fetch(url, {
@@ -35,6 +39,7 @@ async function sendJson(url: string, method: string, body?: object) {
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
   const [chapters, setChapters] = useState<FavoriteChapterItem[]>([]);
+  const [parashiyot, setParashiyot] = useState<FavoriteParashiyaItem[]>([]);
   const [verses, setVerses] = useState<FavoriteVerseItem[]>([]);
   const [lists, setLists] = useState<FavoriteListItem[]>([]);
   const [fetching, setFetching] = useState(false);
@@ -52,6 +57,7 @@ export default function FavoritesPage() {
       .then((r) => r.json())
       .then((d) => {
         setChapters(d.chapters ?? []);
+        setParashiyot(d.parashiyot ?? []);
         setVerses(d.verses ?? []);
         setLists(d.lists ?? []);
       })
@@ -61,6 +67,11 @@ export default function FavoritesPage() {
   async function removeChapter(item: FavoriteChapterItem) {
     setChapters((prev) => prev.filter((c) => !(c.book === item.book && c.chapter === item.chapter)));
     await sendJson("/api/favorites/chapter", "POST", { book: item.book, chapter: item.chapter });
+  }
+
+  async function removeParashiya(item: FavoriteParashiyaItem) {
+    setParashiyot((prev) => prev.filter((p) => parashiyaKey(p) !== parashiyaKey(item)));
+    await sendJson("/api/favorites/parashiya", "POST", { book: item.book, chapter: item.start[0], verse: item.start[1] });
   }
 
   function patchVerse(item: FavoriteVerseItem, patch: Partial<FavoriteVerseItem>) {
@@ -124,7 +135,8 @@ export default function FavoritesPage() {
     });
   }
 
-  const tabVerses = tab === "chapters" ? [] : verses.filter((v) => (tab === "verses" ? v.listId === null : v.listId === tab));
+  const isVerseTab = tab !== "chapters" && tab !== "parashiyot";
+  const tabVerses = !isVerseTab ? [] : verses.filter((v) => (tab === "verses" ? v.listId === null : v.listId === tab));
   const tabBooks = [...new Set(tabVerses.map((v) => v.book))];
   const collapsedInTab = new Set([...collapsed].filter((k) => k.startsWith(`${tab}|`)).map((k) => k.slice(tab.length + 1)));
   const allCollapsed = tabBooks.length > 0 && tabBooks.every((b) => collapsedInTab.has(b));
@@ -142,6 +154,7 @@ export default function FavoritesPage() {
     { id: "verses", label: "הפסוקים האהובים ביותר", count: verses.filter((v) => v.listId === null).length },
     ...lists.map((l) => ({ id: l.id, label: l.name, count: verses.filter((v) => v.listId === l.id).length })),
     { id: "chapters", label: "הפרקים האהובים ביותר", count: chapters.length },
+    { id: "parashiyot", label: "הפרשיות האהובות ביותר", count: parashiyot.length },
   ];
 
   function renderVerse(v: FavoriteVerseItem) {
@@ -219,7 +232,7 @@ export default function FavoritesPage() {
         <HeartIcon filled size={24} />
         <h1 className="text-2xl font-bold text-stone-800">האהובים עליי ביותר</h1>
       </div>
-      <p className="text-stone-400 text-sm mb-6">פרקים ופסוקים ששמרת — כל האהובים ביותר שלך במקום אחד</p>
+      <p className="text-stone-400 text-sm mb-6">פרקים, פרשיות ופסוקים ששמרת — כל האהובים ביותר שלך במקום אחד</p>
 
       {status !== "loading" && !session && (
         <div className="bg-white border border-stone-200 rounded-2xl p-8 text-center">
@@ -294,8 +307,55 @@ export default function FavoritesPage() {
             </section>
           )}
 
+          {/* Favorite parashiyot */}
+          {tab === "parashiyot" && (
+            <section>
+              {parashiyot.length === 0 ? (
+                <p className="text-stone-400 text-sm">
+                  עדיין לא סימנת פרשיות כאהובות ביותר — בדף{" "}
+                  <Link href="/tanakh" className="text-amber-600 hover:underline">קריאת תנ״ך</Link>, במצב קריאה לפי פרשות/פרשיות, לחץ על סמל הלב ליד הפרשייה.
+                </p>
+              ) : (
+                <BookGroups
+                  items={parashiyot}
+                  collapsed={collapsedInTab}
+                  onToggle={toggleBook}
+                  render={(p) => (
+                    <div
+                      key={parashiyaKey(p)}
+                      className="flex items-center justify-between gap-3 bg-white rounded-2xl border border-stone-200 px-4 py-3 shadow-sm"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium text-stone-700 truncate">״{p.title}״</p>
+                        <p className="text-xs text-stone-400 mt-0.5">
+                          {refLabel(p.start)}–{refLabel(p.end)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Link
+                          href={`/tanakh?book=${encodeURIComponent(p.book)}&chapter=${p.start[0]}&verse=${p.start[1]}`}
+                          className="text-xs text-amber-700 hover:text-amber-900 border border-amber-300 hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                        >
+                          קרא ←
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => removeParashiya(p)}
+                          title="הסר מהאהובות ביותר"
+                          className="p-1 rounded-full hover:bg-red-50 transition-colors"
+                        >
+                          <HeartIcon filled size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                />
+              )}
+            </section>
+          )}
+
           {/* Favorite verses — general tab or a named list */}
-          {tab !== "chapters" && (
+          {isVerseTab && (
             <section>
               <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
                 {activeList && renaming === activeList.id ? (

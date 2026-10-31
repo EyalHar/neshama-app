@@ -137,6 +137,7 @@ neshama-app/
 | `CompletedChapter` | Entire chapters marked complete (userId, book, chapter) |
 | `FavoriteVerse` | Verses marked favorite (userId, book, chapter, verse, optional `listId` → FavoriteList, SetNull on delete) |
 | `FavoriteChapter` | Chapters marked favorite (userId, book, chapter) |
+| `FavoriteParashiya` | Parashiyot marked favorite, keyed by their first verse (userId, book, chapter, verse) |
 | `FavoriteList` | Named sub-list of favorite verses, shown as its own tab (userId, name unique per user) |
 | `VerseNote` | Personal notes on a verse (userId, book, chapter, verse, text); every noted verse is also a favorite |
 | `Share` | A published item on /community (userId, type="note", noteId → VerseNote, cascade) |
@@ -169,9 +170,10 @@ neshama-app/
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
 
 ### Favorites
-- `GET /api/favorites` — All favorite chapters and verses (verse text live from Sefaria)
+- `GET /api/favorites` — All favorite chapters, parashiyot and verses (verse text live from Sefaria)
 - `POST /api/favorites/verse` — Toggle a favorite verse (unfavoriting also deletes its notes)
 - `POST /api/favorites/chapter` — Toggle a favorite chapter
+- `POST /api/favorites/parashiya` — Toggle a favorite parashiya `{ book, chapter, verse }` (its first verse)
 - `POST /api/favorites/lists` — Create a named list `{ name }` (409 if the name exists)
 - `PATCH` / `DELETE /api/favorites/lists/[id]` — Rename / delete a list (its verses return to the general tab)
 - `PATCH /api/favorites/verse/list` — Move a favorite verse into a list `{ book, chapter, verse, listId | null }`
