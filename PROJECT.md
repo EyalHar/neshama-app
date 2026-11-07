@@ -43,6 +43,7 @@ neshama-app/
 │   │   │   ├── etymology/      ← Word-family (etymological) search
 │   │   │   ├── letters/        ← Search by first/last letter
 │   │   │   ├── root/           ← Search by Hebrew root and/or verb stem (+ etymological)
+│   │   │   ├── roots/          ← Verb roots matching a letter pattern (roots-by-letters tab)
 │   │   │   ├── mishkal/        ← Nouns/adjectives by mishkal (Gesenius), from data/noun-patterns
 │   │   │   └── substring/      ← Substring / basic word search
 │   │   └── admin/
@@ -158,6 +159,7 @@ neshama-app/
 - `POST /api/tanakh` — Toggle single verse read
 - `POST /api/tanakh/bulk` — Mark/clear a chapter, or a verse range (`completeRange` / `clearRange`)
 - `GET /api/tanakh/units?book=` — Parashot (Torah) or parashiyot (other books) for division mode
+- `GET /api/tanakh/weekly` — This week's parasha and haftarah (Israel), from Sefaria's calendar
 - `DELETE /api/tanakh/reset` — Reset all user progress
 - `GET /api/tanakh/stats` — Total completed chapters count
 
@@ -165,6 +167,7 @@ neshama-app/
 - `GET /api/verses/substring?q=&scope=&whole=&page=` — Word/substring search (500/page)
 - `GET /api/verses/root?root=&stem=&form=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) and/or verb form filter (`form`: perfect, imperfect, imperative, participle, infinitive, infAbsolute — see `VERB_FORMS` in `lib/rootFamily.ts`); `root`, `stem` and `form` are each optional but at least one is required (200/page)
 - `GET /api/verses/mishkal?mishkal=&kind=noun|adjective&root=&scope=&page=` — Verses containing nouns/adjectives of a mishkal (per Gesenius §84–86), from the `data/noun-patterns/` snapshots; without `mishkal`, the list of mishkalim with counts (200/page)
+- `GET /api/verses/roots?l1=&l2=&l3=&scope=` — Verb roots whose 1st/2nd/3rd letters match (empty = any; at least one required), with occurrence counts in the scope
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
 - `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
@@ -225,7 +228,8 @@ neshama-app/
 ### Advanced Search
 - **Basic / Substring** — Hebrew text search with pagination
 - **Root + Binyan Search** — Enter a Hebrew root and/or filter by verb stem (Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael) and/or verb form (perfect, imperfect, imperative, participle, infinitive construct, infinitive absolute); when several are set, results are intersected (word must match the root family *and* the chosen binyan). Root alone maps to a Strong's number and BFS-expands to the full family tree with a direct vs. etymological view toggle; binyan alone (no root) is a plain morph-code filter with no etymological view. Scope filter (All / Torah / Nevi'im / Ketuvim)
-- **Letter Search** — Verses starting and/or ending with chosen Hebrew letters
+- **Roots by Letters** — Three letter selectors (one per root position, each "any" or one of 22 letters) list every matching verb root with its count in the chosen scope; clicking a root runs the root search
+- **First/Last Letter in Verse** — Verses starting and/or ending with chosen Hebrew letters
 
 ### Neshama (Soul)
 - User writes their emotional state and optional wish in Hebrew

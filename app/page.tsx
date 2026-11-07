@@ -28,7 +28,7 @@ const FEATURES = [
   },
   {
     href: "/advanced?tab=letters",
-    title: "אות ראשונה ואחרונה",
+    title: "אות ראשונה ואחרונה בפסוק",
     description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",
     icon: "א",
     color: "from-violet-50 to-purple-50 border-violet-200 hover:border-violet-400",

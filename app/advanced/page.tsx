@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import LetterSearch from "./LetterSearch";
+import RootLetters from "./RootLetters";
 
 const BINYANIM = [
   { id: "all", label: "כל הבניינים" },
@@ -34,15 +35,16 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root" | "etymology" | "mishkal" | "letters";
+type Tab = "basic" | "substring" | "root" | "rootLetters" | "etymology" | "mishkal" | "letters";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "basic", label: "חיפוש בסיסי" },
   { id: "substring", label: "חיפוש תת-מחרוזת" },
   { id: "root", label: "חיפוש לפי שורש ובניין" },
+  { id: "rootLetters", label: "שורשים לפי אותיות" },
   { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
   { id: "mishkal", label: "חיפוש לפי משקל" },
-  { id: "letters", label: "אות ראשונה ואחרונה" },
+  { id: "letters", label: "אות ראשונה ואחרונה בפסוק" },
 ];
 
 type EtymGroup = { key: string; label: string; rootLabel: string | null; definition: string; total: number };
@@ -301,6 +303,22 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     search(rootUrl(rootQ.trim(), stem, verbForm, scope, "direct", p, favoritesOnly), p === 1);
   }
 
+  // From the roots-by-letters tab: run the regular root search for the picked root
+  function pickRoot(root: string) {
+    setTab("root");
+    setRootQ(root);
+    setStem("all");
+    setVerbForm("all");
+    setLastRootQ(root);
+    setLastStem("all");
+    setLastVerbForm("all");
+    setLastScope(scope);
+    setLastFavoritesOnly(favoritesOnly);
+    setRootView("direct");
+    setPage(1);
+    search(rootUrl(root, "all", "all", scope, "direct", 1, favoritesOnly), true);
+  }
+
   function switchRootView(view: "direct" | "etymological") {
     if (view === rootView) return;
     setRootView(view);
@@ -380,7 +398,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
           </button>
         ))}
 
-        {session && (
+        {session && tab !== "rootLetters" && (
           <label className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -405,6 +423,9 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
           </label>
         )}
       </div>
+
+      {/* Roots by letters — lists roots, not verses; picking one switches to the root tab */}
+      {tab === "rootLetters" && <RootLetters scope={scope} onPick={pickRoot} />}
 
       {/* Basic */}
       {tab === "basic" && (

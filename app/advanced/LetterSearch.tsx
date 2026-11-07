@@ -29,7 +29,7 @@ function LetterPicker({ label, value, onChange }: { label: string; value: string
   );
 }
 
-// "אות ראשונה ואחרונה" tab of /advanced — verses that start and end with chosen letters
+// "אות ראשונה ואחרונה בפסוק" tab of /advanced — verses that start and end with chosen letters
 export default function LetterSearch() {
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");

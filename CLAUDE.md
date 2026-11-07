@@ -83,6 +83,9 @@ The "חיפוש לפי משקל" tab (`/api/verses/mishkal`, `lib/mishkal.ts`) r
 
 Tanakh-wide counts per Strong's number (`getCorpusCounts()`, one `GROUP BY lemma, morph` query) and the grammar quiz's verb pool (`lib/grammarQuiz.ts`) are cached in module-level promises for the life of the server process. They only change on re-seed, so restart the server after seeding.
 
+### Roots by letters
+`lib/rootLetters.ts` builds the list of three-letter verb roots (Strong's lemma of Hebrew verbs, finals normalized, homonyms merged) with per-section counts in one cached `GROUP BY` — restart the server after seeding. Strong's files the imperfect of הלך under a separate lemma יָלַךְ (H3212); `MERGE_INTO` folds it into הלך (H1980). The client imports constants/types only from `lib/rootLetterPattern.ts`, since `lib/rootLetters.ts` pulls in Prisma.
+
 ### Grammar quiz: word position via VerseText
 The quiz shows the verse from `VerseText.text` (not Sefaria) because its words are exactly the OSHB words joined by single spaces, so `text.split(" ")[wordNum - 1]` is the asked word (verified on 400 random verses). Keep that invariant in the seeder. The quiz has no LLM: answers come straight from `morph`/`StrongsEntry`. Difficulty = root frequency bands plus, for root questions, how similar the same-length distractor roots look.
 
