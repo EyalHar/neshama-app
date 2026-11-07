@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
   { href: "/community", label: "שיתופים", icon: "💬" },
   { href: "/favorites", label: "האהובים עליי ביותר", icon: "♥" },
+  { href: "/notebook", label: "המחברת שלי", icon: "📝" },
   { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
   { href: "/neshama", label: "נשמה", icon: "🕊" },
 ];
@@ -72,7 +73,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between bg-stone-900 text-amber-100 px-4 py-3" dir="rtl">
+      <div className="md:hidden print:hidden flex items-center justify-between bg-stone-900 text-amber-100 px-4 py-3" dir="rtl">
         <Link href="/" onClick={() => setOpen(false)} className="flame-title font-bold text-lg">
           שַׁלְהֶבֶתְ יָֽה
         </Link>
@@ -85,7 +86,7 @@ export default function Sidebar() {
       <aside
         dir="rtl"
         className={`
-          fixed right-0 top-0 h-full md:static z-40 w-64 bg-stone-900 text-amber-100 flex flex-col
+          fixed right-0 top-0 h-full md:static print:hidden z-40 w-64 bg-stone-900 text-amber-100 flex flex-col
           transition-transform duration-300
           ${open ? "translate-x-0" : "translate-x-full md:translate-x-0"}
         `}
@@ -108,7 +109,7 @@ export default function Sidebar() {
         {/* Nav — scrolls on its own so the sign-in/out footer below always stays visible */}
         <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-1">
           {NAV_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} active={pathname === item.href} onNavigate={() => setOpen(false)} />
+            <NavLink key={item.href} item={item} active={pathname === item.href || pathname.startsWith(`${item.href}/`)} onNavigate={() => setOpen(false)} />
           ))}
 
           {/* Styled like a nav item so it lines up with the links above; its pages are indented under it */}

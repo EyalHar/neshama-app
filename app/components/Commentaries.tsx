@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Commentary } from "@/lib/commentaries";
+import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
 
 async function requestCommentaries(book: string, chapter: number, verse: number): Promise<Commentary[]> {
   const res = await fetch(`/api/commentaries?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`);
@@ -84,7 +85,13 @@ export default function Commentaries({
           <div className="px-4 py-3 max-h-[50vh] overflow-y-auto" role="tabpanel">
             {active.status === "ok" ? (
               <>
-                <div className="space-y-2 text-stone-700 leading-relaxed">
+                {/* Collectable into a notebook page, cited with edition + license (CC-BY-SA needs attribution) */}
+                <div
+                  className="space-y-2 text-stone-700 leading-relaxed"
+                  data-collect-source={`${active.he} על ${TANAKH_BOOKS.find((b) => b.id === book)?.he ?? book} ${toHebrewNumeral(chapter)}:${toHebrewNumeral(verse)}`}
+                  data-collect-href={active.sefariaUrl}
+                  data-collect-attribution={`${active.versionTitle} · ${active.license}`}
+                >
                   {active.segments.map((s, i) => (
                     // Server-sanitized: only <b>/<i>/<strong>/<em>/<br> without attributes remain
                     <p key={i} dangerouslySetInnerHTML={{ __html: s }} />

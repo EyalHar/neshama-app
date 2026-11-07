@@ -9,6 +9,7 @@ import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
 import Commentaries, { BookIcon } from "@/app/components/Commentaries";
 import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
+import { collect } from "@/lib/notebook";
 import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
 import { inRef, type PassageMark, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
 import type { Leitword } from "@/lib/leitwords";
@@ -47,7 +48,7 @@ type UnitsInfo = { kind: DivisionKind | null; units: DivisionUnit[] };
 // Open (פ) / closed (ס) section break, as in a Torah scroll; green once the section is read
 function SectionBreak({ type, done }: { type: "פ" | "ס"; done: boolean }) {
   return (
-    <div className={`flex items-center gap-3 px-4 ${type === "פ" ? "py-4" : "py-1.5"}`} title={type === "פ" ? "פרשה פתוחה" : "פרשה סתומה"}>
+    <div data-collect-skip="" className={`flex items-center gap-3 px-4 ${type === "פ" ? "py-4" : "py-1.5"}`} title={type === "פ" ? "פרשה פתוחה" : "פרשה סתומה"}>
       <span className={`h-px flex-1 ${done ? "bg-green-200" : "bg-stone-200"}`} />
       <span className={`text-sm font-bold transition-colors ${done ? "text-green-600" : "text-stone-300"}`}>
         {done && "✓ "}
@@ -601,9 +602,12 @@ export default function TanakhPage() {
     const commentaryOpen = openCommentaryVerse === k;
     const newChapter = unitMode && (i === 0 || verses[i - 1].chapter !== v.chapter);
     const inReading = !!markedReading && !markedReading.isUnit && inRef([v.chapter, v.verse], markedReading.start, markedReading.end);
+    // Source of this verse when collected into a notebook page
+    const citation = `${selectedBook.he} ${refLabel([v.chapter, v.verse])}`;
+    const verseHref = `/tanakh?book=${encodeURIComponent(selectedBook.id)}&chapter=${v.chapter}&verse=${v.verse}`;
     return (
       <Fragment key={k}>
-        {newChapter && <p className="px-4 pt-2 text-xs font-bold text-stone-400">פרק {toHebrewNumeral(v.chapter)}</p>}
+        {newChapter && <p data-collect-skip="" className="px-4 pt-2 text-xs font-bold text-stone-400">פרק {toHebrewNumeral(v.chapter)}</p>}
         <div className={`relative ${notesOpen ? "z-20" : ""}`}>
           <div
             id={`verse-${v.chapter}-${v.verse}`}
@@ -617,10 +621,10 @@ export default function TanakhPage() {
                 : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
             } ${session ? "cursor-pointer" : "cursor-default"}`}
           >
-            <span className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
+            <span data-collect-skip="" className={`text-xs font-mono mt-1 min-w-[1.5rem] ${isRead ? "text-amber-500" : "text-stone-300"}`}>
               {toHebrewNumeral(v.verse)}
             </span>
-            <p data-gtext="" className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
+            <p data-gtext="" data-collect-source={citation} data-collect-href={verseHref} className={`text-lg leading-relaxed flex-1 ${isRead ? "text-amber-800" : "text-stone-700"}`}>
               <VerseText
                 text={v.text}
                 words={showGematria}
@@ -628,6 +632,16 @@ export default function TanakhPage() {
                 highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
               />
             </p>
+            {session && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); collect({ text: v.text, source: { source: citation, href: verseHref, attribution: null } }); }}
+                title="הוסף פסוק לדף במחברת"
+                className="self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-[15px] leading-none"
+              >
+                📝
+              </button>
+            )}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setOpenCommentaryVerse(commentaryOpen ? null : k); }}
@@ -670,7 +684,7 @@ export default function TanakhPage() {
                 <HeartIcon filled={isFav} size={17} />
               </button>
             )}
-            {isRead && <span className="text-amber-400 text-lg self-start mt-1">✓</span>}
+            {isRead && <span data-collect-skip="" className="text-amber-400 text-lg self-start mt-1">✓</span>}
           </div>
           {commentaryOpen && (
             <div className="mx-2 sm:mx-10 mt-1 mb-3">
@@ -986,7 +1000,7 @@ export default function TanakhPage() {
                   key={si}
                   className={`rounded-2xl transition-colors duration-300 ${selected ? "bg-stone-200/60 ring-1 ring-stone-300" : ""}`}
                 >
-                  <div className="flex items-start gap-1 px-2 pt-2 pb-1">
+                  <div data-collect-skip="" className="flex items-start gap-1 px-2 pt-2 pb-1">
                     <button
                       type="button"
                       onClick={() => toggleSectionCollapsed(si)}

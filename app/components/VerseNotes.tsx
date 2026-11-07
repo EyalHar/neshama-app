@@ -4,6 +4,8 @@ import { useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import DisplayNameForm from "./DisplayNameForm";
 import { NOTE_MAX_LENGTH, type VerseNoteItem } from "@/lib/notes";
+import { collect } from "@/lib/notebook";
+import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
 
 type Props = {
   book: string;
@@ -41,6 +43,11 @@ const textareaClass =
   "w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 leading-relaxed resize-y focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100";
 
 export default function VerseNotes({ book, chapter, verse, notes, isFavorite, onNotesChange, onFavorited, onClose }: Props) {
+  // How a note is cited when collected into a notebook page
+  const noteSource = {
+    source: `הערה שלי על ${TANAKH_BOOKS.find((b) => b.id === book)?.he ?? book} ${toHebrewNumeral(chapter)}:${toHebrewNumeral(verse)}`,
+    href: `/tanakh?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}`,
+  };
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -171,7 +178,7 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
           </div>
         ) : (
           <div key={n.id} className="group/note bg-white rounded-lg border border-amber-100 px-3 py-2">
-            <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap break-words">{n.text}</p>
+            <p data-collect-source={noteSource.source} data-collect-href={noteSource.href} className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap break-words">{n.text}</p>
             <div className="flex items-center justify-between mt-1 gap-2">
               <span className="flex items-center gap-2 text-[11px] text-stone-400">
                 {dateFormat.format(new Date(n.updatedAt))}
@@ -202,6 +209,14 @@ export default function VerseNotes({ book, chapter, verse, notes, isFavorite, on
                     שתף
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => collect({ text: n.text, source: { ...noteSource, attribution: null } })}
+                  title="הוסף לדף במחברת"
+                  className="text-xs text-stone-500 hover:bg-stone-100 px-2 py-0.5 rounded transition-colors"
+                >
+                  📝 לדף
+                </button>
                 <button
                   type="button"
                   onClick={() => { setEditingId(n.id); setEditText(n.text); }}

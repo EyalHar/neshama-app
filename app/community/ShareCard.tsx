@@ -35,6 +35,7 @@ export default function ShareCard({ item, onRemoved }: { item: FeedItem; onRemov
   }
 
   const ref = `${item.bookHe} ${toHebrewNumeral(item.chapter)}, ${toHebrewNumeral(item.verse)}`;
+  const verseHref = `/tanakh?book=${encodeURIComponent(item.book)}&chapter=${item.chapter}&verse=${item.verse}`;
 
   return (
     <article className="bg-white rounded-2xl border border-stone-200 shadow-sm p-5">
@@ -55,14 +56,20 @@ export default function ShareCard({ item, onRemoved }: { item: FeedItem; onRemov
       </header>
 
       <Link
-        href={`/tanakh?book=${encodeURIComponent(item.book)}&chapter=${item.chapter}&verse=${item.verse}`}
+        href={verseHref}
         className="block border-s-4 border-amber-300 bg-amber-50/60 rounded-e-lg px-4 py-2.5 mb-3 hover:bg-amber-50 transition-colors"
       >
         <p className="text-xs font-medium text-amber-700 mb-1">{ref}</p>
-        <p className="text-stone-600 leading-relaxed">{item.verseText}</p>
+        <p data-collect-source={ref} data-collect-href={verseHref} className="text-stone-600 leading-relaxed">{item.verseText}</p>
       </Link>
 
-      <p className="text-stone-800 leading-relaxed whitespace-pre-wrap break-words">{item.text}</p>
+      <p
+        data-collect-source={`${item.author.name} על ${ref}`}
+        data-collect-href={verseHref}
+        className="text-stone-800 leading-relaxed whitespace-pre-wrap break-words"
+      >
+        {item.text}
+      </p>
 
       <footer className="flex items-center gap-5 mt-4 pt-3 border-t border-stone-100">
         <button

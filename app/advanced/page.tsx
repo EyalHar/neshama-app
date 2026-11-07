@@ -91,7 +91,13 @@ function ResultCard({ r, num }: { r: Result; num: number }) {
               {r.bookHe} {toHebrewNumeral(r.chapter)}&lrm;:{toHebrewNumeral(r.verse)}
             </p>
           </div>
-          <p className="text-stone-700 leading-relaxed">{text}</p>
+          <p
+            data-collect-source={`${r.bookHe} ${toHebrewNumeral(r.chapter)}:${toHebrewNumeral(r.verse)}`}
+            data-collect-href={`/tanakh?book=${encodeURIComponent(r.book)}&chapter=${r.chapter}&verse=${r.verse}`}
+            className="text-stone-700 leading-relaxed"
+          >
+            {text}
+          </p>
           {r.forms && r.forms.length > 0 && (
             <p className="text-xs text-stone-400 mt-1">
               צורות: {r.forms.join("، ")}

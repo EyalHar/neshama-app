@@ -27,6 +27,14 @@ const FEATURES = [
     labelColor: "text-red-700",
   },
   {
+    href: "/notebook",
+    title: "המחברת שלי",
+    description: "דפים לדבר תורה או לסיכום: כתבו חופשי ואספו פסוקים, הערות וקטעים מהפרשנים, כל אחד עם המקור שלו",
+    icon: "📝",
+    color: "from-lime-50 to-emerald-50 border-lime-200 hover:border-lime-400",
+    labelColor: "text-lime-800",
+  },
+  {
     href: "/advanced?tab=letters",
     title: "אות ראשונה ואחרונה בפסוק",
     description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",

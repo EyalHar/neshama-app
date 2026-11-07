@@ -12,6 +12,7 @@ A Hebrew Bible (Tanakh) reading companion for Hebrew-speaking users. Features ve
 - **Database:** SQLite via Prisma ORM
 - **AI/LLM:** Groq (llama-3.3-70b-versatile) — primary; Anthropic, OpenAI, Google Gemini SDKs also installed but not actively used
 - **External API:** Sefaria.org (Hebrew verse text with nikud and ta'amim)
+- **Rich text editor:** TipTap 3 (MIT, core + StarterKit only — no paid/cloud features) for notebook pages
 
 ---
 
@@ -27,6 +28,7 @@ neshama-app/
 │   │   ├── events/             ← AI biblical-event → source verses
 │   │   ├── favorites/          ← Favorite verses/chapters (list, verse/, chapter/ toggles)
 │   │   ├── notes/              ← Verse notes (POST; [id]/ PATCH + DELETE)
+│   │   ├── notebook/           ← Notebook pages (list/create; [id]/ get, autosave, delete, append/)
 │   │   ├── shares/             ← Community feed + share (GET/POST); [id]/ DELETE, like/, comments/
 │   │   ├── comments/[id]/      ← Delete a comment (soft if it has replies)
 │   │   ├── profile/            ← Public display name (GET/PATCH)
@@ -58,10 +60,12 @@ neshama-app/
 │   │   ├── VerseNotes.tsx      ← Notes panel (list, add, edit, delete, share) for a verse
 │   │   ├── DisplayNameForm.tsx ← Choose public display name before first share/comment
 │   │   ├── Commentaries.tsx    ← Per-verse commentators panel with tabs (+ BookIcon)
+│   │   ├── NotebookCollector.tsx ← Global: collect selected text / verses / notes into the active notebook page
 │   │   ├── VerseText.tsx       ← Renders a verse with special letters + highlighted words
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
 │   ├── admin/seed/page.tsx
 │   ├── advanced/page.tsx
+│   ├── notebook/               ← page.tsx (list), [id]/page.tsx, NotebookEditor (TipTap), SourceQuote, activeDoc
 │   ├── community/              ← page.tsx (feed), ShareCard, CommentThread, format (dates/avatar)
 │   ├── events/page.tsx
 │   ├── favorites/page.tsx
@@ -81,6 +85,7 @@ neshama-app/
 │   ├── tanakh.ts               ← Book metadata, Hebrew numerals, Sefaria fetch + special-letter marks
 │   ├── favorites.ts            ← Current user + favorite-verse helpers
 │   ├── notes.ts                ← Verse-note type and helpers
+│   ├── notebook.ts             ← Notebook types, sourced-quote node, text export, collect()
 │   ├── shares.ts               ← Viewer/admin, author display, feed + comment types
 │   ├── commentaries.ts         ← Commentator list + allowed licenses
 │   ├── hapax.ts                ← Hapax legomena computation
@@ -117,6 +122,7 @@ neshama-app/
 | `/quiz` | Two tabs: fill-in-the-blank verse quiz (AI) and grammar quiz (root/binyan, 3 levels) |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
+| `/notebook` | "המחברת שלי": personal pages (TipTap editor) for a dvar Torah or summary, collecting verses, notes and commentary excerpts with their sources |
 | `/favorites` | The user's favorite verses and chapters, grouped by book |
 | `/events` | Enter a biblical event → all source verses that mention it |
 | `/unique-words` | Hapax legomena — words occurring only once in the Tanakh |
@@ -140,6 +146,7 @@ neshama-app/
 | `FavoriteChapter` | Chapters marked favorite (userId, book, chapter) |
 | `FavoriteParashiya` | Parashiyot marked favorite, keyed by their first verse (userId, book, chapter, verse) |
 | `FavoriteList` | Named sub-list of favorite verses, shown as its own tab (userId, name unique per user) |
+| `StudyDoc` | Notebook page (userId, title, content = TipTap JSON) |
 | `VerseNote` | Personal notes on a verse (userId, book, chapter, verse, text); every noted verse is also a favorite |
 | `Share` | A published item on /community (userId, type="note", noteId → VerseNote, cascade) |
 | `ShareLike` | One like per user per share |
@@ -181,6 +188,11 @@ neshama-app/
 - `POST /api/favorites/lists` — Create a named list `{ name }` (409 if the name exists)
 - `PATCH` / `DELETE /api/favorites/lists/[id]` — Rename / delete a list (its verses return to the general tab)
 - `PATCH /api/favorites/verse/list` — Move a favorite verse into a list `{ book, chapter, verse, listId | null }`
+
+### Notebook
+- `GET` / `POST /api/notebook` — List pages / create `{ title }`
+- `GET` / `PATCH` / `DELETE /api/notebook/[id]` — Read / autosave `{ title?, content? }` / delete (owner only)
+- `POST /api/notebook/[id]/append` — Append a sourced quote `{ text, source: { source, href, attribution } }`
 
 ### Notes
 - `POST /api/notes` — Add a note `{ book, chapter, verse, text }`; also favorites the verse
@@ -264,6 +276,10 @@ neshama-app/
 - Share any of your notes; the first share/comment asks for a public display name (defaults to the Google name). Only the display name is shown — never the Google name, email or photo
 - Feed with filters (all / mine / liked, by book), likes, and comments threaded to any depth (indent capped at 4 levels, then "בתגובה ל…"); comments with replies are soft-deleted
 - A share always shows its note's current text ("נערך" when edited) and is deleted with the note
+
+### Notebook (`/notebook`)
+- Personal pages with a TipTap editor (headings, bold/italic, lists, quotes, add-a-verse), autosave, copy as text, print/PDF
+- Collect into the "active page": select text in a verse, commentary, note, favorite, search result or share → "הוסף לדף"; or the 📝 button on a verse / note. Each item becomes a quote with its source (and edition + license for commentaries)
 
 ### Commentaries
 - "הצג פרשנים" button on every verse in the reader opens a tabbed panel of classic commentators (Rashi, Ramban, Ibn Ezra, …); edition, license and a Sefaria link are shown under each

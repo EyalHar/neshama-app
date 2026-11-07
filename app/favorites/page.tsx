@@ -170,7 +170,13 @@ export default function FavoritesPage() {
             <p className="text-xs font-medium text-amber-700 mb-1.5">
               {v.bookHe} {toHebrewNumeral(v.chapter)}&lrm;:{toHebrewNumeral(v.verse)}
             </p>
-            <p className="text-stone-700 leading-relaxed">{v.text}</p>
+            <p
+              data-collect-source={`${v.bookHe} ${toHebrewNumeral(v.chapter)}:${toHebrewNumeral(v.verse)}`}
+              data-collect-href={`/tanakh?book=${encodeURIComponent(v.book)}&chapter=${v.chapter}&verse=${v.verse}`}
+              className="text-stone-700 leading-relaxed"
+            >
+              {v.text}
+            </p>
           </div>
           <div className="flex flex-col items-center gap-2 shrink-0">
             <div className="flex items-center gap-1">

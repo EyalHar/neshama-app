@@ -89,3 +89,12 @@ body {
   -webkit-text-fill-color: transparent;
   animation: flame-shimmer 6s ease-in-out infinite, flame-glow 2.8s ease-in-out infinite;
 }
+
+/* Notebook editor (TipTap): Tailwind's preflight strips heading/list/quote styles */
+.notebook-content h2 { font-size: 1.4rem; font-weight: 700; margin: 1.1rem 0 0.4rem; color: #292524; }
+.notebook-content h3 { font-size: 1.15rem; font-weight: 700; margin: 0.9rem 0 0.3rem; color: #44403c; }
+.notebook-content p { margin: 0.35rem 0; }
+.notebook-content ul { list-style: disc; padding-inline-start: 1.5rem; margin: 0.4rem 0; }
+.notebook-content ol { list-style: decimal; padding-inline-start: 1.5rem; margin: 0.4rem 0; }
+.notebook-content > blockquote { border-inline-start: 3px solid #d6d3d1; padding-inline-start: 0.9rem; color: #57534e; margin: 0.6rem 0; }
+.notebook-content p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: #a8a29e; float: right; height: 0; pointer-events: none; }

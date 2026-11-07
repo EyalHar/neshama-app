@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import SessionWrapper from "./components/SessionWrapper";
+import NotebookCollector from "./components/NotebookCollector";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -20,11 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" className={`${geist.variable} h-full antialiased`}>
-      <body className="h-full flex flex-col md:flex-row bg-stone-50 overflow-hidden">
+    <html lang="he" className={`${geist.variable} h-full print:h-auto antialiased`}>
+      <body className="h-full flex flex-col md:flex-row bg-stone-50 overflow-hidden print:h-auto print:overflow-visible print:block print:bg-white">
         <SessionWrapper>
-          <main className="flex-1 h-full overflow-y-auto">{children}</main>
+          <main className="flex-1 h-full overflow-y-auto print:h-auto print:overflow-visible">{children}</main>
           <Sidebar />
+          <NotebookCollector />
         </SessionWrapper>
       </body>
     </html>

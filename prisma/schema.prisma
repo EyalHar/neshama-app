@@ -23,6 +23,7 @@ model User {
   favoriteParashiyot FavoriteParashiya[]
   favoriteLists     FavoriteList[]
   verseNotes        VerseNote[]
+  studyDocs         StudyDoc[]
   shares            Share[]
   shareLikes        ShareLike[]
   shareComments     ShareComment[]
@@ -163,6 +164,20 @@ model FavoriteVerse {
 // A named sub-list of favorite verses (e.g. "פסוקים שמופיעים בתפילה"), shown as its own tab on
 // /favorites. A verse belongs to at most one list; deleting a list returns its verses to the
 // general tab.
+// A personal notebook page ("המחברת שלי"): free text plus quotes collected from verses, notes and
+// commentaries, each kept with its source. `content` is TipTap (ProseMirror) JSON.
+model StudyDoc {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
 model FavoriteList {
   id        String          @id @default(cuid())
   userId    String
