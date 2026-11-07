@@ -10,7 +10,7 @@ import VerseNotes from "@/app/components/VerseNotes";
 import Commentaries, { BookIcon } from "@/app/components/Commentaries";
 import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
-import { inRef, type PassageMark, type PassageResponse, type PassageSection, type PassageVerse } from "@/lib/passage";
+import { inRef, type PassageMark, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
 import type { Leitword } from "@/lib/leitwords";
 import CelebrationModal, { type CelebrationData } from "./CelebrationModal";
 import LeitwordChips from "./LeitwordChips";
@@ -18,6 +18,7 @@ import GematriaSettings from "./GematriaSettings";
 import GematriaOverlay, { hasTextSelection, isTouchWordTap } from "./GematriaOverlay";
 import { parseGematriaMethods } from "@/lib/gematria";
 import { playCelebrationSound } from "./sound";
+import WeeklyReadings, { type WeeklyKind } from "./WeeklyReadings";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const GEMATRIA_KEY = "tanakh-show-gematria";
@@ -102,6 +103,8 @@ export default function TanakhPage() {
   const [highlightedVerse, setHighlightedVerse] = useState<string | null>(null);
   const [pendingRandomVerse, setPendingRandomVerse] = useState(false);
   const [pendingVerseParam, setPendingVerseParam] = useState<VerseRef | null>(null);
+  // The weekly reading last jumped to, marked in the reader while its verses are on screen
+  const [readingMark, setReadingMark] = useState<(WeeklyReading & { kind: WeeklyKind }) | null>(null);
 
   const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
@@ -294,6 +297,17 @@ export default function TanakhPage() {
 
   function selectBook(book: typeof TANAKH_BOOKS[0]) {
     goTo(book, 1);
+  }
+
+  // A reading that is exactly one parasha opens in division mode; anything else (a haftarah,
+  // a festival reading, joined parashot) opens by chapter, with its verses marked
+  function jumpToWeekly(reading: WeeklyReading, kind: WeeklyKind) {
+    const book = TANAKH_BOOKS.find((b) => b.id === reading.book);
+    if (!book) return;
+    setPref(DIVISION_KEY, reading.isUnit ? "units" : "chapters");
+    setReadingMark({ ...reading, kind });
+    goTo(book, reading.start[0], reading.start[1]);
+    setPendingVerseParam(reading.start);
   }
 
   function handleRandomTanakh() {
@@ -560,6 +574,9 @@ export default function TanakhPage() {
   const activeList: Leitword[] = activeScope === "passage" ? leitwords : sections[Number(activeScope)]?.leitwords ?? [];
   const activeForms = activeList.find((l) => l.strongs === activeStrongs)?.forms;
 
+  const markedReading = readingMark?.book === selectedBook.id &&
+    verses.some((v) => inRef([v.chapter, v.verse], readingMark.start, readingMark.end)) ? readingMark : null;
+
   // A parasha holding several parashiyot is shown as one selectable, collapsible block per
   // parashiya; a chapter or a single parashiya is a flat list
   const showSections = unitMode && sections.length > 1;
@@ -583,6 +600,7 @@ export default function TanakhPage() {
     const notesOpen = openNotesVerse === k;
     const commentaryOpen = openCommentaryVerse === k;
     const newChapter = unitMode && (i === 0 || verses[i - 1].chapter !== v.chapter);
+    const inReading = !!markedReading && !markedReading.isUnit && inRef([v.chapter, v.verse], markedReading.start, markedReading.end);
     return (
       <Fragment key={k}>
         {newChapter && <p className="px-4 pt-2 text-xs font-bold text-stone-400">פרק {toHebrewNumeral(v.chapter)}</p>}
@@ -593,7 +611,7 @@ export default function TanakhPage() {
               if (hasTextSelection() || (showGematria && isTouchWordTap(e.target))) return;
               toggleVerse(v);
             }}
-            className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${
+            className={`group flex gap-3 px-4 py-3 rounded-xl transition-colors duration-700 ${inReading ? "shadow-[inset_-3px_0_0_0_#7dd3fc]" : ""} ${
               highlightedVerse === k
                 ? "bg-amber-50 ring-1 ring-amber-200"
                 : isRead ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-stone-100"
@@ -751,6 +769,8 @@ export default function TanakhPage() {
           </div>
         </div>
 
+        <WeeklyReadings onJump={jumpToWeekly} />
+
         {/* Selector */}
         <div className="bg-white rounded-2xl border border-stone-200 p-4 mb-6 shadow-sm">
           {/* Section tabs */}
@@ -896,6 +916,12 @@ export default function TanakhPage() {
               </button>
             )}
             {session && kind === "parashiyot" && sections[0] && parashiyaHeart(sections[0].origin, 22)}
+            {markedReading && (
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${markedReading.kind === "parasha" ? "bg-amber-100 text-amber-800" : "bg-sky-100 text-sky-800"}`}>
+                {markedReading.kind === "parasha" ? "פרשת השבוע" : "הפטרת השבוע"}
+                {!markedReading.isUnit && <> · {refLabel(markedReading.start)}–{refLabel(markedReading.end)}</>}
+              </span>
+            )}
             {isBookComplete && <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ הספר הושלם</span>}
             {!isBookComplete && (unitMode ? passageComplete : completedChapters.has(selectedChapter)) && (
               <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">✓ ה{unitName} {unitName === "פרק" ? "הושלם" : "הושלמה"}</span>

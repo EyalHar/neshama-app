@@ -25,6 +25,16 @@ export type PassageResponse = {
   notes: import("./notes").VerseNoteItem[];
 };
 
+// GET /api/tanakh/weekly: this week's parasha and haftarah
+export type WeeklyReading = {
+  name: string;
+  book: string;
+  start: VerseRef;
+  end: VerseRef;
+  // The range is exactly one parasha, so division mode shows it as a single unit
+  isUnit: boolean;
+};
+
 export const inRef = (ref: VerseRef, start: VerseRef, end: VerseRef) =>
   (ref[0] > start[0] || (ref[0] === start[0] && ref[1] >= start[1])) &&
   (ref[0] < end[0] || (ref[0] === end[0] && ref[1] <= end[1]));
