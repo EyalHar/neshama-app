@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ROOT_LETTERS, type RootItem, type RootScope } from "@/lib/rootLetterPattern";
+import { ANY_LETTER, ROOT_LETTERS, type RootItem, type RootPattern, type RootScope } from "@/lib/rootLetterPattern";
 
-type Pattern = [string, string, string];
 type Sort = "alpha" | "count";
 
 const POSITIONS = ["אות ראשונה", "אות שנייה", "אות שלישית"];
+const EMPTY: RootPattern = ["", "", "", ""];
 
-async function requestRoots(pattern: Pattern, scope: RootScope): Promise<RootItem[]> {
+async function requestRoots(pattern: RootPattern, scope: RootScope): Promise<RootItem[]> {
   const params = new URLSearchParams({ scope });
   pattern.forEach((l, i) => { if (l) params.set(`l${i + 1}`, l); });
   const res = await fetch(`/api/verses/roots?${params}`);
@@ -19,7 +19,7 @@ async function requestRoots(pattern: Pattern, scope: RootScope): Promise<RootIte
 // "שורשים לפי אותיות" tab of /advanced: pick any of a root's three letters and see every verb
 // root that matches. Clicking a root runs the regular root search for it.
 export default function RootLetters({ scope, onPick }: { scope: RootScope; onPick: (root: string) => void }) {
-  const [pattern, setPattern] = useState<Pattern>(["", "", ""]);
+  const [pattern, setPattern] = useState<RootPattern>(EMPTY);
   const [roots, setRoots] = useState<RootItem[] | null>(null);
   const [error, setError] = useState(false);
   const [sort, setSort] = useState<Sort>("alpha");
@@ -37,7 +37,7 @@ export default function RootLetters({ scope, onPick }: { scope: RootScope; onPic
   }, [pattern, scope, empty]);
 
   function setLetter(i: number, letter: string) {
-    setPattern((prev) => prev.map((l, j) => (j === i ? letter : l)) as Pattern);
+    setPattern((prev) => prev.map((l, j) => (j === i ? letter : l)) as RootPattern);
   }
 
   const shown = empty || !roots ? [] : [...roots].sort((a, b) =>
@@ -48,6 +48,7 @@ export default function RootLetters({ scope, onPick }: { scope: RootScope; onPic
     <div>
       <p className="text-stone-500 text-sm mb-4">
         בחר אות אחת או יותר במקומות המתאימים בשורש, ויוצגו כל השורשים שמתאימים. לחיצה על שורש מחפשת אותו בתנ״ך.
+        לשורשים מרובעים, הנדירים בתנ״ך, בחר גם באות הרביעית.
       </p>
 
       <div className="flex flex-wrap items-end gap-3 mb-5">
@@ -68,10 +69,26 @@ export default function RootLetters({ scope, onPick }: { scope: RootScope; onPic
             </select>
           </label>
         ))}
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-stone-500">אות רביעית</span>
+          <select
+            value={pattern[3]}
+            onChange={(e) => setLetter(3, e.target.value)}
+            className={`w-36 rounded-xl border px-3 py-2 text-center bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 ${
+              pattern[3] ? "border-amber-400 text-amber-800 font-bold text-lg" : "border-stone-300 text-stone-500 text-sm"
+            }`}
+          >
+            <option value="">— (שורש בן 3)</option>
+            <option value={ANY_LETTER}>כל אות (מרובע)</option>
+            {ROOT_LETTERS.map((l) => (
+              <option key={l} value={l}>{l}</option>
+            ))}
+          </select>
+        </label>
         {!empty && (
           <button
             type="button"
-            onClick={() => { setPattern(["", "", ""]); setRoots(null); }}
+            onClick={() => { setPattern(EMPTY); setRoots(null); }}
             className="text-sm text-stone-500 hover:text-amber-700 px-2 py-2"
           >
             נקה

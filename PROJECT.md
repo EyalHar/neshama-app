@@ -167,7 +167,8 @@ neshama-app/
 - `GET /api/verses/substring?q=&scope=&whole=&page=` — Word/substring search (500/page)
 - `GET /api/verses/root?root=&stem=&form=&scope=&view=direct|etymological&page=` — Root search via Strong's family tree, optionally intersected with a verb stem (binyan) and/or verb form filter (`form`: perfect, imperfect, imperative, participle, infinitive, infAbsolute — see `VERB_FORMS` in `lib/rootFamily.ts`); `root`, `stem` and `form` are each optional but at least one is required (200/page)
 - `GET /api/verses/mishkal?mishkal=&kind=noun|adjective&root=&scope=&page=` — Verses containing nouns/adjectives of a mishkal (per Gesenius §84–86), from the `data/noun-patterns/` snapshots; without `mishkal`, the list of mishkalim with counts (200/page)
-- `GET /api/verses/roots?l1=&l2=&l3=&scope=` — Verb roots whose 1st/2nd/3rd letters match (empty = any; at least one required), with occurrence counts in the scope
+- `GET /api/verses/roots?l1=&l2=&l3=&l4=&scope=` — Verb roots whose letters match (empty = any; `l4` empty = triliteral, `*`/letter = quadriliteral; at least one required), with occurrence counts in the scope
+- `GET /api/verses/root-hint?root=` — For a typed 4+ letter root (e.g. כלכל), the triliteral roots its verb forms are filed under (כול)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
 - `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites

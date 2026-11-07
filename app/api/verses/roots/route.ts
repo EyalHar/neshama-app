@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findRootsByLetters } from "@/lib/rootLetters";
-import { ROOT_LETTERS, type RootScope } from "@/lib/rootLetterPattern";
+import { ANY_LETTER, ROOT_LETTERS, type RootPattern, type RootScope } from "@/lib/rootLetterPattern";
 
 const SCOPES: RootScope[] = ["tanakh", "torah", "nevi", "ketuvim"];
 
-// GET /api/verses/roots?l1=&l2=&l3=&scope= — verb roots matching a letter pattern; each lN is a
-// single (non-final) letter or empty for "any", and at least one must be given
+// GET /api/verses/roots?l1=&l2=&l3=&l4=&scope= — verb roots matching a letter pattern. l1–l3: a
+// single (non-final) letter or empty for "any". l4: empty for triliteral roots, "*" or a letter for
+// quadriliteral ones. At least one position must be set.
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const pattern = ["l1", "l2", "l3"].map((p) => searchParams.get(p) ?? "") as [string, string, string];
+  const pattern = ["l1", "l2", "l3", "l4"].map((p) => searchParams.get(p) ?? "") as RootPattern;
   const scope = (searchParams.get("scope") ?? "tanakh") as RootScope;
 
-  if (pattern.some((l) => l && !ROOT_LETTERS.includes(l)) || !SCOPES.includes(scope)) {
+  const validLetter = (l: string, i: number) => !l || ROOT_LETTERS.includes(l) || (i === 3 && l === ANY_LETTER);
+  if (!pattern.every(validLetter) || !SCOPES.includes(scope)) {
     return NextResponse.json({ error: "Invalid letters or scope" }, { status: 400 });
   }
   if (pattern.every((l) => !l)) {

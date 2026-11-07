@@ -7,6 +7,7 @@ import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import LetterSearch from "./LetterSearch";
 import RootLetters from "./RootLetters";
+import type { RootItem } from "@/lib/rootLetterPattern";
 
 const BINYANIM = [
   { id: "all", label: "כל הבניינים" },
@@ -130,6 +131,8 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [lastNikudMode, setLastNikudMode] = useState(false);
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
+  // For a typed 4+ letter "root" like כלכל: the triliteral roots its verb forms are filed under
+  const [rootHint, setRootHint] = useState<RootItem[]>([]);
   const [stem, setStem] = useState("all");
   const [verbForm, setVerbForm] = useState("all");
   const [wordQ, setWordQ] = useState("");
@@ -289,10 +292,20 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     }
   }
 
+  function loadRootHint(root: string) {
+    setRootHint([]);
+    if ([...root].length < 4) return;
+    fetch(`/api/verses/root-hint?root=${encodeURIComponent(root)}`)
+      .then((r) => r.json())
+      .then((d) => setRootHint(d.roots ?? []))
+      .catch(() => {});
+  }
+
   function handleRoot(e: React.FormEvent, p = 1) {
     e.preventDefault();
     const hasRoot = rootQ.trim().length > 0;
     if (!hasRoot && stem === "all" && verbForm === "all") return;
+    if (p === 1) loadRootHint(rootQ.trim());
     setLastRootQ(rootQ.trim());
     setLastStem(stem);
     setLastVerbForm(verbForm);
@@ -307,6 +320,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   function pickRoot(root: string) {
     setTab("root");
     setRootQ(root);
+    loadRootHint(root);
     setStem("all");
     setVerbForm("all");
     setLastRootQ(root);
@@ -547,6 +561,25 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
               </button>
             ))}
           </div>
+          {rootHint.length > 0 && (
+            <div className="bg-sky-50 border border-sky-200 rounded-xl px-4 py-3 mb-4 text-sm text-sky-900">
+              <p className="mb-2">
+                ״{lastRootQ}״ היא צורת הכפלה של שורש תלת־אותי (כמו כִּלְכֵּל מ־כול, או חֳמַרְמַר מ־חמר), והפעלים בצורה הזו רשומים תחת השורש. החיפוש למטה מציג רק מילים שנכתבות ״{lastRootQ}״, כמו שמות ושמות עצם.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {rootHint.map((h) => (
+                  <button
+                    key={h.letters}
+                    type="button"
+                    onClick={() => pickRoot(h.plain)}
+                    className="bg-white border border-sky-300 hover:bg-sky-100 rounded-lg px-3 py-1 font-medium transition-colors"
+                  >
+                    חפש את השורש {[...h.letters].join("־")} <span className="text-xs text-sky-600">({h.count} פעלים בצורה זו)</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
