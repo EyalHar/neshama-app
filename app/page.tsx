@@ -75,6 +75,22 @@ const FEATURES = [
     labelColor: "text-orange-700",
   },
   {
+    href: "/letter-pairs",
+    title: "צירופי אותיות",
+    description: "גלגל 231 השערים של ספר יצירה: שורשי המקרא שחולקים צמד אותיות, פנים ואחור",
+    icon: "◎",
+    color: "from-fuchsia-50 to-pink-50 border-fuchsia-200 hover:border-fuchsia-400",
+    labelColor: "text-fuchsia-700",
+  },
+  {
+    href: "/loanwords",
+    title: "מילים שאולות",
+    description: "מילים שנכנסו לעברית המקראית מפרסית, ממצרית, מיוונית ומשפות אחרות, עם הפסוקים",
+    icon: "🌍",
+    color: "from-sky-50 to-cyan-50 border-sky-200 hover:border-sky-400",
+    labelColor: "text-sky-700",
+  },
+  {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",

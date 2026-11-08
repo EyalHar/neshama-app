@@ -13,3 +13,5 @@ export type RootPattern = [string, string, string, string];
 
 // `letters`: the root in regular (non-final) letters, e.g. "ברכ"; `plain`: Strong's spelling ("ברך")
 export type RootItem = { letters: string; plain: string; lemmaHe: string; count: number };
+
+export type RootListItem = RootItem & { definition: string };

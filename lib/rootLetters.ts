@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS } from "@/lib/tanakh";
 import { parseWord } from "@/lib/wordStats";
-import { ANY_LETTER, type RootItem, type RootPattern, type RootScope } from "@/lib/rootLetterPattern";
+import { ANY_LETTER, type RootItem, type RootListItem, type RootPattern, type RootScope } from "@/lib/rootLetterPattern";
 
 // Browse roots by their letters ("שורשים לפי אותיות" in /advanced). A root here is the Strong's
 // lemma of a Hebrew *verb*: for verbs the lemma is the root itself (ברך, שוב, נתן), which makes
@@ -29,7 +29,7 @@ const NOT_A_VERB = new Set(["6256"]);
 // חִסְפֵּס, רֻטֲפַשׁ, and the denominative הִשְׂמְאִיל (from שְׂמֹאל, "to go left")
 const QUADRILITERALS = new Set(["3765", "3736", "6576", "2636", "7375", "8041"]);
 
-type RootRow = { letters: string; plain: string; lemmaHe: string; counts: Record<Exclude<RootScope, "tanakh">, number> };
+type RootRow = { letters: string; plain: string; lemmaHe: string; definition: string; counts: Record<Exclude<RootScope, "tanakh">, number> };
 
 const SECTION_SCOPE: Record<string, Exclude<RootScope, "tanakh">> = { "תורה": "torah", "נביאים": "nevi", "כתובים": "ketuvim" };
 const scopeOfBook = new Map(TANAKH_BOOKS.map((b) => [b.id, SECTION_SCOPE[b.section]]));
@@ -44,7 +44,7 @@ function getRoots(): Promise<RootRow[]> {
       prisma.$queryRawUnsafe<{ book: string; lemma: string; morph: string; c: bigint | number }[]>(
         `SELECT book, lemma, morph, COUNT(*) AS c FROM "WordEntry" WHERE morph LIKE 'H%' AND morph GLOB '*V*' GROUP BY book, lemma, morph`
       ),
-      prisma.strongsEntry.findMany({ select: { number: true, lemmaPlain: true, lemmaHe: true } }),
+      prisma.strongsEntry.findMany({ select: { number: true, lemmaPlain: true, lemmaHe: true, definition: true } }),
     ]);
     const meta = new Map(strongs.map((s) => [s.number.replace(/^H/, ""), s]));
 
@@ -60,15 +60,15 @@ function getRoots(): Promise<RootRow[]> {
       const letters = [...m.lemmaPlain].map((ch) => FINAL_TO_REGULAR[ch] ?? ch).join("");
       if (!/^[א-ת]{3}$/.test(letters) && !(QUADRILITERALS.has(w.num) && /^[א-ת]{4}$/.test(letters))) continue;
       const c = Number(r.c);
-      const row = byLetters.get(letters) ?? { letters, plain: m.lemmaPlain, lemmaHe: m.lemmaHe, counts: { torah: 0, nevi: 0, ketuvim: 0 }, best: 0 };
+      const row = byLetters.get(letters) ?? { letters, plain: m.lemmaPlain, lemmaHe: m.lemmaHe, definition: m.definition, counts: { torah: 0, nevi: 0, ketuvim: 0 }, best: 0 };
       row.counts[scope] += c;
       const numCount = (countsByNum.get(w.num) ?? 0) + c;
       countsByNum.set(w.num, numCount);
-      // Display the most frequent homonym's spelling
-      if (numCount > row.best) Object.assign(row, { plain: m.lemmaPlain, lemmaHe: m.lemmaHe, best: numCount });
+      // Display the most frequent homonym's spelling and meaning
+      if (numCount > row.best) Object.assign(row, { plain: m.lemmaPlain, lemmaHe: m.lemmaHe, definition: m.definition, best: numCount });
       byLetters.set(letters, row);
     }
-    return [...byLetters.values()].map(({ letters, plain, lemmaHe, counts }) => ({ letters, plain, lemmaHe, counts }));
+    return [...byLetters.values()].map(({ letters, plain, lemmaHe, definition, counts }) => ({ letters, plain, lemmaHe, definition, counts }));
   })();
   return rootsPromise;
 }
@@ -88,6 +88,21 @@ export async function findRootsByLetters(pattern: RootPattern, scope: RootScope)
       count: scope === "tanakh" ? r.counts.torah + r.counts.nevi + r.counts.ketuvim : r.counts[scope],
     }))
     .filter((r) => r.count > 0);
+}
+
+// Every triliteral verb root with its Tanakh-wide count and the Strong's meaning of its most
+// frequent homonym — the data of the letter-pairs wheel (/letter-pairs)
+export async function listTriliteralRoots(): Promise<RootListItem[]> {
+  const roots = await getRoots();
+  return roots
+    .filter((r) => r.letters.length === 3)
+    .map((r) => ({
+      letters: r.letters,
+      plain: r.plain,
+      lemmaHe: r.lemmaHe,
+      definition: r.definition,
+      count: r.counts.torah + r.counts.nevi + r.counts.ketuvim,
+    }));
 }
 
 // For a typed "root" longer than three letters (כלכל, חמרמר…): the verb roots whose forms contain
