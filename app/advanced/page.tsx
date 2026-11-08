@@ -863,11 +863,11 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
                 </div>
               )}
             </div>
-            {(tab === "basic" || tab === "substring") && (
+            {tab === "substring" && (
               <WordAnalysis
-                key={`${tab}:${tab === "basic" ? lastBasicQ : lastSubstringQ}:${lastScope}`}
-                q={tab === "basic" ? lastBasicQ : lastSubstringQ}
-                whole={tab === "basic"}
+                key={`${lastSubstringQ}:${lastScope}`}
+                q={lastSubstringQ}
+                whole={false}
                 scope={lastScope}
                 onPickRoot={pickFamily}
                 compact
