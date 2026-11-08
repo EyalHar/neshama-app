@@ -24,6 +24,8 @@ const STUDY_ITEMS: NavItem[] = [
   { href: "/events", label: "אירועי התנ״ך", icon: "📜" },
   { href: "/unique-words", label: "מילים יחידאיות", icon: "1" },
   { href: "/special-letters", label: "אותיות מיוחדות", icon: "ב" },
+  { href: "/letter-pairs", label: "צירופי אותיות", icon: "◎" },
+  { href: "/loanwords", label: "מילים שאולות", icon: "🌍" },
   { href: "/jerusalem-names", label: "שמות ירושלים", icon: <TempleIcon /> },
   { href: "/biblical-places", label: "ערים ויישובים במקרא", icon: "📍" },
   { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },

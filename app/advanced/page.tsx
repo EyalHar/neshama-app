@@ -7,6 +7,7 @@ import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import LetterSearch from "./LetterSearch";
 import RootLetters from "./RootLetters";
+import WordAnalysis from "./WordAnalysis";
 import type { RootItem } from "@/lib/rootLetterPattern";
 
 const BINYANIM = [
@@ -36,12 +37,13 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root" | "rootLetters" | "etymology" | "mishkal" | "letters";
+type Tab = "basic" | "substring" | "root" | "analyze" | "rootLetters" | "etymology" | "mishkal" | "letters";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "basic", label: "חיפוש בסיסי" },
   { id: "substring", label: "חיפוש תת-מחרוזת" },
   { id: "root", label: "חיפוש לפי שורש ובניין" },
+  { id: "analyze", label: "מה השורש?" },
   { id: "rootLetters", label: "שורשים לפי אותיות" },
   { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
   { id: "mishkal", label: "חיפוש לפי משקל" },
@@ -124,9 +126,10 @@ function NotSeeded() {
   );
 }
 
-// ?tab= opens a specific tab directly (e.g. /letters redirects to ?tab=letters)
-export default function AdvancedPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const { tab: tabParam } = use(searchParams);
+// ?tab= opens a specific tab directly (e.g. /letters redirects to ?tab=letters); ?root= runs a root
+// search on load (links from /letter-pairs)
+export default function AdvancedPage({ searchParams }: { searchParams: Promise<{ tab?: string; root?: string }> }) {
+  const { tab: tabParam, root: rootParam } = use(searchParams);
   const { data: session } = useSession();
   const [tab, setTab] = useState<Tab>(TABS.find((t) => t.id === tabParam)?.id ?? "basic");
   const [basicQ, setBasicQ] = useState("");
@@ -142,6 +145,8 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [stem, setStem] = useState("all");
   const [verbForm, setVerbForm] = useState("all");
   const [wordQ, setWordQ] = useState("");
+  const [analyzeQ, setAnalyzeQ] = useState("");
+  const [lastAnalyzeQ, setLastAnalyzeQ] = useState("");
   const [mishkalList, setMishkalList] = useState<MishkalOption[] | null>(null);
   const [mishkalQ, setMishkalQ] = useState("");
   const [mishkalKind, setMishkalKind] = useState("all");
@@ -322,8 +327,9 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     search(rootUrl(rootQ.trim(), stem, verbForm, scope, "direct", p, favoritesOnly), p === 1);
   }
 
-  // From the roots-by-letters tab: run the regular root search for the picked root
-  function pickRoot(root: string) {
+  // From the roots-by-letters tab, the word analysis or a ?root= link: run the regular root
+  // search for the picked root (the word analysis opens the whole family, "etymological")
+  function pickRoot(root: string, view: "direct" | "etymological" = "direct") {
     setTab("root");
     setRootQ(root);
     loadRootHint(root);
@@ -334,10 +340,32 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     setLastVerbForm("all");
     setLastScope(scope);
     setLastFavoritesOnly(favoritesOnly);
-    setRootView("direct");
+    setRootView(view);
     setPage(1);
-    search(rootUrl(root, "all", "all", scope, "direct", 1, favoritesOnly), true);
+    search(rootUrl(root, "all", "all", scope, view, 1, favoritesOnly), true);
   }
+
+  function pickFamily(root: string) {
+    pickRoot(root, "etymological");
+  }
+
+  function handleAnalyze(e: React.FormEvent) {
+    e.preventDefault();
+    if (analyzeQ.trim().length < 2) return;
+    setLastAnalyzeQ(analyzeQ.trim());
+    setLastScope(scope);
+  }
+
+  // Deferred to a microtask so no state is set in the effect body; the cleanup also keeps
+  // StrictMode's double-run from searching twice
+  useEffect(() => {
+    const root = rootParam?.trim();
+    if (!root || !/^[א-ת]+$/.test(root)) return;
+    let cancelled = false;
+    queueMicrotask(() => { if (!cancelled) pickRoot(root); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootParam]);
 
   function switchRootView(view: "direct" | "etymological") {
     if (view === rootView) return;
@@ -418,7 +446,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
           </button>
         ))}
 
-        {session && tab !== "rootLetters" && (
+        {session && tab !== "rootLetters" && tab !== "analyze" && (
           <label className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -446,6 +474,35 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
 
       {/* Roots by letters — lists roots, not verses; picking one switches to the root tab */}
       {tab === "rootLetters" && <RootLetters scope={scope} onPick={pickRoot} />}
+
+      {/* What is the root of a word */}
+      {tab === "analyze" && (
+        <div>
+          <p className="text-stone-500 text-sm mb-4">
+            הקלידו מילה כפי שהיא מופיעה בפסוק, גם עם תחיליות וסיומות (למשל רדידי, בעיר, וישמע), ותקבלו ממה היא בנויה ומה השורש שלה
+          </p>
+          <form onSubmit={handleAnalyze} className="flex gap-2 mb-6">
+            <input
+              type="text"
+              value={analyzeQ}
+              onChange={(e) => setAnalyzeQ(e.target.value)}
+              placeholder="לדוגמה: רדידי"
+              className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={analyzeQ.trim().length < 2}
+              className="bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
+            >
+              נתח
+            </button>
+          </form>
+          {lastAnalyzeQ && (
+            <WordAnalysis key={`${lastAnalyzeQ}:${lastScope}`} q={lastAnalyzeQ} whole scope={lastScope} onPickRoot={pickFamily} />
+          )}
+        </div>
+      )}
 
       {/* Basic */}
       {tab === "basic" && (
@@ -806,6 +863,16 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
                 </div>
               )}
             </div>
+            {(tab === "basic" || tab === "substring") && (
+              <WordAnalysis
+                key={`${tab}:${tab === "basic" ? lastBasicQ : lastSubstringQ}:${lastScope}`}
+                q={tab === "basic" ? lastBasicQ : lastSubstringQ}
+                whole={tab === "basic"}
+                scope={lastScope}
+                onPickRoot={pickFamily}
+                compact
+              />
+            )}
             <div className="space-y-3">
               {results.map((r, i) => (
                 <ResultCard key={`${r.book}-${r.chapter}-${r.verse}`} r={r} num={(page - 1) * pageSize + i + 1} />

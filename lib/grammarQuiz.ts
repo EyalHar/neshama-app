@@ -36,7 +36,7 @@ const GENDER: Record<string, string> = { m: "זכר", f: "נקבה", c: "זכר 
 const NUMBER: Record<string, string> = { s: "יחיד", p: "רבים", d: "זוגי" };
 
 // "Vqw3ms" → "קל · עתיד (וי״ו ההיפוך) · נסתר יחיד זכר"
-function describeVerb(seg: string): string {
+export function describeVerb(seg: string): string {
   const [, stem, tense, ...rest] = seg;
   const parts = [BINYANIM[stem], TENSE[tense]];
   const hasPerson = /[123]/.test(rest[0] ?? "");

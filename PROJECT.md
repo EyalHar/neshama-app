@@ -35,6 +35,8 @@ neshama-app/
 │   │   ├── commentaries/       ← Classic commentaries on a verse (from Sefaria, license-filtered)
 │   │   ├── hapax/              ← Words occurring once in the Tanakh
 │   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
+│   │   ├── letter-pairs/       ← All triliteral verb roots + meanings, for the letter-pairs wheel
+│   │   ├── loanwords/verses/   ← Verses a loanword occurs in
 │   │   ├── unknown-roots/      ← Crowdsourced missing Strong's roots
 │   │   ├── tanakh/             ← Reading progress CRUD + stats
 │   │   │   ├── bulk/           ← Batch complete/clear (chapter or verse range)
@@ -42,6 +44,7 @@ neshama-app/
 │   │   │   ├── reset/          ← Delete all user progress
 │   │   │   └── stats/          ← Completed chapters count
 │   │   ├── verses/
+│   │   │   ├── analyze/        ← Word analysis: lexeme, morphology, Strong's chain to the root
 │   │   │   ├── etymology/      ← Word-family (etymological) search
 │   │   │   ├── letters/        ← Search by first/last letter
 │   │   │   ├── root/           ← Search by Hebrew root and/or verb stem (+ etymological)
@@ -70,6 +73,8 @@ neshama-app/
 │   ├── events/page.tsx
 │   ├── favorites/page.tsx
 │   ├── jerusalem-names/page.tsx
+│   ├── letter-pairs/           ← page.tsx + LetterWheel (231-gate wheel of letter pairs)
+│   ├── loanwords/              ← page.tsx + LoanwordsBrowser
 │   ├── letters/page.tsx
 │   ├── login/page.tsx
 │   ├── neshama/page.tsx
@@ -89,6 +94,8 @@ neshama-app/
 │   ├── shares.ts               ← Viewer/admin, author display, feed + comment types
 │   ├── commentaries.ts         ← Commentator list + allowed licenses
 │   ├── hapax.ts                ← Hapax legomena computation
+│   ├── wordAnalysis.ts         ← "מה השורש?": OSHB morph → Hebrew description + derivedFrom chain
+│   ├── loanwords.ts            ← Loanword types, labels + data/loanwords snapshot (client-safe)
 │   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per passage and per parashiya
 │   ├── divisions.ts            ← Parashot / parashiyot: units, sections in a range
 │   ├── parashot.json           ← 54 Torah portions (snapshot from Sefaria)
@@ -128,6 +135,8 @@ neshama-app/
 | `/unique-words` | Hapax legomena — words occurring only once in the Tanakh |
 | `/special-letters` | All large, small and suspended letters and inverted nuns, linked to the reader |
 | `/jerusalem-names` | Names of Jerusalem with their source verses |
+| `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
+| `/loanwords` | Words borrowed from Persian, Egyptian, Greek etc., per Strong's, with their verses |
 | `/login` | Google OAuth login |
 | `/admin/seed` | Database seeding UI (OSHB morphology + Strong's dictionary) |
 
@@ -178,6 +187,7 @@ neshama-app/
 - `GET /api/verses/root-hint?root=` — For a typed 4+ letter root (e.g. כלכל), the triliteral roots its verb forms are filed under (כול)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
 - `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
+- `GET /api/verses/analyze?q=&whole=1&scope=` — For each typed word (with prefixes/suffixes, no nikud needed): its lexemes, forms, per form a Hebrew parse per occurrence pattern (`describeMorph()`) with up to 50 verse refs, and the Strong's `derivedFrom` chain to the root (several parents → `candidates`). `whole=0` analyzes every word containing the text
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
 
 ### Favorites
@@ -202,6 +212,8 @@ neshama-app/
 ### Content Pages
 - `GET /api/hapax?section=&page=&mergeSpelling=&mergeDerived=` — Hapax legomena
 - `GET /api/jerusalem-names` — Names of Jerusalem with source verses
+- `GET /api/letter-pairs` — Every triliteral verb root (`lib/rootLetters.ts`) with its count and Strong's meaning
+- `GET /api/loanwords/verses?strongs=` — Verses a loanword occurs in (up to 100), with the word's position in `VerseText.text`
 - `GET /api/unknown-roots` / `PATCH /api/unknown-roots` — List / suggest missing roots
 
 ### Community
@@ -242,6 +254,7 @@ neshama-app/
 - **Basic / Substring** — Hebrew text search with pagination
 - **Root + Binyan Search** — Enter a Hebrew root and/or filter by verb stem (Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael) and/or verb form (perfect, imperfect, imperative, participle, infinitive construct, infinitive absolute); when several are set, results are intersected (word must match the root family *and* the chosen binyan). Root alone maps to a Strong's number and BFS-expands to the full family tree with a direct vs. etymological view toggle; binyan alone (no root) is a plain morph-code filter with no etymological view. Scope filter (All / Torah / Nevi'im / Ketuvim)
 - **Roots by Letters** — Three letter selectors (one per root position, each "any" or one of 22 letters) list every matching verb root with its count in the chosen scope; clicking a root runs the root search
+- **What is the root? (`?tab=analyze`)** — Type a word as it appears in a verse (רדידי) → its dictionary entry (רָדִיד), how it is built (noun, construct + possessive "שלי"), and Strong's chain to the root (← רָדַד), with a button opening the root's whole family. The same analysis appears above the results of the basic and substring searches
 - **First/Last Letter in Verse** — Verses starting and/or ending with chosen Hebrew letters
 
 ### Neshama (Soul)
@@ -290,6 +303,15 @@ neshama-app/
 ### Special Letters (`/special-letters`)
 - All 63 large, small and suspended letters and inverted nuns (per Sefaria's MAM text), each shown in its word and linked to the verse
 - Data is a static snapshot in `lib/special-letters.json`; the reader computes the same marks live per chapter
+
+### Letter Pairs (`/letter-pairs`)
+- The 22 letters on a circle with a chord per pair (231 "gates", Sefer Yetzirah 2:4); chord weight = number of roots containing the pair
+- Modes: letters adjacent in the root, or anywhere in it. A pair lists its roots in both orders ("פנים" / "אחור"), with Strong's meaning; a root links to `/advanced?tab=root&root=`
+- Presented as shared letters, not proven relations in meaning
+
+### Loanwords (`/loanwords`)
+- 229 Tanakh words Strong's (1894) marks as of Persian / Egyptian / Greek / Babylonian / foreign origin, with its "probably" / "perhaps" hedges; proper names hidden by default
+- Snapshot `data/loanwords/loanwords.json`, built by `node scripts/build-loanwords.mjs`. Strong's misses loans identified later (Akkadian הֵיכָל, כִּסֵּא); the page says so
 
 ### Names of Jerusalem (`/jerusalem-names`)
 - 29 traditional names of Jerusalem with their source verses — some resolved live from the DB, others fixed citations
