@@ -254,7 +254,7 @@ neshama-app/
 - **Basic / Substring** — Hebrew text search with pagination
 - **Root + Binyan Search** — Enter a Hebrew root and/or filter by verb stem (Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael) and/or verb form (perfect, imperfect, imperative, participle, infinitive construct, infinitive absolute); when several are set, results are intersected (word must match the root family *and* the chosen binyan). Root alone maps to a Strong's number and BFS-expands to the full family tree with a direct vs. etymological view toggle; binyan alone (no root) is a plain morph-code filter with no etymological view. Scope filter (All / Torah / Nevi'im / Ketuvim)
 - **Roots by Letters** — Three letter selectors (one per root position, each "any" or one of 22 letters) list every matching verb root with its count in the chosen scope; clicking a root runs the root search
-- **What is the root? (`?tab=analyze`)** — Type a word as it appears in a verse (רדידי) → its dictionary entry (רָדִיד), how it is built (noun, construct + possessive "שלי"), and Strong's chain to the root (← רָדַד), with a button opening the root's whole family. The same analysis appears above the results of the basic and substring searches
+- **What is the root? (`?tab=analyze`)** — Type a word as it appears in a verse (רדידי) → its dictionary entry (רָדִיד), how it is built (noun, construct + possessive "שלי"), and Strong's chain to the root (← רָדַד), with a button opening the root's whole family. The same analysis appears above the substring search results (not the basic search, to keep it light)
 - **First/Last Letter in Verse** — Verses starting and/or ending with chosen Hebrew letters
 
 ### Neshama (Soul)
