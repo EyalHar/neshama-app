@@ -8,6 +8,8 @@ import VerseText, { findWordRanges } from "@/app/components/VerseText";
 import NoteIcon from "@/app/components/NoteIcon";
 import VerseNotes from "@/app/components/VerseNotes";
 import Commentaries, { BookIcon } from "@/app/components/Commentaries";
+import Echoes, { EchoIcon } from "@/app/components/Echoes";
+import VerseStructure, { TreeIcon } from "@/app/components/VerseStructure";
 import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 import { collect } from "@/lib/notebook";
 import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
@@ -22,6 +24,7 @@ import { playCelebrationSound } from "./sound";
 import WeeklyReadings, { type WeeklyKind } from "./WeeklyReadings";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
+const QAMATS_QATAN_KEY = "tanakh-show-qamats-qatan";
 const GEMATRIA_KEY = "tanakh-show-gematria";
 const GEMATRIA_METHODS_KEY = "tanakh-gematria-methods";
 const DIVISION_KEY = "tanakh-division";
@@ -92,6 +95,8 @@ export default function TanakhPage() {
   const [notes, setNotes] = useState<VerseNoteItem[]>([]);
   const [openNotesVerse, setOpenNotesVerse] = useState<string | null>(null);
   const [openCommentaryVerse, setOpenCommentaryVerse] = useState<string | null>(null);
+  const [openEchoVerse, setOpenEchoVerse] = useState<string | null>(null);
+  const [openStructureVerse, setOpenStructureVerse] = useState<string | null>(null);
   const [selectedSection, setSelectedSection] = useState<number | null>(null); // tinted parashiya
   const [collapsedSections, setCollapsedSections] = useState<Set<number>>(new Set());
   const chapterHeaderRef = useRef<HTMLDivElement>(null);
@@ -108,6 +113,7 @@ export default function TanakhPage() {
   const [readingMark, setReadingMark] = useState<(WeeklyReading & { kind: WeeklyKind }) | null>(null);
 
   const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
+  const showQamatsQatan = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(QAMATS_QATAN_KEY) === "1", () => false);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
   const showGematria = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_KEY) === "1", () => false);
   const gematriaMethods = parseGematriaMethods(
@@ -191,6 +197,8 @@ export default function TanakhPage() {
     setReadVerses(new Set());
     setOpenNotesVerse(null);
     setOpenCommentaryVerse(null);
+    setOpenEchoVerse(null);
+    setOpenStructureVerse(null);
     setActiveLeitword(null);
     setSelectedSection(null);
     setCollapsedSections(new Set());
@@ -600,6 +608,8 @@ export default function TanakhPage() {
     const verseNotes = notes.filter((n) => n.chapter === v.chapter && n.verse === v.verse);
     const notesOpen = openNotesVerse === k;
     const commentaryOpen = openCommentaryVerse === k;
+    const echoOpen = openEchoVerse === k;
+    const structureOpen = openStructureVerse === k;
     const newChapter = unitMode && (i === 0 || verses[i - 1].chapter !== v.chapter);
     const inReading = !!markedReading && !markedReading.isUnit && inRef([v.chapter, v.verse], markedReading.start, markedReading.end);
     // Source of this verse when collected into a notebook page
@@ -630,6 +640,7 @@ export default function TanakhPage() {
                 words={showGematria}
                 marks={showSpecialLetters ? specialLetters.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
                 highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
+                qamatsQatan={showQamatsQatan}
               />
             </p>
             {session && (
@@ -652,6 +663,28 @@ export default function TanakhPage() {
               }`}
             >
               <BookIcon />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setOpenEchoVerse(echoOpen ? null : k); }}
+              title="הדים: פסוקים שמהדהדים את הפסוק"
+              aria-expanded={echoOpen}
+              className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
+                echoOpen ? "opacity-100 text-violet-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+              }`}
+            >
+              <EchoIcon />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setOpenStructureVerse(structureOpen ? null : k); }}
+              title="מבנה הפסוק לפי הטעמים"
+              aria-expanded={structureOpen}
+              className={`self-start mt-1 shrink-0 p-0.5 rounded-full text-stone-500 hover:bg-stone-200 transition-opacity ${
+                structureOpen ? "opacity-100 text-sky-700" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+              }`}
+            >
+              <TreeIcon />
             </button>
             {session && (
               <button
@@ -686,6 +719,16 @@ export default function TanakhPage() {
             )}
             {isRead && <span data-collect-skip="" className="text-amber-400 text-lg self-start mt-1">✓</span>}
           </div>
+          {structureOpen && (
+            <div className="mx-2 sm:mx-10 mt-1 mb-3">
+              <VerseStructure text={v.text} book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenStructureVerse(null)} />
+            </div>
+          )}
+          {echoOpen && (
+            <div className="mx-2 sm:mx-10 mt-1 mb-3">
+              <Echoes book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenEchoVerse(null)} />
+            </div>
+          )}
           {commentaryOpen && (
             <div className="mx-2 sm:mx-10 mt-1 mb-3">
               <Commentaries book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenCommentaryVerse(null)} />
@@ -773,6 +816,15 @@ export default function TanakhPage() {
                 className="accent-amber-600 w-3.5 h-3.5"
               />
               הצג אותיות מיוחדות
+            </label>
+            <label className="flex items-center justify-center gap-2 text-xs text-stone-500 cursor-pointer select-none" title="אות שמתחתיה קמץ קטן (קָמָץ חָטוּף) נצבעת בכחול">
+              <input
+                type="checkbox"
+                checked={showQamatsQatan}
+                onChange={(e) => setPref(QAMATS_QATAN_KEY, e.target.checked ? "1" : "0")}
+                className="accent-sky-600 w-3.5 h-3.5"
+              />
+              סמן קמץ קטן <span className="text-sm text-stone-700">(<span className="text-sky-600 font-semibold">כׇּ</span>ל)</span>
             </label>
             <GematriaSettings
               enabled={showGematria}
