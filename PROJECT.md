@@ -33,6 +33,8 @@ neshama-app/
 │   │   ├── comments/[id]/      ← Delete a comment (soft if it has replies)
 │   │   ├── profile/            ← Public display name (GET/PATCH)
 │   │   ├── commentaries/       ← Classic commentaries on a verse (from Sefaria, license-filtered)
+│   │   ├── echoes/             ← Verses that share a rare word combination with a verse
+│   │   ├── characters/         ← People of a book and the chapters each pair shares
 │   │   ├── hapax/              ← Words occurring once in the Tanakh
 │   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
 │   │   ├── letter-pairs/       ← All triliteral verb roots + meanings, for the letter-pairs wheel
@@ -63,6 +65,8 @@ neshama-app/
 │   │   ├── VerseNotes.tsx      ← Notes panel (list, add, edit, delete, share) for a verse
 │   │   ├── DisplayNameForm.tsx ← Choose public display name before first share/comment
 │   │   ├── Commentaries.tsx    ← Per-verse commentators panel with tabs (+ BookIcon)
+│   │   ├── Echoes.tsx          ← Per-verse echoes panel (+ EchoIcon)
+│   │   ├── VerseStructure.tsx  ← Per-verse accent tree panel (+ TreeIcon)
 │   │   ├── NotebookCollector.tsx ← Global: collect selected text / verses / notes into the active notebook page
 │   │   ├── VerseText.tsx       ← Renders a verse with special letters + highlighted words
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
@@ -74,6 +78,9 @@ neshama-app/
 │   ├── favorites/page.tsx
 │   ├── jerusalem-names/page.tsx
 │   ├── letter-pairs/           ← page.tsx + LetterWheel (231-gate wheel of letter pairs)
+│   ├── characters/             ← page.tsx + CharacterGraph (force-directed network)
+│   ├── word-shifts/page.tsx    ← "גלגולי מילים": biblical vs modern meaning
+│   ├── parallels/              ← page.tsx (list) + [id]/page.tsx (side-by-side diff of a passage told twice)
 │   ├── loanwords/              ← page.tsx + LoanwordsBrowser
 │   ├── letters/page.tsx
 │   ├── login/page.tsx
@@ -97,6 +104,12 @@ neshama-app/
 │   ├── wordAnalysis.ts         ← "מה השורש?": OSHB morph → Hebrew description + derivedFrom chain
 │   ├── loanwords.ts            ← Loanword types, labels + data/loanwords snapshot (client-safe)
 │   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per passage and per parashiya
+│   ├── echoes.ts               ← "מאין ההד": rare shared lexeme pairs / phrases between verses (cached index)
+│   ├── parallels.ts            ← Parallel passages snapshot (data/parallels) + labels, parallelOf()
+│   ├── taamim.ts               ← Verse structure by disjunctive accents (client-safe parser)
+│   ├── characters.ts           ← Person names (OSHB Np + Strong's) per book/chapter, network (cached)
+│   ├── wordShifts.ts           ← Hand-picked list of words whose meaning changed (by Strong's number)
+│   ├── textDiff.ts             ← Word-level diff of two verse versions (same / spelling / only)
 │   ├── divisions.ts            ← Parashot / parashiyot: units, sections in a range
 │   ├── parashot.json           ← 54 Torah portions (snapshot from Sefaria)
 │   ├── parashiyot.json         ← 3,482 open/closed sections in the Tanakh (from MAM {פ}/{ס})
@@ -136,6 +149,9 @@ neshama-app/
 | `/special-letters` | All large, small and suspended letters and inverted nuns, linked to the reader |
 | `/jerusalem-names` | Names of Jerusalem with their source verses |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
+| `/parallels` | "נוסחים מקבילים": 102 passages told twice (Samuel–Kings / Chronicles, II Sam 22 / Ps 18, Decalogue…), each side by side with word differences marked |
+| `/characters` | "רשת הדמויות": the 30 most-named people of a book as a network; edge = chapters they share |
+| `/word-shifts` | "גלגולי מילים": biblical words with a different meaning today (חַשְׁמַל, אֶקְדָּח, מְדִינָה…), each with a verse |
 | `/loanwords` | Words borrowed from Persian, Egyptian, Greek etc., per Strong's, with their verses |
 | `/login` | Google OAuth login |
 | `/admin/seed` | Database seeding UI (OSHB morphology + Strong's dictionary) |
@@ -225,6 +241,12 @@ neshama-app/
 - `DELETE /api/comments/[id]` — Comment author, share author or admin; soft delete when it has replies
 - `GET` / `PATCH /api/profile` — Display name
 
+### Characters
+- `GET /api/characters?book=` — `{ nodes: { id, name, definition, count, chapters }[], edges: { a, b, chapters }[] }` for the 30 most-named people of the book
+
+### Echoes
+- `GET /api/echoes?book=&chapter=&verse=` — Up to 10 verses elsewhere that share a rare lexeme pair or a rare two-word phrase with the verse, scored by rarity; each with `strength` (strong/weak), shared lexemes and phrases, word numbers to highlight in both verses, and `parallelId` when the two are part of a parallel passage
+
 ### Commentaries
 - `GET /api/commentaries?book=&chapter=&verse=` — Classic commentators on a verse from Sefaria; only Public Domain / CC0 / CC-BY / CC-BY-SA editions are returned with text, others as a Sefaria link
 
@@ -247,6 +269,7 @@ neshama-app/
 - Division toggle: chapters ↔ parashot with parashiyot (Torah) or parashiyot (Nevi'im/Ketuvim; Psalms stays by chapter). Parashiyot shown with פ/ס breaks, per-parashiya leitwords (≥4 verses), a small toast + chime on finishing a parashiya, and a confetti modal for a finished parasha
 - Favorite verses and chapters (heart icons)
 - "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
+- "סמן קמץ קטן" checkbox — colors every letter carrying a qamats qatan (U+05C7 in Sefaria's text, which most fonts draw like a regular qamats), so כׇּל reads differently from כָּל
 - "חישוב גימטריה" checkbox — hovering a word (tapping, on touch screens) shows its gematria; selecting letters, even across verses, shows their sum while selecting. A settings popover picks the methods shown: standard, gadol (final letters 500–900), katan, ordinal (`lib/gematria.ts`). Words joined by maqaf count separately; verse numbers in a selection are ignored
 - Leitwords (מילים מנחות) — up to 5 roots the chapter repeats far above their Tanakh-wide rate (log-likelihood vs. corpus frequency); clicking one highlights all its occurrences in the chapter
 
@@ -294,6 +317,21 @@ neshama-app/
 - Personal pages with a TipTap editor (headings, bold/italic, lists, quotes, add-a-verse), autosave, copy as text, print/PDF
 - Collect into the "active page": select text in a verse, commentary, note, favorite, search result or share → "הוסף לדף"; or the 📝 button on a verse / note. Each item becomes a quote with its source (and edition + license for commentaries)
 
+### Echoes (מאין ההד)
+- An echo icon on every verse in the reader opens the verses elsewhere in the Tanakh that share a rare combination of words with it — וַיִּקַּח אֶת הַמַּאֲכֶלֶת (Gen 22:10 / Judg 19:29), הַכֶּר נָא (Gen 37:32 / 38:25), תֹהוּ וָבֹהוּ (Gen 1:2 / Jer 4:23). The shared words are highlighted in both verses; weak echoes are behind a toggle; an echo inside a parallel passage links to its comparison
+
+### Verse Structure (accent tree)
+- A tree icon on every verse in the reader shows the verse divided by its disjunctive accents as nested boxes: halves by אתנחתא, then זקף/סגולתא/טפחא, then רביע/פשטא/תביר, then גרש/פזר/לגרמיה. Parsed client-side from the Sefaria text (`lib/taamim.ts`). Prose system only: Psalms, Proverbs and Job 3:2–42:6 (טעמי אמ״ת) show a notice
+
+### Characters (`/characters`)
+- Per book, the 30 most-named people as a force-directed graph (node size = mentions, edge width = shared chapters). Clicking a person lists who they appear with and the shared chapters, linked to the reader; a person can be hidden (tribes named after a patriarch, merged namesakes). Divine names, places and months are left out
+
+### Word Shifts (`/word-shifts`)
+- 26 hand-picked words, each tied to its Strong's number: the biblical sense, today's sense, the occurrence count and a verse with the word highlighted
+
+### Parallel Passages (`/parallels`)
+- 102 passages the Tanakh tells twice, found from the data by `node scripts/build-parallels.mjs` (snapshot `data/parallels/parallels.json`). The view aligns the two versions verse by verse and marks words found in only one version and plene/defective spelling differences; verses told in only one version stand alone
+
 ### Commentaries
 - "הצג פרשנים" button on every verse in the reader opens a tabbed panel of classic commentators (Rashi, Ramban, Ibn Ezra, …); edition, license and a Sefaria link are shown under each
 
@@ -320,7 +358,7 @@ neshama-app/
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)

@@ -49,7 +49,7 @@ When a verse is toggled read, `POST /api/tanakh` checks verse → chapter → bo
 Progress updates dispatch a custom DOM event `tanakh-stats-update` on `window`. The Sidebar listens for it and refetches `/api/tanakh/stats`. Do not replace this with context — the Sidebar is rendered in the root layout outside the page tree.
 
 ### Sidebar layout
-The root `body` is viewport-height with `overflow-hidden`, so the Sidebar can't grow past the screen. Its `nav` is the only scrolling part (`flex-1 min-h-0 overflow-y-auto`), while the title and the sign-in/out footer are `shrink-0`. Links are split into `NAV_ITEMS` (always visible) and `STUDY_ITEMS` (the collapsible "עיון ומחקר" group, auto-open when the current page is in it). There is no "ראשי" item: the site title links home. Keep the scrolling setup when adding items: with 16 items the list already exceeds a laptop screen, and without the nav scroll the footer, including the "התחבר" link, gets clipped off-screen.
+The root `body` is viewport-height with `overflow-hidden`, so the Sidebar can't grow past the screen. Its `nav` is the only scrolling part (`flex-1 min-h-0 overflow-y-auto`), while the title and the sign-in/out footer are `shrink-0`. Links are split into `NAV_ITEMS` (always visible) and `STUDY_ITEMS` (the collapsible "עיון ומחקר" group, auto-open when the current page is in it). There is no "ראשי" item: the site title links home. Keep the scrolling setup when adding items: with 19 items the list already exceeds a laptop screen, and without the nav scroll the footer, including the "התחבר" link, gets clipped off-screen.
 
 ### Root search BFS
 `GET /api/verses/root` resolves a Hebrew root to a Strong's number, then does a BFS through `StrongsEntry.derivedFrom` (comma-separated Strong's numbers) to build a family tree. "Direct" view shows only the queried root's verses; "etymological" view includes all descendants.
@@ -88,6 +88,16 @@ Tanakh-wide counts per Strong's number (`getCorpusCounts()`, one `GROUP BY lemma
 
 ### Word analysis ("מה השורש?")
 `lib/wordAnalysis.ts` matches typed words against `WordEntry.plain` (which includes prefixes), groups by Strong's number via `parseWord()`, turns each morph chain into Hebrew with `describeMorph()` (verbs reuse `describeVerb()` from `lib/grammarQuiz.ts`), and walks `derivedFrom` up while there is a single parent. Many entries list several parents, often a verse cross-reference beside the real source (סֵפֶר: H9, H5608), so they are shown as `candidates` rather than guessed. Aramaic verbs get no binyan (OSHB's Aramaic stem codes differ).
+
+### Echoes and parallel passages
+`lib/echoes.ts` builds one in-memory index per server process from all of `WordEntry` (about 3 s on first request; restart after seeding): content-lexeme pairs and two-word surface phrases (leading ו stripped), keeping only those found in at most 6 verses. A verse's echoes are the verses sharing those features, scored by Σ log(N / df), same chapter excluded. Below 8 nothing is shown; 15+ is "strong". The weights were tuned on known echoes (Gen 22:10 / Judg 19:29, Gen 37:32 / 38:25, Gen 1:2 / Jer 4:23, I Kings 19:4 / Jonah 4:8): re-check them when changing anything.
+
+`/parallels` reads `data/parallels/parallels.json`, built from the data by `node scripts/build-parallels.mjs` (verse pairs with Jaccard ≥ 0.6 over lexemes chained into passages, then gaps filled at ≥ 0.3 so differently told verses like זָכוֹר / שָׁמוֹר are aligned). Passage ids are positions in that file, so they change when it is rebuilt. `lib/textDiff.ts` diffs a verse pair by LCS over letter skeletons without ו/י, so plene/defective spellings count as the same word, marked "spelling".
+
+### Accent tree, characters, word shifts
+- `lib/taamim.ts` parses the reader's Sefaria text (accents are kept there, stripped in `VerseText`). Disjunctives get a rank (1 אתנחתא, 2 kings incl. טפחא, 3 dukes, 4 counts; the last word is סוף פסוק); a segment is split after every inner word of the highest rank found in it. שלשלת and מונח count as disjunctive only with a following paseq (לגרמיה). Prose system only.
+- `lib/characters.ts` keeps OSHB `Np` words whose Strong's definition starts with a capital and whose main sense (before "also") isn't a place or month; `SAME_PERSON` merges renamed people (אברם→אברהם, שרי→שרה, יונתן→יהונתן). Cached per server process.
+- `lib/wordShifts.ts` is a curated list: add a word only after checking its Strong's definition and verses in the data, not from memory.
 
 ### Loanwords and letter pairs
 `/loanwords` reads `data/loanwords/loanwords.json`, a snapshot built by `node scripts/build-loanwords.mjs` from Strong's `derivation` field (the seeder doesn't store it). Strong's is from 1894 and misses many loans known today, which the page states; don't present the list as complete. `/letter-pairs` uses `listTriliteralRoots()` from the cached root list in `lib/rootLetters.ts` (restart after seeding). It shows roots that share letters, not related meanings: keep that framing.
