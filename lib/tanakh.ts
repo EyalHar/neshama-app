@@ -110,6 +110,15 @@ export function checkTanakhCompletion(
   });
 }
 
+// Sefaria's MAM text puts version notes inline after a word: `<sup class="footnote-marker">*</sup>
+// <i class="footnote">(בספרי ספרד ואשכנז …)</i>`. They are not part of the verse.
+const FOOTNOTE_RE = /<sup class="footnote-marker">[\s\S]*?<\/sup>\s*<i class="footnote">([\s\S]*?)<\/i>|<i class="footnote">([\s\S]*?)<\/i>/g;
+
+// Plain verse text from Sefaria's HTML, without version notes
+export function stripVerseHtml(html: string): string {
+  return stripHtml(html.replace(FOOTNOTE_RE, ""));
+}
+
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, "")
@@ -139,36 +148,56 @@ const KIND_BY_OPEN = Object.fromEntries(
 );
 const TAG_KIND: Record<string, SpecialLetterKind> = { big: "large", small: "small", sup: "suspended" };
 
+// A version note (חילוף נוסח: Sephardi/Ashkenazi/Yemenite books, the Aleppo Codex) at offset `at`
+// of a verse's stripped text, right after the word it is about
+export type VersionNote = { verse: number; at: number; text: string };
+
+const NOTE_OPEN = "";
+const NOTE_CLOSE = "";
+
+// Version notes become sentinel-wrapped plain text, located (and removed) by extractMarks()
+function markNotes(html: string): string {
+  return html.replace(FOOTNOTE_RE, (_, a?: string, b?: string) =>
+    NOTE_OPEN + stripHtml(a ?? b ?? "").replace(/^\((.*)\)$/, "$1") + NOTE_CLOSE);
+}
+
 // Sefaria (MAM) wraps special letters as <big>, <small>, bare <sup>, and <span class="mam-spi-invnun">.
-// <small> also wraps the paseq (׀), so only spans containing a Hebrew letter count. Footnotes
-// (Yemenite variants) can contain <big> too — those are left unmarked.
+// <small> also wraps the paseq (׀), so only spans containing a Hebrew letter count. Version notes
+// can contain <big> too, but markNotes() has already turned them into plain text.
 function markSpecialLetters(html: string): string {
   return html
-    .replace(/<i class="footnote">[\s\S]*?<\/i>/g, (fn) => fn.replace(/<\/?(big|small|sup)>/g, ""))
     .replace(/<(big|small|sup)>([^<]*)<\/\1>/g, (whole, tag: string, inner: string) =>
       /[א-ת]/.test(inner) ? MARK_OPEN[TAG_KIND[tag]] + inner + MARK_CLOSE : whole)
     .replace(/<span class="mam-spi-invnun">([^<]*)<\/span>/g, (_, inner: string) =>
       MARK_OPEN.inverted + inner + MARK_CLOSE);
 }
 
-function extractMarks(marked: string, verse: number): { text: string; marks: SpecialLetterMark[] } {
+function extractMarks(marked: string, verse: number): { text: string; marks: SpecialLetterMark[]; notes: VersionNote[] } {
   let text = "";
   const marks: SpecialLetterMark[] = [];
+  const notes: VersionNote[] = [];
   let open: { start: number; kind: SpecialLetterKind } | null = null;
+  let note: { at: number; text: string } | null = null;
   for (const ch of marked) {
-    if (KIND_BY_OPEN[ch]) open = { start: text.length, kind: KIND_BY_OPEN[ch] };
+    if (note) {
+      if (ch === NOTE_CLOSE) { notes.push({ verse, at: note.at, text: note.text.trim() }); note = null; }
+      else note.text += ch;
+    } else if (ch === NOTE_OPEN) note = { at: text.endsWith(" ") ? text.length - 1 : text.length, text: "" };
+    else if (KIND_BY_OPEN[ch]) open = { start: text.length, kind: KIND_BY_OPEN[ch] };
     else if (ch === MARK_CLOSE) {
       if (open) marks.push({ verse, start: open.start, end: text.length, kind: open.kind });
       open = null;
-    } else text += ch;
+    } else if (ch !== " " || (text !== "" && !text.endsWith(" "))) text += ch;
   }
-  return { text, marks };
+  if (text.endsWith(" ")) text = text.slice(0, -1);
+  for (const n of notes) n.at = Math.min(n.at, text.length);
+  return { text, marks, notes };
 }
 
 export async function fetchChapterWithMarks(
   bookId: string,
   chapter: number
-): Promise<{ verses: string[]; specialLetters: SpecialLetterMark[] }> {
+): Promise<{ verses: string[]; specialLetters: SpecialLetterMark[]; notes: VersionNote[] }> {
   const ref = `${bookId} ${chapter}`;
   const encoded = encodeURIComponent(ref);
   const res = await fetch(
@@ -180,12 +209,14 @@ export async function fetchChapterWithMarks(
   const raw: string[] = Array.isArray(data.he) ? data.he : [];
   const verses: string[] = [];
   const specialLetters: SpecialLetterMark[] = [];
+  const notes: VersionNote[] = [];
   raw.forEach((html, i) => {
-    const { text, marks } = extractMarks(stripHtml(markSpecialLetters(html)), i + 1);
-    verses.push(text);
-    specialLetters.push(...marks);
+    const extracted = extractMarks(stripHtml(markSpecialLetters(markNotes(html))), i + 1);
+    verses.push(extracted.text);
+    specialLetters.push(...extracted.marks);
+    notes.push(...extracted.notes);
   });
-  return { verses, specialLetters };
+  return { verses, specialLetters, notes };
 }
 
 export async function fetchChapter(bookId: string, chapter: number): Promise<string[]> {

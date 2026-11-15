@@ -187,11 +187,11 @@ neshama-app/
 ## API Routes Summary
 
 ### Tanakh Progress
-- `GET /api/tanakh?book=&chapter=` or `?book=&from=c:v&to=c:v` — Fetch a chapter or a verse range (parasha/parashiya) from Sefaria + user's read/favorite status, all keyed by chapter:verse; a range also returns `sections` (parashiyot with per-section leitwords) and `chapterVerseCounts`; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
+- `GET /api/tanakh?book=&chapter=` or `?book=&from=c:v&to=c:v` — Fetch a chapter or a verse range (parasha/parashiya) from Sefaria + user's read/favorite status, all keyed by chapter:verse; a range also returns `sections` (parashiyot with per-section leitwords) and `chapterVerseCounts`; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `versionNotes` (`{ chapter, verse, at, text }[]`, Sefaria's version notes taken out of the verse text), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
 - `POST /api/tanakh` — Toggle single verse read
 - `POST /api/tanakh/bulk` — Mark/clear a chapter, or a verse range (`completeRange` / `clearRange`)
 - `GET /api/tanakh/units?book=` — Parashot (Torah) or parashiyot (other books) for division mode
-- `GET /api/tanakh/weekly` — This week's parasha and haftarah (Israel), from Sefaria's calendar
+- `GET /api/tanakh/weekly?custom=ashkenazi|sephardi` — This week's parasha and haftarah (Israel) by custom, from Sefaria's calendar
 - `DELETE /api/tanakh/reset` — Reset all user progress
 - `GET /api/tanakh/stats` — Total completed chapters count
 
@@ -358,7 +358,7 @@ neshama-app/
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; custom (Ashkenazi/Sephardi: weekly haftarah and accent names in the accent tree, `lib/custom.ts`) as `tanakh-custom`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SpecialLetterKind, SpecialLetterMark } from "@/lib/tanakh";
 import { SPECIAL_LETTER_CLASS, SPECIAL_LETTER_KINDS } from "@/lib/special-letters";
+import VersionNoteMark from "./VersionNoteMark";
 
 const LABEL = Object.fromEntries(SPECIAL_LETTER_KINDS.map((k) => [k.kind, k.label]));
 const HIGHLIGHT_CLASS = "bg-yellow-200/80 rounded-sm";
@@ -36,22 +37,25 @@ export function findWordRanges(text: string, forms: Set<string>): Range[] {
 // Renders a verse with special letters (letter-level spans), qamats qatan letters and highlighted
 // words (word-level spans) layered together: the text is cut at every boundary of any of them.
 // With `words`, each word (split like findWordRanges) is also wrapped in a `data-word`
-// span, which the gematria overlay hovers over.
+// span, which the gematria overlay hovers over. Version notes are markers placed at their offset,
+// always outside word spans.
 export default function VerseText({
   text,
   marks = [],
   highlights = [],
+  notes = [],
   words = false,
   qamatsQatan = false,
 }: {
   text: string;
   marks?: SpecialLetterMark[];
   highlights?: Range[];
+  notes?: { at: number; text: string }[];
   words?: boolean;
   qamatsQatan?: boolean;
 }) {
   const qatan = qamatsQatan ? qamatsQatanRanges(text) : [];
-  if (marks.length === 0 && highlights.length === 0 && qatan.length === 0 && !words) return <>{text}</>;
+  if (marks.length === 0 && highlights.length === 0 && qatan.length === 0 && notes.length === 0 && !words) return <>{text}</>;
 
   const wordRanges = words
     ? [...text.matchAll(WORD_RE)].filter((m) => /[א-ת]/.test(m[0])).map((m) => ({ start: m.index, end: m.index + m[0].length }))
@@ -59,12 +63,21 @@ export default function VerseText({
 
   const cuts = new Set([0, text.length]);
   for (const r of [...marks, ...highlights, ...qatan, ...wordRanges]) { cuts.add(r.start); cuts.add(r.end); }
+  for (const n of notes) cuts.add(n.at);
   const points = [...cuts].sort((a, b) => a - b);
 
-  function pieces(from: number, to: number): ReactNode[] {
-    const parts: ReactNode[] = [];
+  const emitted = new Set<number>();
+  function notesAt(pos: number): ReactNode[] {
+    if (emitted.has(pos)) return [];
+    emitted.add(pos);
+    return notes.filter((n) => n.at === pos).map((n, i) => <VersionNoteMark key={`n${pos}-${i}`} text={n.text} />);
+  }
+
+  function pieces(from: number, to: number, withNotes = true): ReactNode[] {
+    const parts: ReactNode[] = withNotes && from === 0 ? notesAt(0) : [];
     const inside = points.filter((p) => p >= from && p <= to);
     for (let i = 0; i < inside.length - 1; i++) {
+      if (withNotes && i > 0) parts.push(...notesAt(inside[i]));
       const [start, end] = [inside[i], inside[i + 1]];
       const piece = text.slice(start, end);
       const kind: SpecialLetterKind | undefined = marks.find((m) => m.start <= start && end <= m.end)?.kind;
@@ -81,6 +94,7 @@ export default function VerseText({
         </span>
       );
     }
+    if (withNotes && to === text.length) parts.push(...notesAt(text.length));
     return parts;
   }
 
@@ -92,11 +106,14 @@ export default function VerseText({
     parts.push(...pieces(pos, w.start));
     parts.push(
       <span key={`w${w.start}`} data-word="" className={WORD_CLASS}>
-        {pieces(w.start, w.end)}
+        {pieces(w.start, w.end, false)}
       </span>
     );
+    parts.push(...notesAt(w.end));
     pos = w.end;
   }
   parts.push(...pieces(pos, text.length));
+  // A note that fell inside a word (none known) still gets shown, at the end of the verse
+  for (const n of notes) parts.push(...notesAt(n.at));
   return <>{parts}</>;
 }

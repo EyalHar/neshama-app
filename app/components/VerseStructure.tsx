@@ -1,6 +1,7 @@
 "use client";
 
-import { LEVEL_NAMES, parseVerse, usesProseAccents, type Segment } from "@/lib/taamim";
+import { LEVEL_NAMES, accentName, parseVerse, usesProseAccents, type Segment } from "@/lib/taamim";
+import type { Custom } from "@/lib/custom";
 
 export function TreeIcon({ size = 17 }: { size?: number }) {
   return (
@@ -22,11 +23,18 @@ const DEPTH_STYLE = [
 ];
 const LABEL_STYLE = ["text-amber-700", "text-sky-700", "text-emerald-700", "text-violet-700", "text-rose-700"];
 
-function SegmentBox({ s, depth }: { s: Segment; depth: number }) {
+const LEVEL_ACCENTS = [
+  ["סוף פסוק", "אתנחתא"],
+  ["זקף", "סגולתא", "שלשלת", "טפחא"],
+  ["רביע", "פשטא", "תביר", "זרקא", "יתיב"],
+  ["גרש", "גרשיים", "פזר", "תלישא גדולה", "קרני פרה", "לגרמיה"],
+];
+
+function SegmentBox({ s, depth, custom }: { s: Segment; depth: number; custom: Custom }) {
   const d = Math.min(depth, DEPTH_STYLE.length - 1);
   const label = s.accent && (
     <span className={`text-[11px] font-medium whitespace-nowrap ${LABEL_STYLE[d]}`}>
-      {s.accent.name}
+      {accentName(s.accent.name, custom)}
     </span>
   );
   if (s.children.length === 0) {
@@ -40,7 +48,7 @@ function SegmentBox({ s, depth }: { s: Segment; depth: number }) {
   return (
     <div className={`border rounded-xl p-1.5 flex flex-col gap-1 ${DEPTH_STYLE[d]}`}>
       <div className="flex flex-wrap gap-1.5 items-stretch">
-        {s.children.map((c, i) => <SegmentBox key={i} s={c} depth={depth + 1} />)}
+        {s.children.map((c, i) => <SegmentBox key={i} s={c} depth={depth + 1} custom={custom} />)}
       </div>
       <div className="text-center">{label}</div>
     </div>
@@ -49,8 +57,8 @@ function SegmentBox({ s, depth }: { s: Segment; depth: number }) {
 
 // The verse divided by its disjunctive accents, as nested boxes: the outer box is the verse,
 // inside it the halves (אתנחתא), inside each half its parts (זקף, טפחא…) and so on
-export default function VerseStructure({ text, book, chapter, verse, onClose }: {
-  text: string; book: string; chapter: number; verse: number; onClose: () => void;
+export default function VerseStructure({ text, book, chapter, verse, custom, onClose }: {
+  text: string; book: string; chapter: number; verse: number; custom: Custom; onClose: () => void;
 }) {
   const supported = usesProseAccents(book, chapter, verse);
   const tree = supported ? parseVerse(text) : null;
@@ -70,11 +78,11 @@ export default function VerseStructure({ text, book, chapter, verse, onClose }: 
         )}
         {tree && (
           <>
-            <SegmentBox s={tree} depth={0} />
+            <SegmentBox s={tree} depth={0} custom={custom} />
             <p className="text-[11px] text-stone-400 mt-2 leading-relaxed">
-              כל תיבה נגמרת בטעם מפסיק, וחלוקתה הפנימית נעשית לפי הטעם החזק שבתוכה. דרגות: {LEVEL_NAMES[1]} (סוף פסוק, אתנחתא) ·{" "}
-              {LEVEL_NAMES[2]} (זקף, סגולתא, שלשלת, טפחא) · {LEVEL_NAMES[3]} (רביע, פשטא, תביר, זרקא, יתיב) ·{" "}
-              {LEVEL_NAMES[4]} (גרש, גרשיים, פזר, תלישא גדולה, קרני פרה, לגרמיה). מילים בלי טעם מפסיק מחוברות למילה שאחריהן.
+              כל תיבה נגמרת בטעם מפסיק, וחלוקתה הפנימית נעשית לפי הטעם החזק שבתוכה. דרגות:{" "}
+              {LEVEL_ACCENTS.map((names, i) => `${LEVEL_NAMES[i + 1]} (${names.map((n) => accentName(n, custom)).join(", ")})`).join(" · ")}.
+              מילים בלי טעם מפסיק מחוברות למילה שאחריהן. שמות הטעמים לפי מנהג {custom === "sephardi" ? "ספרד" : "אשכנז"}.
             </p>
           </>
         )}

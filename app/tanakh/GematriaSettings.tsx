@@ -37,7 +37,7 @@ export default function GematriaSettings({
   }
 
   return (
-    <div ref={ref} className="relative flex items-center justify-center gap-1">
+    <div ref={ref} className="relative flex items-center gap-1">
       <label className="flex items-center gap-2 text-xs text-stone-500 cursor-pointer select-none">
         <input
           type="checkbox"

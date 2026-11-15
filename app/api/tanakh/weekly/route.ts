@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { parseCustom } from "@/lib/custom";
 import { getUnits, type VerseRef } from "@/lib/divisions";
 import type { WeeklyReading } from "@/lib/passage";
 import { TANAKH_BOOKS } from "@/lib/tanakh";
@@ -14,13 +15,15 @@ function parseRef(ref: string): Omit<WeeklyReading, "name" | "isUnit"> | null {
 
 type CalendarItem = { title: { en: string }; displayValue: { he: string }; ref?: string };
 
-// GET /api/tanakh/weekly — this week's Torah reading and haftarah (Israel), from Sefaria's
-// calendar. On a festival Shabbat that is the festival reading. The date is Israel's, so the
-// week turns over on Saturday night there.
-export async function GET() {
+// GET /api/tanakh/weekly?custom=ashkenazi|sephardi — this week's Torah reading and haftarah
+// (Israel), from Sefaria's calendar. On a festival Shabbat that is the festival reading. The date
+// is Israel's, so the week turns over on Saturday night there. With `custom`, Sefaria titles the
+// haftarah "Haftarah (A)" / "Haftarah (S)".
+export async function GET(req: NextRequest) {
+  const custom = parseCustom(req.nextUrl.searchParams.get("custom"));
   const [year, month, day] = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem" }).format(new Date()).split("-");
   const res = await fetch(
-    `https://www.sefaria.org/api/calendars?diaspora=0&year=${year}&month=${parseInt(month)}&day=${parseInt(day)}`,
+    `https://www.sefaria.org/api/calendars?diaspora=0&custom=${custom}&year=${year}&month=${parseInt(month)}&day=${parseInt(day)}`,
     { next: { revalidate: 3600 } }
   );
   if (!res.ok) return NextResponse.json({ error: "Failed to fetch calendar" }, { status: 502 });
@@ -36,7 +39,7 @@ export async function GET() {
   const parashaItem = items.find((i) => i.title.en === "Parashat Hashavua");
   const parasha = parashaItem ? toReading(parashaItem, parashaItem.displayValue.he) : null;
   const haftarot = items
-    .filter((i) => i.title.en === "Haftarah")
+    .filter((i) => i.title.en.startsWith("Haftarah"))
     .map((i) => toReading(i, i.displayValue.he))
     .filter((r): r is WeeklyReading => r !== null);
 

@@ -2,7 +2,7 @@ import data from "./special-letters.json";
 import type { SpecialLetterKind } from "./tanakh";
 
 // special-letters.json is a one-time snapshot of every <big>/<small>/<sup>/inverted-nun mark in
-// Sefaria's "Miqra according to the Masorah" text, excluding marks inside Yemenite-variant footnotes.
+// Sefaria's "Miqra according to the Masorah" text, excluding marks inside version notes (footnotes).
 export type SpecialLetterEntry = {
   book: string;
   chapter: number;
