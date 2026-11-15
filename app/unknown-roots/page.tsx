@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toHebrewNumeral, TANAKH_BOOKS } from "@/lib/tanakh";
+import PageHeader from "@/app/components/PageHeader";
 
 const bookOrder = new Map(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 const stripNikud = (s: string) => s.replace(/[֑-ׇ]/g, "");
@@ -69,7 +70,7 @@ export default function UnknownRootsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">מילים ללא שורש ידוע</h1>
+      <PageHeader title="מילים ללא שורש ידוע" />
       <p className="text-stone-500 text-sm mb-6">
         מילים שב-Strong's Hebrew Dictionary אין להן הפניה לשורש. עזור להשלים את המידע.
       </p>

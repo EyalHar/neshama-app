@@ -8,7 +8,8 @@ import HeartIcon from "@/app/components/HeartIcon";
 import LetterSearch from "./LetterSearch";
 import RootLetters from "./RootLetters";
 import WordAnalysis from "./WordAnalysis";
-import type { RootItem } from "@/lib/rootLetterPattern";
+import type { RootItem } from "@/lib/rootLetterPattern";
+import PageHeader from "@/app/components/PageHeader";
 
 const BINYANIM = [
   { id: "all", label: "כל הבניינים" },
@@ -408,7 +409,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">חיפוש בתנ״ך</h1>
+      <PageHeader title="חיפוש בתנ״ך" />
       <p className="text-stone-400 text-xs mb-6">Based on <a href="https://github.com/openscriptures/morphhb" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-600">Open Scriptures Hebrew Bible</a></p>
 
       {/* Tabs */}

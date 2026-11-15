@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
+import PageHeader from "@/app/components/PageHeader";
 import {
   SPECIAL_LETTERS,
   SPECIAL_LETTER_KINDS,
@@ -49,7 +50,7 @@ export default function SpecialLettersPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">אותיות מיוחדות בתנ״ך</h1>
+      <PageHeader title="אותיות מיוחדות בתנ״ך" />
       <p className="text-stone-500 text-sm mb-1">
         אותיות רבתי, זעירות ותלויות ונוני״ן הפוכות, כפי שהן מסומנות בנוסח ״מקרא על פי המסורה״
       </p>

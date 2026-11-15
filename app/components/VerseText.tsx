@@ -12,7 +12,9 @@ const WORD_RE = /[^\s־]+/g;
 // the rendering), so the whole letter with its marks is colored.
 const QAMATS_QATAN = "ׇ";
 const CLUSTER_RE = /[א-ת][֑-ׇֽֿׁׂׅׄ]*/g;
-const QAMATS_QATAN_CLASS = "text-sky-600 font-semibold";
+// Color only: a heavier weight than the verse's would draw these letters from another cut of the
+// font, so they would look smaller than their neighbors
+const QAMATS_QATAN_CLASS = "text-sky-700";
 
 function qamatsQatanRanges(text: string): Range[] {
   if (!text.includes(QAMATS_QATAN)) return [];

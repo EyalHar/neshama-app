@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toHebrewNumeral } from "@/lib/tanakh";
+import PageHeader from "@/app/components/PageHeader";
 
 type VerseResult = { book: string; bookHe: string; chapter: number; verse: number; text: string };
 type NameResult = { id: string; name: string; source: "lemma" | "phrase" | "fixed"; verseCount: number; verses: VerseResult[] };
@@ -107,7 +108,7 @@ export default function JerusalemNamesPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">שמות ירושלים בתנ״ך</h1>
+      <PageHeader title="שמות ירושלים בתנ״ך" />
       <p className="text-stone-500 text-sm mb-1">
         מבחר של 29 מתוך שבעים השמות שהמדרש (במדבר רבה יד, יב) מונה לירושלים — כל שם עם המקור
         או המקורות שלו בתנ״ך, מקושרים ישירות לקורא

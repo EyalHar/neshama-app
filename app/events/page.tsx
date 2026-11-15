@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import PageHeader from "@/app/components/PageHeader";
 
 const STORAGE_KEY = "events-search-state";
 
@@ -159,7 +160,7 @@ export default function EventsPage() {
             </button>
           )}
           <div className="text-5xl mb-4">📜</div>
-          <h1 className="text-3xl font-bold text-stone-800 mb-3">אירועי התנ״ך</h1>
+          <PageHeader title="אירועי התנ״ך" center />
           <p className="text-stone-500 leading-relaxed">
             הזן שם של אירוע מהתנ״ך וקבל את כל המקורות בהם הוא מוזכר
           </p>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { StudyDocSummary } from "@/lib/notebook";
 import { setActiveDoc, useActiveDoc } from "./activeDoc";
+import PageHeader from "@/app/components/PageHeader";
 
 const dateFormat = new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -46,7 +47,7 @@ export default function NotebookListPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">המחברת שלי</h1>
+      <PageHeader title="המחברת שלי" />
       <p className="text-stone-500 text-sm mb-6">
         דפים לדבר תורה, לסיכום או לכל צורך. אפשר לכתוב בהם חופשי, ולאסוף אליהם פסוקים, הערות וקטעים מפרשנים מכל מקום באתר:
         מסמנים טקסט ולוחצים ״הוסף לדף״.

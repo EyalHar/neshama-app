@@ -1,11 +1,12 @@
 import { TOOL_GROUPS } from "./tools";
-import ToolCard from "./ToolCard";
+import ToolCard from "./ToolCard";
+import PageHeader from "@/app/components/PageHeader";
 
 export default function DiscoverPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-amber-50" dir="rtl">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-        <h1 className="text-3xl font-bold text-stone-800 mb-2">גלה</h1>
+        <PageHeader title="גלה" />
         <p className="text-stone-500 leading-relaxed mb-10 max-w-2xl">
           כלים לעיון ולמחקר בתנ״ך: במילים ובאותיות, בנוסח ובמבנה שלו, ובאנשים, במקומות ובאירועים שבו.
         </p>

@@ -1,9 +1,10 @@
-import LetterWheel from "./LetterWheel";
+import LetterWheel from "./LetterWheel";
+import PageHeader from "@/app/components/PageHeader";
 
 export default function LetterPairsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">צירופי אותיות · רל״א שערים</h1>
+      <PageHeader title="צירופי אותיות · רל״א שערים" />
       <p className="text-stone-500 text-sm mb-4 leading-relaxed max-w-3xl">
         &quot;עשרים ושתים אותיות יסוד, קבען בגלגל כמין חומה ברל״א שערים, וחוזר הגלגל פנים ואחור&quot; (ספר יצירה ב, ד).
         כל קו בגלגל מחבר שתי אותיות, וכל צמד כזה הוא &quot;שער&quot;: 22×21÷2 = 231. בחרו שתי אותיות כדי לראות את

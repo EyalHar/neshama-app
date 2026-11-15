@@ -1,9 +1,10 @@
-import LoanwordsBrowser from "./LoanwordsBrowser";
+import LoanwordsBrowser from "./LoanwordsBrowser";
+import PageHeader from "@/app/components/PageHeader";
 
 export default function LoanwordsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">מילים שאולות במקרא</h1>
+      <PageHeader title="מילים שאולות במקרא" />
       <p className="text-stone-500 text-sm mb-4 leading-relaxed">
         מילים שנכנסו לעברית המקראית משפות אחרות: פרסית (בעיקר באסתר, עזרא, נחמיה ודניאל), מצרית (בסיפורי יוסף
         ויציאת מצרים), יוונית ושפות שהמקור המדויק שלהן לא ידוע.

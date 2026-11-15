@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
-import { TRADITIONS, VERSION_NOTES, noteRange, type VersionNoteEntry } from "@/lib/versionNotes";
+import { TRADITIONS, VERSION_NOTES, noteRange, type VersionNoteEntry } from "@/lib/versionNotes";
+import PageHeader from "@/app/components/PageHeader";
 
 const BOOK_HE = Object.fromEntries(TANAKH_BOOKS.map((b) => [b.id, b.he]));
 // A word with nikud in a note is the variant reading it quotes; the rest of the note is unpointed
@@ -34,7 +35,7 @@ export default function VersionNotesPage() {
   const groups = TRADITIONS.map((t) => ({ ...t, notes: VERSION_NOTES.filter((n) => n.tradition === t.id) })).filter((g) => g.notes.length > 0);
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">חילופי נוסח</h1>
+      <PageHeader title="חילופי נוסח" />
       <p className="text-stone-500 text-sm leading-relaxed mb-4 max-w-3xl">
         הטקסט באתר הוא מהדורת &quot;מקרא על פי המסורה&quot;, המבוססת על כתר ארם צובא ועל כתבי יד קרובים לו. המהדורה מציינת{" "}
         {VERSION_NOTES.length} מקומות שבהם קהילות או כתבי יד כתובים אחרת. בקורא הם מסומנים בכוכבית כחולה אחרי המילה.

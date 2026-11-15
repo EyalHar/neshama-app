@@ -104,8 +104,8 @@ function Lexeme({ l, onPickRoot }: { l: LexemeAnalysis; onPickRoot: (root: strin
       )}
 
       <div className="border-t border-stone-100 pt-3">
-        <p className="text-xs font-medium text-stone-500 mb-2">
-          {derived ? "גזירה לפי Strong's" : l.primitiveRoot ? "שורש ראשוני לפי Strong's" : "מקור לפי Strong's"}
+        <p className="text-xs font-medium text-stone-600 mb-2">
+          {l.primitiveRoot && !derived ? "המילה היא עצמה שורש: היא לא נגזרת ממילה אחרת" : "מאיזה שורש המילה נגזרת"}
         </p>
         <div className="flex items-start gap-2 flex-wrap">
           {l.chain.map((link, i) => (
@@ -192,7 +192,8 @@ export default function WordAnalysis({ q, whole, scope, onPickRoot, compact = fa
         )
       )}
       <p className="text-[11px] text-stone-400 mt-3">
-        הניתוח מתוך OSHB (מורפולוגיה) ו-Strong&apos;s (גזירה). השורש שמציין Strong&apos;s הוא הצעה של מילון מ-1894, לא הכרעה.
+        ניתוח הצורה (בניין, זמן, גוף) מתוך OSHB, והשורש לפי מילון Strong&apos;s, מילון עברי-אנגלי לתנ״ך מסוף המאה ה-19 שמציין
+        לכל מילה ממה היא נגזרת. השורש שהוא מציין הוא הצעה של המילון, לא הכרעה.
       </p>
     </section>
   );

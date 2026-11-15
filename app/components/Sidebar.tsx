@@ -2,44 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { TOOL_HREFS } from "../discover/tools";
-
-type NavItem = { href: string; label: string; icon: ReactNode };
-
-// Three titled groups: the text itself, the user's own and shared content, and experiences. The
-// study tools live on /discover, so "גלה" is also active on any of their pages.
-const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
-  {
-    title: "תנ״ך",
-    items: [
-      { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
-      { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
-      { href: "/discover", label: "גלה", icon: "✨" },
-    ],
-  },
-  {
-    title: "אישי וקהילה",
-    items: [
-      { href: "/favorites", label: "האהובים שלי", icon: "♥" },
-      { href: "/notebook", label: "המחברת שלי", icon: "📝" },
-      { href: "/community", label: "קהילה", icon: "💬" },
-    ],
-  },
-  {
-    title: "חוויה",
-    items: [
-      { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
-      { href: "/neshama", label: "נשמה", icon: "🕊" },
-    ],
-  },
-];
-
-function isActive(href: string, pathname: string): boolean {
-  if (href === "/discover" && TOOL_HREFS.some((t) => pathname === t || pathname.startsWith(`${t}/`))) return true;
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
+import { NAV_GROUPS, isNavActive, type NavItem } from "./nav";
 
 function NavLink({ item, active, onNavigate }: { item: NavItem; active: boolean; onNavigate: () => void }) {
   return (
@@ -122,7 +87,7 @@ export default function Sidebar() {
               <h2 className="px-4 mb-1.5 text-[11px] font-semibold tracking-wide text-stone-500">{group.title}</h2>
               <div className="space-y-0.5">
                 {group.items.map((item) => (
-                  <NavLink key={item.href} item={item} active={isActive(item.href, pathname)} onNavigate={() => setOpen(false)} />
+                  <NavLink key={item.href} item={item} active={isNavActive(item.href, pathname)} onNavigate={() => setOpen(false)} />
                 ))}
               </div>
             </section>

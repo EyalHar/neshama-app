@@ -1,7 +1,9 @@
 "use client";
 
-import { toHebrewNumeral } from "@/lib/tanakh";
+import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
 import Confetti from "@/app/components/Confetti";
+
+const TANAKH_CHAPTERS = TANAKH_BOOKS.reduce((sum, b) => sum + b.chapters, 0);
 
 const CHAPTER_ENCOURAGEMENTS = [
   "כל הכבוד! המשך כך — כל פרק מקרב אותך יותר לתנ״ך שלך.",
@@ -40,7 +42,9 @@ export interface CelebrationData {
   chapterNum?: number;
   parashaName?: string;
   sectionName?: string;
-  count: number;
+  count: number; // chapter: completed chapters in the whole Tanakh; book/section/tanakh: completed books
+  bookCount?: number; // chapter: completed chapters in this book
+  bookTotal?: number;
   nextUnreadChapter?: number;
 }
 
@@ -95,7 +99,7 @@ export default function CelebrationModal({
             <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
             <p className="text-stone-600 mb-2">
               סיימת את ספר {celebration.bookName}!<br />
-              <span className="font-semibold text-amber-700">{celebration.count} ספרים הושלמו עד כה</span>
+              <span className="font-semibold text-amber-700">{celebration.count} מתוך {TANAKH_BOOKS.length} ספרי התנ״ך הושלמו עד כה</span>
             </p>
             <p className="text-stone-500 text-sm italic mb-6">{randomItem(BOOK_ENCOURAGEMENTS)}</p>
             <button onClick={onClose} className={primaryButton}>תודה!</button>
@@ -115,9 +119,20 @@ export default function CelebrationModal({
             <div className="text-5xl mb-4 animate-emoji-pulse-glow inline-block">⭐</div>
             <h2 className="text-2xl font-bold text-stone-800 mb-2">כל הכבוד!</h2>
             <p className="text-stone-600 mb-2">
-              סיימת את פרק {toHebrewNumeral(celebration.chapterNum!)} ב{celebration.bookName}!<br />
-              <span className="font-semibold text-amber-700">{celebration.count} פרקים הושלמו עד כה</span>
+              סיימת את פרק {toHebrewNumeral(celebration.chapterNum!)} ב{celebration.bookName}!
             </p>
+            <div className="flex justify-center gap-3 mb-3 text-sm">
+              {celebration.bookCount !== undefined && celebration.bookTotal !== undefined && (
+                <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">
+                  <div className="text-xs text-stone-500">בספר {celebration.bookName}</div>
+                  <div className="font-semibold text-amber-800">{celebration.bookCount} מתוך {celebration.bookTotal} פרקים</div>
+                </div>
+              )}
+              <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">
+                <div className="text-xs text-stone-500">בכל התנ״ך</div>
+                <div className="font-semibold text-amber-800">{celebration.count} מתוך {TANAKH_CHAPTERS} פרקים</div>
+              </div>
+            </div>
             <p className="text-stone-500 text-sm italic mb-6">{randomItem(CHAPTER_ENCOURAGEMENTS)}</p>
             <div className="flex flex-col gap-3">
               {celebration.nextUnreadChapter && (
