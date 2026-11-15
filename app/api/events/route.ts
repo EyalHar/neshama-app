@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { stripVerseHtml } from "@/lib/tanakh";
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -27,20 +28,6 @@ const SYSTEM_PROMPT = `אתה מומחה בתנ"ך העברי.
 - ציין רק פסוקים שאתה בטוח שהם קיימים
 - כל הטקסט מחוץ ל-sefaria_ref — בעברית בלבד`;
 
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&thinsp;/g, " ")
-    .replace(/&[a-zA-Z]+;/g, "")
-    .replace(/\{[^}]*\}/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 async function fetchVerseFromSefaria(ref: string): Promise<string | null> {
   try {
     const encoded = encodeURIComponent(ref);
@@ -51,7 +38,7 @@ async function fetchVerseFromSefaria(ref: string): Promise<string | null> {
     if (!res.ok) return null;
     const data = await res.json();
     const raw = Array.isArray(data.he) ? data.he.join(" ") : data.he;
-    return raw ? stripHtml(raw) : null;
+    return raw ? stripVerseHtml(raw) : null;
   } catch {
     return null;
   }

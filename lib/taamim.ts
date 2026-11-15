@@ -8,7 +8,24 @@
 // Prose system only: Psalms, Proverbs and the poetic body of Job (3:2–42:6) use the other system
 // (טעמי אמ״ת), with different accents and rules.
 
+import type { Custom } from "./custom";
+
 export type Accent = { name: string; level: number };
+
+// Accent names are stored in their Ashkenazi form. The Sephardi (Jerusalem-Sephardi) names follow
+// the tradition table in Wikipedia's "Hebrew cantillation"; accents named the same are left out.
+const SEPHARDI_NAMES: Record<string, string> = {
+  "אתנחתא": "אתנח",
+  "זקף קטן": "זקף קטון",
+  "טפחא": "טרחא",
+  "פשטא": "קדמא",
+  "גרש": "גריש",
+  "גרשיים": "שני גרישין",
+  "פזר": "פזר גדול",
+  "תלישא גדולה": "תלשא",
+};
+
+export const accentName = (name: string, custom: Custom) => (custom === "sephardi" ? SEPHARDI_NAMES[name] ?? name : name);
 
 const DISJUNCTIVES: Record<number, Accent> = {
   0x0591: { name: "אתנחתא", level: 1 },

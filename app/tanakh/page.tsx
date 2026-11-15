@@ -13,7 +13,7 @@ import VerseStructure, { TreeIcon } from "@/app/components/VerseStructure";
 import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 import { collect } from "@/lib/notebook";
 import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
-import { inRef, type PassageMark, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
+import { inRef, type PassageMark, type PassageNote, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
 import type { Leitword } from "@/lib/leitwords";
 import CelebrationModal, { type CelebrationData } from "./CelebrationModal";
 import LeitwordChips from "./LeitwordChips";
@@ -22,6 +22,8 @@ import GematriaOverlay, { hasTextSelection, isTouchWordTap } from "./GematriaOve
 import { parseGematriaMethods } from "@/lib/gematria";
 import { playCelebrationSound } from "./sound";
 import WeeklyReadings, { type WeeklyKind } from "./WeeklyReadings";
+import HeaderMenu from "./HeaderMenu";
+import { CUSTOM_KEY, CUSTOMS, parseCustom } from "@/lib/custom";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const QAMATS_QATAN_KEY = "tanakh-show-qamats-qatan";
@@ -82,6 +84,7 @@ export default function TanakhPage() {
   const [chapterVerseCounts, setChapterVerseCounts] = useState<Record<number, number>>({});
   const [sections, setSections] = useState<PassageSection[]>([]);
   const [specialLetters, setSpecialLetters] = useState<PassageMark[]>([]);
+  const [versionNotes, setVersionNotes] = useState<PassageNote[]>([]);
   const [leitwords, setLeitwords] = useState<Leitword[]>([]);
   const [activeLeitword, setActiveLeitword] = useState<string | null>(null); // `${scope}|${strongs}`
   const [readVerses, setReadVerses] = useState<Set<string>>(new Set());
@@ -114,8 +117,10 @@ export default function TanakhPage() {
 
   const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
   const showQamatsQatan = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(QAMATS_QATAN_KEY) === "1", () => false);
+  const custom = useSyncExternalStore(subscribePrefs, () => parseCustom(localStorage.getItem(CUSTOM_KEY)), () => "ashkenazi" as const);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
   const showGematria = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_KEY) === "1", () => false);
+  const activeSettings = [showSpecialLetters, showQamatsQatan, showGematria].filter(Boolean).length;
   const gematriaMethods = parseGematriaMethods(
     useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_METHODS_KEY) ?? "", () => "")
   );
@@ -208,6 +213,7 @@ export default function TanakhPage() {
       setChapterVerseCounts(data.chapterVerseCounts ?? {});
       setSections(data.sections ?? []);
       setSpecialLetters(data.specialLetters ?? []);
+      setVersionNotes(data.versionNotes ?? []);
       setLeitwords(data.leitwords ?? []);
       setVersesLoadedFor(loadedKey);
       setReadVerses(new Set(data.readVerses ?? []));
@@ -640,6 +646,7 @@ export default function TanakhPage() {
                 words={showGematria}
                 marks={showSpecialLetters ? specialLetters.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
                 highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
+                notes={versionNotes.filter((n) => n.chapter === v.chapter && n.verse === v.verse)}
                 qamatsQatan={showQamatsQatan}
               />
             </p>
@@ -721,7 +728,7 @@ export default function TanakhPage() {
           </div>
           {structureOpen && (
             <div className="mx-2 sm:mx-10 mt-1 mb-3">
-              <VerseStructure text={v.text} book={selectedBook.id} chapter={v.chapter} verse={v.verse} onClose={() => setOpenStructureVerse(null)} />
+              <VerseStructure text={v.text} book={selectedBook.id} chapter={v.chapter} verse={v.verse} custom={custom} onClose={() => setOpenStructureVerse(null)} />
             </div>
           )}
           {echoOpen && (
@@ -782,60 +789,109 @@ export default function TanakhPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 mb-6">
+          <div className="pt-1">
             <h1 className="text-2xl font-bold text-stone-800">קריאת תנ״ך</h1>
             {!session && (
               <a href="/login" className="text-amber-600 text-sm hover:underline">התחבר לשמירת התקדמות</a>
             )}
           </div>
-          <div className="flex flex-col gap-1 w-36">
-            <button
-              onClick={handleRandomTanakh}
-              className="w-full bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+          <div className="flex items-center gap-2 pt-1.5">
+            <HeaderMenu
+              label="אקראי"
+              icon={
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="w-4 h-4">
+                  <rect x="3" y="3" width="14" height="14" rx="3" />
+                  <circle cx="7" cy="7" r="1" fill="currentColor" stroke="none" />
+                  <circle cx="13" cy="13" r="1" fill="currentColor" stroke="none" />
+                  <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              }
             >
-              פרק אקראי מהתנ״ך
-            </button>
-            <button
-              onClick={handleRandomInBook}
-              className="w-full bg-stone-600 hover:bg-stone-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+              {(close) => (
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => { close(); handleRandomTanakh(); }}
+                    className="w-full bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    פרק אקראי מהתנ״ך
+                  </button>
+                  <button
+                    onClick={() => { close(); handleRandomInBook(); }}
+                    className="w-full bg-stone-600 hover:bg-stone-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    פרק אקראי מ{selectedBook.he}
+                  </button>
+                  <button
+                    onClick={() => { close(); handleRandomVerse(); }}
+                    className="w-full bg-stone-400 hover:bg-stone-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    פסוק אקראי מהתנ״ך
+                  </button>
+                </div>
+              )}
+            </HeaderMenu>
+            <HeaderMenu
+              label="הגדרות תצוגה"
+              badge={activeSettings}
+              icon={
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="w-4 h-4">
+                  <path d="M3 6h8M15 6h2M3 14h2M9 14h8" />
+                  <circle cx="13" cy="6" r="2" />
+                  <circle cx="7" cy="14" r="2" />
+                </svg>
+              }
             >
-              פרק אקראי מ{selectedBook.he}
-            </button>
-            <button
-              onClick={handleRandomVerse}
-              className="w-full bg-stone-400 hover:bg-stone-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-            >
-              פסוק אקראי מהתנ״ך
-            </button>
-            <label className="flex items-center justify-center gap-2 mt-1 text-xs text-stone-500 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={showSpecialLetters}
-                onChange={(e) => setPref(SHOW_SPECIAL_KEY, e.target.checked ? "1" : "0")}
-                className="accent-amber-600 w-3.5 h-3.5"
-              />
-              הצג אותיות מיוחדות
-            </label>
-            <label className="flex items-center justify-center gap-2 text-xs text-stone-500 cursor-pointer select-none" title="אות שמתחתיה קמץ קטן (קָמָץ חָטוּף) נצבעת בכחול">
-              <input
-                type="checkbox"
-                checked={showQamatsQatan}
-                onChange={(e) => setPref(QAMATS_QATAN_KEY, e.target.checked ? "1" : "0")}
-                className="accent-sky-600 w-3.5 h-3.5"
-              />
-              סמן קמץ קטן <span className="text-sm text-stone-700">(<span className="text-sky-600 font-semibold">כׇּ</span>ל)</span>
-            </label>
-            <GematriaSettings
-              enabled={showGematria}
-              methods={gematriaMethods}
-              onToggle={(on) => setPref(GEMATRIA_KEY, on ? "1" : "0")}
-              onMethodsChange={(methods) => setPref(GEMATRIA_METHODS_KEY, methods.join(","))}
-            />
+              {() => (
+                <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-2 text-xs text-stone-500 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={showSpecialLetters}
+                    onChange={(e) => setPref(SHOW_SPECIAL_KEY, e.target.checked ? "1" : "0")}
+                    className="accent-amber-600 w-3.5 h-3.5"
+                  />
+                  הצג אותיות מיוחדות
+                </label>
+                <label className="flex items-center gap-2 text-xs text-stone-500 cursor-pointer select-none" title="אות שמתחתיה קמץ קטן (קָמָץ חָטוּף) נצבעת בכחול">
+                  <input
+                    type="checkbox"
+                    checked={showQamatsQatan}
+                    onChange={(e) => setPref(QAMATS_QATAN_KEY, e.target.checked ? "1" : "0")}
+                    className="accent-sky-600 w-3.5 h-3.5"
+                  />
+                  סמן קמץ קטן <span className="text-sm text-stone-700">(<span className="text-sky-600 font-semibold">כׇּ</span>ל)</span>
+                </label>
+                <GematriaSettings
+                  enabled={showGematria}
+                  methods={gematriaMethods}
+                  onToggle={(on) => setPref(GEMATRIA_KEY, on ? "1" : "0")}
+                  onMethodsChange={(methods) => setPref(GEMATRIA_METHODS_KEY, methods.join(","))}
+                />
+                <div className="flex items-center gap-1.5 pt-1.5 mt-0.5 border-t border-stone-100 text-xs text-stone-500" title="קובע את הפטרת השבוע ואת שמות הטעמים בעץ הטעמים">
+                  מנהג:
+                  <div className="flex rounded-lg border border-stone-200 overflow-hidden" role="radiogroup" aria-label="מנהג">
+                    {CUSTOMS.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={custom === c.id}
+                        onClick={() => setPref(CUSTOM_KEY, c.id)}
+                        className={`px-2 py-0.5 transition-colors ${custom === c.id ? "bg-amber-600 text-white" : "bg-white hover:bg-stone-100"}`}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              )}
+            </HeaderMenu>
           </div>
         </div>
 
-        <WeeklyReadings onJump={jumpToWeekly} />
+        <WeeklyReadings custom={custom} onJump={jumpToWeekly} />
 
         {/* Selector */}
         <div className="bg-white rounded-2xl border border-stone-200 p-4 mb-6 shadow-sm">

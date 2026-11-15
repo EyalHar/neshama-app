@@ -64,8 +64,11 @@ OSHB word elements can contain markup such as `<seg type="x-large">ע</seg>` (en
 
 ### Special letters: two sources, one markup
 Large/small/suspended letters and inverted nuns come from Sefaria's markup (`<big>`, `<small>`, bare `<sup>`, `<span class="mam-spi-invnun">`), in two places:
-- **Reader (live):** `fetchChapterWithMarks()` in `lib/tanakh.ts` replaces those tags with private-use sentinel characters before `stripHtml()`, then walks the stripped text to compute `{ verse, start, end, kind }` offsets. `fetchChapter()` is a thin wrapper that drops the marks. `<small>` around a paseq (׀) and tags inside Yemenite-variant footnotes are not counted.
+- **Reader (live):** `fetchChapterWithMarks()` in `lib/tanakh.ts` replaces those tags with private-use sentinel characters before `stripHtml()`, then walks the stripped text to compute `{ verse, start, end, kind }` offsets. `fetchChapter()` is a thin wrapper that drops the marks. `<small>` around a paseq (׀) and tags inside version notes are not counted.
 - **`/special-letters` page (static):** `lib/special-letters.json` is a one-time snapshot built by scanning all 39 books via Sefaria API v3 with the same rules. If the rules change, regenerate it so the two stay consistent.
+
+### Version notes (חילופי נוסח)
+Sefaria's MAM text puts 31 version notes inline after a word (`<sup class="footnote-marker">*</sup><i class="footnote">(בספרי ספרד ואשכנז …)</i>`): readings of Sephardi/Ashkenazi or Yemenite books, or the Aleppo Codex. They are not verse text. `fetchChapterWithMarks()` takes them out with a sentinel pass like the special letters and returns them as `notes` (`{ verse, at, text }`, `at` = offset right after the word); the reader shows a `*` marker (`app/components/VersionNoteMark.tsx`) there, outside the gematria word spans. Any other Sefaria verse fetch must go through `stripVerseHtml()`, or the note text ends up inside the verse.
 
 ### Reader passages: chapter or verse range
 The reader (`app/tanakh/page.tsx`) shows a *passage*: either a chapter or, in division mode, a verse range (a parasha in the Torah, a parashiya elsewhere; Psalms has no division mode). Everything per-verse — read status, favorites, notes, special-letter marks, leitword forms, DOM ids — is keyed by chapter **and** verse (`"c:v"`), because a parasha spans chapters. Position is stored as a book + anchor verse: chapter mode shows the anchor's chapter, division mode the unit containing it, so switching modes or following a verse link keeps the place.

@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NOTE_INCLUDE, toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { getPassageLeitwords } from "@/lib/leitwords";
-import type { PassageMark, PassageSection, PassageVerse } from "@/lib/passage";
+import type { PassageMark, PassageNote, PassageSection, PassageVerse } from "@/lib/passage";
 import { compareRefs, getParashiyot, parseRef, refKey, type VerseRef } from "@/lib/divisions";
 import { getCompletionEvents } from "@/lib/progress";
 import { fetchChapterWithMarks, TANAKH_BOOKS, type Section } from "@/lib/tanakh";
@@ -44,9 +44,11 @@ export async function GET(request: NextRequest) {
 
     const verses: PassageVerse[] = [];
     const specialLetters: PassageMark[] = [];
+    const versionNotes: PassageNote[] = [];
     chapterNums.forEach((c, i) => {
       chapters[i].verses.forEach((text, vi) => { if (inRange(c, vi + 1)) verses.push({ chapter: c, verse: vi + 1, text }); });
       for (const m of chapters[i].specialLetters) if (inRange(c, m.verse)) specialLetters.push({ ...m, chapter: c });
+      for (const n of chapters[i].notes) if (inRange(c, n.verse)) versionNotes.push({ ...n, chapter: c });
     });
 
     const parashiyot = isRange ? getParashiyot(book, from, to) : [];
@@ -142,7 +144,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      verses, chapterVerseCounts, specialLetters, leitwords: leit.passage, sections,
+      verses, chapterVerseCounts, specialLetters, versionNotes, leitwords: leit.passage, sections,
       readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, favoriteParashiyot, notes,
     });
   } catch {
