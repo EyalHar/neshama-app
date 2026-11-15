@@ -4,42 +4,49 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, type ReactNode } from "react";
 import { useSession, signOut } from "next-auth/react";
-import TempleIcon from "./TempleIcon";
+import { TOOL_HREFS } from "../discover/tools";
 
 type NavItem = { href: string; label: string; icon: ReactNode };
 
-// Everyday pages — always visible
-const NAV_ITEMS: NavItem[] = [
-  { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
-  { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
-  { href: "/community", label: "שיתופים", icon: "💬" },
-  { href: "/favorites", label: "האהובים עליי ביותר", icon: "♥" },
-  { href: "/notebook", label: "המחברת שלי", icon: "📝" },
-  { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
-  { href: "/neshama", label: "נשמה", icon: "🕊" },
+// Three titled groups: the text itself, the user's own and shared content, and experiences. The
+// study tools live on /discover, so "גלה" is also active on any of their pages.
+const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
+  {
+    title: "תנ״ך",
+    items: [
+      { href: "/tanakh", label: "קריאת תנ״ך", icon: "📖" },
+      { href: "/advanced", label: "חיפוש בתנ״ך", icon: "🔍" },
+      { href: "/discover", label: "גלה", icon: "✨" },
+    ],
+  },
+  {
+    title: "אישי וקהילה",
+    items: [
+      { href: "/favorites", label: "האהובים שלי", icon: "♥" },
+      { href: "/notebook", label: "המחברת שלי", icon: "📝" },
+      { href: "/community", label: "קהילה", icon: "💬" },
+    ],
+  },
+  {
+    title: "חוויה",
+    items: [
+      { href: "/quiz", label: "בחן את עצמך", icon: "🎯" },
+      { href: "/neshama", label: "נשמה", icon: "🕊" },
+    ],
+  },
 ];
 
-// Occasional study pages — in the collapsible "עיון ומחקר" group
-const STUDY_ITEMS: NavItem[] = [
-  { href: "/events", label: "אירועי התנ״ך", icon: "📜" },
-  { href: "/unique-words", label: "מילים יחידאיות", icon: "1" },
-  { href: "/special-letters", label: "אותיות מיוחדות", icon: "ב" },
-  { href: "/parallels", label: "נוסחים מקבילים", icon: "⇄" },
-  { href: "/characters", label: "רשת הדמויות", icon: "👥" },
-  { href: "/word-shifts", label: "גלגולי מילים", icon: "↻" },
-  { href: "/letter-pairs", label: "צירופי אותיות", icon: "◎" },
-  { href: "/loanwords", label: "מילים שאולות", icon: "🌍" },
-  { href: "/jerusalem-names", label: "שמות ירושלים", icon: <TempleIcon /> },
-  { href: "/biblical-places", label: "ערים ויישובים במקרא", icon: "📍" },
-  { href: "/unknown-roots", label: "שורשים לא ידועים", icon: "?" },
-];
+function isActive(href: string, pathname: string): boolean {
+  if (href === "/discover" && TOOL_HREFS.some((t) => pathname === t || pathname.startsWith(`${t}/`))) return true;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 function NavLink({ item, active, onNavigate }: { item: NavItem; active: boolean; onNavigate: () => void }) {
   return (
     <Link
       href={item.href}
       onClick={onNavigate}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
         active ? "bg-amber-700 text-white" : "text-stone-300 hover:bg-stone-800 hover:text-amber-200"
       }`}
     >
@@ -54,9 +61,6 @@ export default function Sidebar() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [completedChapters, setCompletedChapters] = useState<number | null>(null);
-  // null = follow the current page (open when on one of its pages); set once the user toggles
-  const [studyToggled, setStudyToggled] = useState<boolean | null>(null);
-  const studyOpen = studyToggled ?? STUDY_ITEMS.some((i) => i.href === pathname);
 
   const fetchStats = () => {
     if (!session?.user) { setCompletedChapters(null); return; }
@@ -103,7 +107,7 @@ export default function Sidebar() {
           onClick={() => setOpen(false)}
           aria-current={pathname === "/" ? "page" : undefined}
           title="לדף הראשי"
-          className="shrink-0 block px-6 py-8 border-b border-stone-700 hover:bg-stone-800/60 transition-colors"
+          className="shrink-0 block px-6 py-6 border-b border-stone-700 hover:bg-stone-800/60 transition-colors"
         >
           <h1 className="flame-title text-xl font-bold leading-snug">
             שַׁלְהֶבֶתְ יָֽה
@@ -112,38 +116,17 @@ export default function Sidebar() {
         </Link>
 
         {/* Nav — scrolls on its own so the sign-in/out footer below always stays visible */}
-        <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} active={pathname === item.href || pathname.startsWith(`${item.href}/`)} onNavigate={() => setOpen(false)} />
+        <nav className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 py-4">
+          {NAV_GROUPS.map((group, i) => (
+            <section key={group.title} aria-label={group.title} className={i > 0 ? "mt-5" : ""}>
+              <h2 className="px-4 mb-1.5 text-[11px] font-semibold tracking-wide text-stone-500">{group.title}</h2>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavLink key={item.href} item={item} active={isActive(item.href, pathname)} onNavigate={() => setOpen(false)} />
+                ))}
+              </div>
+            </section>
           ))}
-
-          {/* Styled like a nav item so it lines up with the links above; its pages are indented under it */}
-          <button
-            type="button"
-            onClick={() => setStudyToggled(!studyOpen)}
-            aria-expanded={studyOpen}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-              studyOpen ? "text-amber-200" : "text-stone-300"
-            } hover:bg-stone-800 hover:text-amber-200`}
-          >
-            <span className="w-5 shrink-0 text-center text-base">📚</span>
-            עיון ומחקר
-            <svg
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-              className={`ms-auto w-4 h-4 text-stone-500 transition-transform duration-200 ${studyOpen ? "rotate-180" : ""}`}
-            >
-              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-            </svg>
-          </button>
-          {studyOpen && (
-            <div className="ms-6 ps-2 border-s border-stone-700 space-y-1">
-              {STUDY_ITEMS.map((item) => (
-                <NavLink key={item.href} item={item} active={pathname === item.href} onNavigate={() => setOpen(false)} />
-              ))}
-            </div>
-          )}
         </nav>
 
         <div className="shrink-0 px-6 py-4 border-t border-stone-700 space-y-1">

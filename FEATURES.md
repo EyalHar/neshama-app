@@ -663,3 +663,17 @@
 **קבצים:** `lib/tanakh.ts`, `lib/passage.ts`, `app/api/tanakh/route.ts`, `app/components/VersionNoteMark.tsx` (חדש), `app/components/VerseText.tsx`, `app/tanakh/page.tsx`, `app/api/events/route.ts`, `app/api/neshama/route.ts`.
 
 **DB:** ללא שינוי.
+
+### "גלה" ותפריט מקוצר — [תאריך: 2026-11-15]
+
+**תיאור:** התפריט הצדדי כולל 8 קישורים בשלוש קבוצות עם כותרות: "תנ״ך" (קריאה, חיפוש, גלה), "אישי וקהילה" (האהובים שלי, המחברת שלי, קהילה) ו"חוויה" (בחן את עצמך, נשמה). כלי העיון עברו לדף `/discover`, ככרטיסים בשלוש קבוצות: מילים ואותיות; אנשים, מקומות ואירועים; נוסח ומבנה. "גלה" מסומן כפעיל גם בכל אחד מדפי הכלים. הכרטיסים בדף הבית וב"גלה" אחידים (רכיב `ToolCard`): רקע לבן, צבע רק באייקון.
+
+**קבצים:** `app/discover/page.tsx`, `app/discover/tools.tsx` (רשימת הכלים, משותפת לדף הבית), `app/discover/ToolCard.tsx`, `app/components/Sidebar.tsx`, `app/page.tsx`.
+
+### חילופי נוסח — [תאריך: 2026-11-15]
+
+**תיאור:** דף `/version-notes` מציג את 31 הערות חילופי הנוסח שבמהדורת "מקרא על פי המסורה", לפי מסורת: ספרי ספרד ואשכנז (12), מגילות אשכנז (2), ספרי תימן (11), כתר ארם צובא (5) וספרים אחרים (1). כל הערה מוצגת עם הפסוק, המילה מודגשת, וקישור לקורא. הערות על חלוקת פרשות מסומנות בתג.
+
+**מקור:** snapshot ב-`data/version-notes/version-notes.json`, נבנה ב-`node scripts/build-version-notes.mjs` מ-Sefaria (CC-BY-SA), באותה שיטה שבה הקורא מוציא את ההערות מהפסוק.
+
+**קבצים:** `app/version-notes/page.tsx`, `lib/versionNotes.ts`, `scripts/build-version-notes.mjs`.

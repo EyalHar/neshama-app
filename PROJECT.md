@@ -135,6 +135,7 @@ neshama-app/
 | Route | Purpose |
 |---|---|
 | `/` | Home — feature cards linking to all sections |
+| `/discover` | "גלה": the study tools as cards in three topic groups (words and letters, text and structure, people/places/events), from `app/discover/tools.tsx` |
 | `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti, notes, leitwords, commentaries |
 | `/community` | Shared notes/insights from all users, with likes and threaded comments (signed-in only) |
 | `/letters` | Redirects to `/advanced?tab=letters` (the letter search is now a search tab) |
@@ -147,6 +148,7 @@ neshama-app/
 | `/events` | Enter a biblical event → all source verses that mention it |
 | `/unique-words` | Hapax legomena — words occurring only once in the Tanakh |
 | `/special-letters` | All large, small and suspended letters and inverted nuns, linked to the reader |
+| `/version-notes` | "חילופי נוסח": the 31 version notes of Sefaria's MAM text (Sephardi/Ashkenazi, Yemenite, Aleppo Codex), each with its verse and word, from `data/version-notes/` |
 | `/jerusalem-names` | Names of Jerusalem with their source verses |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
 | `/parallels` | "נוסחים מקבילים": 102 passages told twice (Samuel–Kings / Chronicles, II Sam 22 / Ps 18, Decalogue…), each side by side with word differences marked |

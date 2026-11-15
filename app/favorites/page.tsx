@@ -236,7 +236,7 @@ export default function FavoritesPage() {
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
       <div className="flex items-center gap-2 mb-1">
         <HeartIcon filled size={24} />
-        <h1 className="text-2xl font-bold text-stone-800">האהובים עליי ביותר</h1>
+        <h1 className="text-2xl font-bold text-stone-800">האהובים שלי</h1>
       </div>
       <p className="text-stone-400 text-sm mb-6">פרקים, פרשיות ופסוקים ששמרת — כל האהובים ביותר שלך במקום אחד</p>
 
