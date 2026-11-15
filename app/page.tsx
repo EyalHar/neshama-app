@@ -1,5 +1,5 @@
-import Link from "next/link";
-import TempleIcon from "./components/TempleIcon";
+import { TOOL_GROUPS } from "./discover/tools";
+import ToolCard from "./discover/ToolCard";
 
 const FEATURES = [
   {
@@ -7,145 +7,50 @@ const FEATURES = [
     title: "קריאת תנ״ך",
     description: "קרא את התנ״ך פרק אחרי פרק, סמן פסוקים שקראת ועקוב אחר ההתקדמות שלך",
     icon: "📖",
-    color: "from-stone-50 to-green-50 border-stone-200 hover:border-green-400",
-    labelColor: "text-stone-700",
   },
   {
     href: "/community",
-    title: "שיתופים",
+    title: "קהילה",
     description: "הערות וחידושים על פסוקים ששיתפו משתמשי האתר — קרא, הגב ועשה לייק, ושתף גם את שלך",
     icon: "💬",
-    color: "from-sky-50 to-indigo-50 border-sky-200 hover:border-sky-400",
-    labelColor: "text-sky-700",
   },
   {
     href: "/favorites",
-    title: "האהובים עליי ביותר",
+    title: "האהובים שלי",
     description: "פרקים ופסוקים ששמרת כאהובים ביותר — הכל במקום אחד, מוכן לחזור אליו בכל רגע",
-    icon: "♥",
-    color: "from-red-50 to-rose-50 border-red-200 hover:border-red-400",
-    labelColor: "text-red-700",
+    icon: <span className="text-red-600">♥</span>,
   },
   {
     href: "/notebook",
     title: "המחברת שלי",
     description: "דפים לדבר תורה או לסיכום: כתבו חופשי ואספו פסוקים, הערות וקטעים מהפרשנים, כל אחד עם המקור שלו",
     icon: "📝",
-    color: "from-lime-50 to-emerald-50 border-lime-200 hover:border-lime-400",
-    labelColor: "text-lime-800",
   },
   {
     href: "/advanced?tab=letters",
     title: "אות ראשונה ואחרונה בפסוק",
     description: "מצא פסוקים שמתחילים ונגמרים באותיות שתבחר מהאלף-בית",
     icon: "א",
-    color: "from-violet-50 to-purple-50 border-violet-200 hover:border-violet-400",
-    labelColor: "text-violet-700",
   },
   {
     href: "/advanced",
     title: "חיפוש בתנ״ך",
     description: "חיפוש בסיסי, חיפוש תת-מחרוזת, חיפוש לפי שורש עברי וחיפוש לפי בניין — על כל מילות התנ״ך",
     icon: "🔍",
-    color: "from-teal-50 to-cyan-50 border-teal-200 hover:border-teal-400",
-    labelColor: "text-teal-700",
-  },
-  {
-    href: "/events",
-    title: "אירועי התנ״ך",
-    description: "הזן אירוע מהתנ״ך וקבל את כל המקורות בהם הוא מוזכר — מעמד מתן תורה, קריעת ים סוף ועוד",
-    icon: "📜",
-    color: "from-rose-50 to-pink-50 border-rose-200 hover:border-rose-400",
-    labelColor: "text-rose-700",
-  },
-  {
-    href: "/unique-words",
-    title: "מילים יחידאיות",
-    description: "מילים שמופיעות פעם אחת בלבד בכל התנ״ך, מחולקות לפי תורה, נביאים וכתובים",
-    icon: "1",
-    color: "from-emerald-50 to-green-50 border-emerald-200 hover:border-emerald-400",
-    labelColor: "text-emerald-700",
-  },
-  {
-    href: "/special-letters",
-    title: "אותיות מיוחדות",
-    description: "אותיות רבתי, זעירות ותלויות ונוני״ן הפוכות בתנ״ך, עם קישור לכל פרק",
-    icon: "ב",
-    color: "from-orange-50 to-amber-50 border-orange-200 hover:border-orange-400",
-    labelColor: "text-orange-700",
-  },
-  {
-    href: "/parallels",
-    title: "נוסחים מקבילים",
-    description: "קטעים שהתנ״ך מספר פעמיים, זה לצד זה עם ההבדלים מסומנים: שמואל ודברי הימים, שירת דוד, עשרת הדיברות",
-    icon: "⇄",
-    color: "from-amber-50 to-yellow-50 border-amber-200 hover:border-amber-400",
-    labelColor: "text-amber-700",
-  },
-  {
-    href: "/characters",
-    title: "רשת הדמויות",
-    description: "מי מופיע עם מי: גרף של הדמויות בכל ספר והפרקים שבהם הן נפגשות",
-    icon: "👥",
-    color: "from-rose-50 to-orange-50 border-rose-200 hover:border-rose-400",
-    labelColor: "text-rose-700",
-  },
-  {
-    href: "/word-shifts",
-    title: "גלגולי מילים",
-    description: "מילים מקראיות שמשמעותן היום אחרת: החשמל של יחזקאל, האקדח שהיה אבן חן, המדינה שהייתה פלך",
-    icon: "↻",
-    color: "from-teal-50 to-emerald-50 border-teal-200 hover:border-teal-400",
-    labelColor: "text-teal-700",
-  },
-  {
-    href: "/letter-pairs",
-    title: "צירופי אותיות",
-    description: "גלגל 231 השערים של ספר יצירה: שורשי המקרא שחולקים צמד אותיות, פנים ואחור",
-    icon: "◎",
-    color: "from-fuchsia-50 to-pink-50 border-fuchsia-200 hover:border-fuchsia-400",
-    labelColor: "text-fuchsia-700",
-  },
-  {
-    href: "/loanwords",
-    title: "מילים שאולות",
-    description: "מילים שנכנסו לעברית המקראית מפרסית, ממצרית, מיוונית ומשפות אחרות, עם הפסוקים",
-    icon: "🌍",
-    color: "from-sky-50 to-cyan-50 border-sky-200 hover:border-sky-400",
-    labelColor: "text-sky-700",
   },
   {
     href: "/quiz",
     title: "בחן את עצמך",
     description: "חידון פסוקים — השלם את המילה החסרה וגלה כמה אתה מכיר את התנ״ך",
     icon: "🎯",
-    color: "from-indigo-50 to-blue-50 border-indigo-200 hover:border-indigo-400",
-    labelColor: "text-indigo-700",
   },
   {
     href: "/neshama",
     title: "נשמה",
     description: "שתף מה עובר עליך וקבל פסוקים מהתנ״ך שמדברים ישירות לליבך",
     icon: "🕊",
-    color: "from-amber-50 to-orange-50 border-amber-200 hover:border-amber-400",
-    labelColor: "text-amber-700",
   },
-  {
-    href: "/jerusalem-names",
-    title: "שמות ירושלים",
-    description: "מבחר שמותיה של ירושלים בתנ״ך — מ׳שלם׳ ו׳ציון׳ ועד ׳עיר הקודש׳ — עם כל המקורות, מקושרים לקורא",
-    icon: <TempleIcon className="text-yellow-700" />,
-    color: "from-yellow-50 to-yellow-100 border-yellow-300 hover:border-yellow-500",
-    labelColor: "text-yellow-800",
-  },
-  {
-    href: "/biblical-places",
-    title: "ערים ויישובים במקרא",
-    description: "יישובים של היום ששמם מופיע בתנ״ך, ולצידם ערים מקראיות שחרבו — כל שם מקושר לפסוק",
-    icon: "📍",
-    color: "from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-400",
-    labelColor: "text-emerald-800",
-  },
+  ...TOOL_GROUPS.flatMap((g) => g.tools),
 ];
 
 export default function HomePage() {
@@ -164,21 +69,8 @@ export default function HomePage() {
         </div>
 
         {/* Feature cards */}
-        <div className="grid gap-5">
-          {FEATURES.map((f) => (
-            <Link key={f.href} href={f.href}>
-              <div className={`bg-gradient-to-br ${f.color} border-2 rounded-2xl p-7 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md`}>
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl">{f.icon}</span>
-                  <div>
-                    <h2 className={`text-xl font-bold ${f.labelColor} mb-1`}>{f.title}</h2>
-                    <p className="text-stone-600 leading-relaxed">{f.description}</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {FEATURES.map((f) => <ToolCard key={f.href} {...f} />)}
         </div>
       </div>
     </div>

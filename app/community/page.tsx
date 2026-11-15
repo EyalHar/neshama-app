@@ -69,7 +69,7 @@ export default function CommunityPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">שיתופים</h1>
+      <h1 className="text-2xl font-bold text-stone-800 mb-1">קהילה</h1>
       <p className="text-stone-500 text-sm mb-6">הערות וחידושים על פסוקים, ששיתפו משתמשי האתר</p>
 
       {status !== "loading" && !session && (
