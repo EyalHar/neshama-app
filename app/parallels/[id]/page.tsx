@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { toHebrewNumeral } from "@/lib/tanakh";
 import { PARALLELS, bookHe, sideLabel, type ParallelSide } from "@/lib/parallels";
 import { diffWords, type DiffWord } from "@/lib/textDiff";
+import PageHeader from "@/app/components/PageHeader";
 
 type Verse = { chapter: number; verse: number; text: string };
 type Cell = { verse: Verse; words: DiffWord[] } | null;
@@ -102,9 +103,9 @@ export default async function ParallelPage({ params }: { params: Promise<{ id: s
   return (
     <div className="max-w-6xl mx-auto px-4 py-8" dir="rtl">
       <Link href="/parallels" className="text-sm text-stone-500 hover:text-amber-700">→ כל הנוסחים המקבילים</Link>
-      <h1 className="text-2xl font-bold text-stone-800 mt-2 mb-3">
-        {sideLabel(p.a)} <span className="text-stone-400 font-normal">↔</span> {sideLabel(p.b)}
-      </h1>
+      <div className="mt-3">
+        <PageHeader title={<>{sideLabel(p.a)} <span className="text-stone-400 font-normal">↔</span> {sideLabel(p.b)}</>} />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
         <ReadLinks side={p.a} />
         <ReadLinks side={p.b} />

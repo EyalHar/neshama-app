@@ -12,6 +12,7 @@ import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 import type { FavoriteListItem } from "@/lib/favoriteLists";
 import BookGroups from "./BookGroups";
 import MoveMenu from "./MoveMenu";
+import PageHeader from "@/app/components/PageHeader";
 
 type FavoriteChapterItem = { book: string; bookHe: string; chapter: number };
 type FavoriteParashiyaItem = { book: string; bookHe: string; start: VerseRef; end: VerseRef; title: string };
@@ -234,10 +235,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
-      <div className="flex items-center gap-2 mb-1">
-        <HeartIcon filled size={24} />
-        <h1 className="text-2xl font-bold text-stone-800">האהובים שלי</h1>
-      </div>
+      <PageHeader title={<span className="inline-flex items-center gap-2"><HeartIcon filled size={26} />האהובים שלי</span>} />
       <p className="text-stone-400 text-sm mb-6">פרקים, פרשיות ופסוקים ששמרת — כל האהובים ביותר שלך במקום אחד</p>
 
       {status !== "loading" && !session && (

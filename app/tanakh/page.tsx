@@ -24,6 +24,7 @@ import { playCelebrationSound } from "./sound";
 import WeeklyReadings, { type WeeklyKind } from "./WeeklyReadings";
 import HeaderMenu from "./HeaderMenu";
 import { CUSTOM_KEY, CUSTOMS, parseCustom } from "@/lib/custom";
+import PageHeader from "@/app/components/PageHeader";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const QAMATS_QATAN_KEY = "tanakh-show-qamats-qatan";
@@ -431,7 +432,7 @@ export default function TanakhPage() {
     } else if (data.chapterJustCompleted) {
       const newCompleted = new Set([...completedChapters, v.chapter]);
       playCelebrationSound("chapter");
-      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: v.chapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(v.chapter, newCompleted) });
+      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: v.chapter, count: data.completedChaptersTotal, bookCount: newCompleted.size, bookTotal: selectedBook.chapters, nextUnreadChapter: findNextUnreadChapter(v.chapter, newCompleted) });
     }
   }
 
@@ -453,7 +454,7 @@ export default function TanakhPage() {
       if (celebrateBig(data)) return;
       const newCompleted = new Set([...completedChapters, selectedChapter]);
       playCelebrationSound("chapter");
-      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
+      setCelebration({ type: "chapter", bookName: selectedBook.he, chapterNum: selectedChapter, count: data.completedChaptersTotal, bookCount: newCompleted.size, bookTotal: selectedBook.chapters, nextUnreadChapter: findNextUnreadChapter(selectedChapter, newCompleted) });
       return;
     }
 
@@ -789,13 +790,9 @@ export default function TanakhPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 mb-6">
-          <div className="pt-1">
-            <h1 className="text-2xl font-bold text-stone-800">קריאת תנ״ך</h1>
-            {!session && (
-              <a href="/login" className="text-amber-600 text-sm hover:underline">התחבר לשמירת התקדמות</a>
-            )}
-          </div>
+        <PageHeader
+          title="קריאת תנ״ך"
+          actions={
           <div className="flex items-center gap-2 pt-1.5">
             <HeaderMenu
               label="אקראי"
@@ -860,7 +857,7 @@ export default function TanakhPage() {
                     onChange={(e) => setPref(QAMATS_QATAN_KEY, e.target.checked ? "1" : "0")}
                     className="accent-sky-600 w-3.5 h-3.5"
                   />
-                  סמן קמץ קטן <span className="text-sm text-stone-700">(<span className="text-sky-600 font-semibold">כׇּ</span>ל)</span>
+                  סמן קמץ קטן <span className="text-sm text-stone-700">(<span className="text-sky-700">כׇּ</span>ל)</span>
                 </label>
                 <GematriaSettings
                   enabled={showGematria}
@@ -889,7 +886,12 @@ export default function TanakhPage() {
               )}
             </HeaderMenu>
           </div>
-        </div>
+          }
+        >
+          {!session && (
+            <a href="/login" className="inline-block mt-3 text-amber-600 text-sm hover:underline">התחבר לשמירת התקדמות</a>
+          )}
+        </PageHeader>
 
         <WeeklyReadings custom={custom} onJump={jumpToWeekly} />
 

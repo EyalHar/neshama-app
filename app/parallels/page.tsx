@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { PARALLELS, sideLabel, workHe, type Parallel } from "@/lib/parallels";
+import { PARALLELS, sideLabel, workHe, type Parallel } from "@/lib/parallels";
+import PageHeader from "@/app/components/PageHeader";
 
 const SNIPPET_WORDS = 6;
 
@@ -20,7 +21,7 @@ export default async function ParallelsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">נוסחים מקבילים</h1>
+      <PageHeader title="נוסחים מקבילים" />
       <p className="text-stone-500 text-sm mb-6 leading-relaxed max-w-3xl">
         קטעים שהתנ״ך מספר פעמיים: שמואל ומלכים מול דברי הימים, שירת דוד בשמואל ובתהלים, עשרת הדיברות בשמות ובדברים,
         ציווי המשכן ועשייתו ועוד. בחרו קטע כדי לראות את שני הנוסחים זה לצד זה, עם ההבדלים מסומנים. הרשימה חושבה

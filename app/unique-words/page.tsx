@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toHebrewNumeral } from "@/lib/tanakh";
+import PageHeader from "@/app/components/PageHeader";
 
 type Section = "תורה" | "נביאים" | "כתובים";
 const SECTIONS: Section[] = ["תורה", "נביאים", "כתובים"];
@@ -104,7 +105,7 @@ export default function UniqueWordsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">מילים יחידאיות בתנ״ך</h1>
+      <PageHeader title="מילים יחידאיות בתנ״ך" />
       <p className="text-stone-500 text-sm mb-4">
         מילים שמופיעות פעם אחת בלבד בכל התנ״ך (hapax legomena), מחולקות לפי תורה, נביאים וכתובים
       </p>

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
 import { parseWord } from "@/lib/wordStats";
-import { WORD_SHIFTS, type WordShift } from "@/lib/wordShifts";
+import { WORD_SHIFTS, type WordShift } from "@/lib/wordShifts";
+import PageHeader from "@/app/components/PageHeader";
 
 const BOOK_HE = new Map(TANAKH_BOOKS.map((b) => [b.id, b.he]));
 
@@ -74,7 +75,7 @@ export default async function WordShiftsPage() {
   const shifts = await Promise.all(WORD_SHIFTS.map(load));
   return (
     <div className="max-w-5xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">גלגולי מילים: אז והיום</h1>
+      <PageHeader title="גלגולי מילים: אז והיום" />
       <p className="text-stone-500 text-sm mb-6 leading-relaxed max-w-3xl">
         מילים מקראיות שהמשמעות שלהן בעברית של היום שונה מהמשמעות בתנ״ך. כשהעברית חזרה להיות שפה מדוברת, מילים רבות
         קיבלו תפקיד חדש: החשמל של יחזקאל, המכונות של המקדש והאקדח שהיה אבן חן. זו רשימה נבחרת. המשמעות המקראית מבוססת

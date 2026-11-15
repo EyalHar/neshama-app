@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import VerseQuiz from "./VerseQuiz";
 import GrammarQuiz from "./GrammarQuiz";
+import PageHeader from "@/app/components/PageHeader";
 
 type Mode = "verse" | "grammar";
 
@@ -21,7 +22,7 @@ export default function QuizPage() {
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-amber-50" dir="rtl">
       <div className="max-w-2xl mx-auto px-4 py-10">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-stone-800 mb-1">בחן את עצמך</h1>
+          <PageHeader title="בחן את עצמך" center />
           <p className="text-stone-500">{current.subtitle}</p>
         </div>
 

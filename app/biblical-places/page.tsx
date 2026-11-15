@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
+import PageHeader from "@/app/components/PageHeader";
 import {
   MODERN_PLACES,
   ANCIENT_PLACES,
@@ -68,7 +69,7 @@ export default function BiblicalPlacesPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8" dir="rtl">
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">ערים ויישובים במקרא</h1>
+      <PageHeader title="ערים ויישובים במקרא" />
       <p className="text-stone-500 text-sm mb-6">
         יישובים של היום ששמם מופיע בתנ״ך, ויישובים מקראיים שכבר אינם קיימים — כל שם מקושר לפסוק בקורא
       </p>

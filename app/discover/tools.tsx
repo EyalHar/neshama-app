@@ -105,5 +105,3 @@ export const TOOL_GROUPS: ToolGroup[] = [
     ],
   },
 ];
-
-export const TOOL_HREFS = TOOL_GROUPS.flatMap((g) => g.tools.map((t) => t.href));
