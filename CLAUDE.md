@@ -113,6 +113,11 @@ Tanakh-wide counts per Strong's number (`getCorpusCounts()`, one `GROUP BY lemma
 ### Grammar quiz: word position via VerseText
 The quiz shows the verse from `VerseText.text` (not Sefaria) because its words are exactly the OSHB words joined by single spaces, so `text.split(" ")[wordNum - 1]` is the asked word (verified on 400 random verses). Keep that invariant in the seeder. The quiz has no LLM: answers come straight from `morph`/`StrongsEntry`. Difficulty = root frequency bands plus, for root questions, how similar the same-length distractor roots look.
 
+The missing-letters quiz (`lib/lettersQuiz.ts`) relies on the same invariant, plus `WordEntry.plain` equalling the word's letters: it splits the word into letter+nikud units (`splitGraphemes()` in `lib/hebrewLetters.ts`, client-safe) and skips the first N letters, where N is the number of prefix segments in `lemma`. Unpointed words are ketiv and are never blanked.
+
+### Who said to whom: a hand-checked snapshot
+`/api/quiz/who-said` (`lib/whoSaid.ts`) reads `data/who-said/who-said.json`, built by `node scripts/build-who-said.mjs` from OSHB: a speech verb, a name, then אֶל/לְ + name, the quote being the rest of the verse up to the next 3rd-person wayyiqtol. The automatic rules are not enough on their own ("אמר אל" can mean "said about"; a narrator's remark can sit inside the verse), so every item was read: `EXCLUDE` and `TRIM` in the script hold the decisions. After changing the rules, run it with `--review` and read the new items before keeping the file. Divine speech is capped per pair, so "ה׳ אל משה" (86 matches) doesn't take over.
+
 There is no word-level mapping between the reader's Sefaria text and OSHB's words, so highlighting is done by form: the API returns each verse's unpointed surface forms (`WordEntry.plain`), and `findWordRanges()` in `app/components/VerseText.tsx` matches them against the verse's words split on spaces and maqaf, with nikud stripped. Measured at 99.7% of occurrences found; the misses are mostly ketiv/qere. `VerseText` renders special letters and highlights together by cutting the text at every boundary of either.
 
 ### Verse notes are always on favorites

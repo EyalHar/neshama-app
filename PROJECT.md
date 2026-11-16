@@ -24,7 +24,9 @@ neshama-app/
 │   │   ├── auth/[...nextauth]/ ← NextAuth handler
 │   │   ├── neshama/            ← AI verse-by-emotion endpoint
 │   │   ├── quiz/               ← AI quiz generation endpoint
-│   │   │   └── grammar/        ← Root/binyan quiz from morphology (no AI)
+│   │   │   ├── grammar/        ← Root/binyan quiz from morphology (no AI)
+│   │   │   ├── letters/        ← Missing-letters quiz (no AI)
+│   │   │   └── who-said/       ← "Who said to whom" quiz from data/who-said (no AI)
 │   │   ├── events/             ← AI biblical-event → source verses
 │   │   ├── favorites/          ← Favorite verses/chapters (list, verse/, chapter/ toggles)
 │   │   ├── notes/              ← Verse notes (POST; [id]/ PATCH + DELETE)
@@ -85,7 +87,7 @@ neshama-app/
 │   ├── letters/page.tsx
 │   ├── login/page.tsx
 │   ├── neshama/page.tsx
-│   ├── quiz/                   ← page.tsx (tabs), VerseQuiz, GrammarQuiz, QuizActions, QuizStatus
+│   ├── quiz/                   ← page.tsx (tabs), VerseQuiz, GrammarQuiz, LettersQuiz, WhoSaidQuiz, QuizActions, QuizStatus, Segmented
 │   ├── special-letters/page.tsx
 │   ├── tanakh/page.tsx
 │   ├── unique-words/page.tsx
@@ -116,6 +118,9 @@ neshama-app/
 │   ├── passage.ts              ← Reader passage response types
 │   ├── progress.ts             ← Book/section/Tanakh completion events
 │   ├── grammarQuiz.ts          ← Grammar quiz question generator
+│   ├── lettersQuiz.ts          ← Missing-letters quiz generator
+│   ├── hebrewLetters.ts        ← Client-safe letter helpers (letter+nikud split, final forms)
+│   ├── whoSaid.ts              ← "Who said to whom" question generator (data/who-said snapshot)
 │   ├── wordStats.ts            ← WordEntry parsing + Tanakh-wide frequency counts (cached)
 │   ├── gematria.ts             ← Gematria methods (standard, gadol, katan, ordinal)
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
@@ -140,7 +145,7 @@ neshama-app/
 | `/community` | Shared notes/insights from all users, with likes and threaded comments (signed-in only) |
 | `/letters` | Redirects to `/advanced?tab=letters` (the letter search is now a search tab) |
 | `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological), word family, first/last letter. `?tab=` opens a tab directly |
-| `/quiz` | Two tabs: fill-in-the-blank verse quiz (AI) and grammar quiz (root/binyan, 3 levels) |
+| `/quiz` | Four tabs: fill-in-the-blank verse quiz (AI), grammar quiz (root/binyan), missing letters (letter bank or full keyboard) and who said to whom; the last three in 3 levels |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
 | `/notebook` | "המחברת שלי": personal pages (TipTap editor) for a dvar Torah or summary, collecting verses, notes and commentary excerpts with their sources |
@@ -256,6 +261,8 @@ neshama-app/
 - `POST /api/neshama` — Groq: detect emotion → return 2–3 matching verses with message
 - `POST /api/quiz` — Groq: generate fill-in-the-blank quiz from random Tanakh verse
 - `GET /api/quiz/grammar?type=root|binyan|mixed&level=easy|medium|hard` — Root/binyan question generated from OSHB morphology (no AI)
+- `GET /api/quiz/letters?level=easy|medium|hard` — A verse with letters blanked out: `{ words, blanks: { word, letter, answer, marks }[], distractors }` (no AI)
+- `GET /api/quiz/who-said?level=easy|medium|hard` — A quote and four "X אל Y" options, from `data/who-said/` (no AI)
 - `POST /api/events` — Groq: find the source verses of a biblical event
 
 ---
@@ -291,7 +298,9 @@ neshama-app/
 ### Quiz
 - **Verse tab:** AI selects a random verse, blanks one meaningful word, generates 4 options
 - **Grammar tab:** identify the root or binyan of a highlighted verb in its verse; mixed/root/binyan × easy/medium/hard. Built from OSHB data only (no AI). Harder levels use rarer roots and look-alike distractor roots. After a correct answer, shows the word's full parse (binyan, tense, person/gender/number) and a first-try streak
-- In both: mark the verse as read and jump to it in the reader
+- **Missing letters tab:** a verse with letters blanked out (easy: 3 in the Torah, nikud as a hint; medium: 6 in Torah/Nevi'im, vowels only; hard: 10 anywhere, no nikud). Answer from a letter bank padded with look-/sound-alike letters, or from the full alphabet (the physical keyboard works too, on any layout). Blanks favor the letters of the word's Strong's lemma; prefix letters and ketiv words are never blanked
+- **Who said to whom tab:** a quote, and four "X אל Y" options; after answering, the whole verse. 197 quotes (82 people) from `data/who-said/who-said.json`, built by `node scripts/build-who-said.mjs` from the speech formula (וַיֹּאמֶר X אֶל Y) and checked by hand. Level = how often the less-known of the two is named; harder levels add the reversed pair and pairs sharing a person
+- In all of them: mark the verse as read and jump to it in the reader
 
 ### Unknown Roots Crowdsourcing
 - Table of Strong's entries with no `derivedFrom` parent

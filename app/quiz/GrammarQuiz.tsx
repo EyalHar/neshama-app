@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import QuizActions from "./QuizActions";
+import Segmented from "./Segmented";
 import { QuizSpinner, QuizError } from "./QuizStatus";
 import type { GrammarQuestion, QuizLevel, QuizType } from "@/lib/grammarQuiz";
 
@@ -17,34 +18,6 @@ const LEVEL_OPTIONS: { id: QuizLevel; label: string }[] = [
   { id: "medium", label: "בינוני" },
   { id: "hard", label: "קשה" },
 ];
-
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { id: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="inline-flex bg-stone-100 rounded-xl p-1">
-      {options.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          onClick={() => onChange(o.id)}
-          aria-pressed={value === o.id}
-          className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-            value === o.id ? "bg-white text-amber-800 font-medium shadow-sm" : "text-stone-500 hover:text-stone-700"
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 async function requestQuestion(t: TypeChoice, l: QuizLevel): Promise<GrammarQuestion> {
   const res = await fetch(`/api/quiz/grammar?type=${t}&level=${l}`);
