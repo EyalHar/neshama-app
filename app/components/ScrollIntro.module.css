@@ -1,0 +1,334 @@
+/* Torah-scroll hero. The base rules are the end state (scroll open, title lit); .pending is the
+   closed scroll shown before hydration, .play animates from closed to open, .done is the end
+   state plus the ambient letters. Timeline of .play (seconds):
+   0.3–1.7 rollers part · 0.8–2.4 light · 1.2–2.0 / 1.9–2.7 columns written · 2.1–4.2 letters
+   rise · 2.8–4.0 title ignites · 3.5–4.3 subtitle. */
+
+.root {
+  --wood-dark: #4a2c14;
+  --wood: #7a4a22;
+  --wood-light: #a8703a;
+  --parchment: #f6ead0;
+  --parchment-edge: #e2cc9c;
+  --ink: #2a1a0b;
+  --gold: #d97706;
+  --roller-w: 30px;
+  text-align: center;
+}
+
+.titleWrap {
+  margin-bottom: 1.75rem;
+}
+
+/* ---- Stage ---- */
+
+.stage {
+  position: relative;
+  height: 230px;
+  max-width: 560px;
+  margin: 0 auto 2.25rem;
+  cursor: default;
+}
+
+.light {
+  position: absolute;
+  inset: -40px -10%;
+  background: radial-gradient(ellipse at center, rgba(251, 191, 36, 0.28), rgba(251, 191, 36, 0) 65%);
+  pointer-events: none;
+}
+
+.parchment {
+  position: absolute;
+  inset: 0 calc(var(--roller-w) / 2);
+  background:
+    linear-gradient(to bottom, rgba(120, 80, 30, 0.10), rgba(120, 80, 30, 0) 8%, rgba(120, 80, 30, 0) 92%, rgba(120, 80, 30, 0.12)),
+    repeating-linear-gradient(90deg, rgba(150, 110, 50, 0.035) 0 2px, transparent 2px 7px),
+    radial-gradient(ellipse at 30% 40%, rgba(255, 255, 255, 0.5), transparent 60%),
+    var(--parchment);
+  box-shadow: inset 0 0 24px rgba(140, 95, 40, 0.25), 0 10px 24px -12px rgba(80, 50, 20, 0.45);
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+}
+
+.columns {
+  position: absolute;
+  inset: 20px 34px;
+  display: flex;
+  gap: 30px;
+  direction: rtl;
+}
+
+.column {
+  flex: 1;
+  margin: 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.85;
+  text-align: justify;
+  /* a column ends mid-text, and Genesis 1:5 ends an open section (פתוחה) */
+  text-align-last: right;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 55%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 55%);
+  -webkit-mask-size: 100% 220%;
+  mask-size: 100% 220%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.bigBet {
+  font-size: 1.7em;
+  font-weight: 700;
+  line-height: 0;
+}
+
+/* ---- Rollers (עצי חיים) ---- */
+
+.roller {
+  position: absolute;
+  top: -30px;
+  bottom: -30px;
+  width: var(--roller-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 6px 6px rgba(60, 35, 15, 0.35));
+}
+
+.rollerRight {
+  right: 0;
+}
+
+.rollerLeft {
+  left: 0;
+}
+
+.knob {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--wood-light), var(--wood-dark));
+  flex-shrink: 0;
+}
+
+.handle {
+  width: 8px;
+  height: 12px;
+  background: linear-gradient(to right, var(--wood-dark), var(--wood-light) 50%, var(--wood-dark));
+  flex-shrink: 0;
+}
+
+.disc {
+  width: 46px;
+  height: 7px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--wood-dark), var(--wood) 30%, var(--wood-light) 55%, var(--wood-dark));
+  flex-shrink: 0;
+}
+
+.cylinder {
+  flex: 1;
+  width: 100%;
+  background:
+    repeating-linear-gradient(to bottom, rgba(120, 80, 30, 0.07) 0 1px, transparent 1px 9px),
+    linear-gradient(to right, #b89662, #efe0bb 35%, #fbf3dd 55%, #d9c08c 80%, #a8875a);
+}
+
+/* ---- Letters ---- */
+
+/* Same font size and weight as the columns: each rising letter starts exactly on its original */
+.letters {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.85;
+}
+
+.rising,
+.ambient {
+  position: absolute;
+  color: var(--gold);
+  opacity: 0;
+}
+
+/* ---- Subtitle ---- */
+
+.subtitleWrap {
+  margin-top: 0.5rem;
+}
+
+/* ================= .pending: the closed scroll before hydration ================= */
+
+.pending .rollerRight {
+  right: calc(50% - var(--roller-w));
+}
+
+.pending .rollerLeft {
+  left: calc(50% - var(--roller-w));
+}
+
+.pending .parchment {
+  clip-path: inset(0 50% 0 50%);
+}
+
+.pending .light,
+.pending .titleWrap,
+.pending .subtitleWrap {
+  opacity: 0;
+}
+
+/* ================= .play: the intro ================= */
+
+@keyframes open-right {
+  from { right: calc(50% - var(--roller-w)); }
+  to   { right: 0; }
+}
+
+@keyframes open-left {
+  from { left: calc(50% - var(--roller-w)); }
+  to   { left: 0; }
+}
+
+@keyframes unroll {
+  from { clip-path: inset(0 50% 0 50%); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes light-up {
+  0%   { opacity: 0; transform: scale(0.6); }
+  50%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes write {
+  from { -webkit-mask-position: 0 100%; mask-position: 0 100%; }
+  to   { -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+
+@keyframes rise {
+  0%   { opacity: 0; color: var(--ink); transform: none; text-shadow: none; }
+  12%  { opacity: 1; }
+  45%  { color: var(--gold); text-shadow: 0 0 10px rgba(251, 191, 36, 0.9), 0 0 22px rgba(234, 88, 12, 0.5); }
+  100% {
+    opacity: 0;
+    color: #f59e0b;
+    transform: translate(var(--dx), -250px) scale(1.6) rotate(var(--rot));
+    text-shadow: 0 0 14px rgba(251, 191, 36, 1), 0 0 30px rgba(234, 88, 12, 0.6);
+  }
+}
+
+@keyframes ignite {
+  0%   { opacity: 0; filter: blur(10px); transform: translateY(14px) scale(0.96); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; filter: blur(0); transform: none; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes drift {
+  0%   { opacity: 0; transform: none; text-shadow: 0 0 8px rgba(251, 191, 36, 0.7); }
+  20%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(var(--dx), -190px) scale(1.4); text-shadow: 0 0 12px rgba(251, 191, 36, 0.9); }
+}
+
+.play .rollerRight {
+  animation: open-right 1.4s cubic-bezier(0.45, 0, 0.2, 1) 0.3s both;
+}
+
+.play .rollerLeft {
+  animation: open-left 1.4s cubic-bezier(0.45, 0, 0.2, 1) 0.3s both;
+}
+
+.play .parchment {
+  animation: unroll 1.4s cubic-bezier(0.45, 0, 0.2, 1) 0.3s both;
+}
+
+.play .light {
+  animation: light-up 1.6s ease-out 0.8s both;
+}
+
+.play .column {
+  animation: write 0.8s linear 1.2s both;
+}
+
+.play .column.second {
+  animation-delay: 1.9s;
+}
+
+.play .rising {
+  animation: rise 1.6s cubic-bezier(0.3, 0, 0.4, 1) var(--delay) both;
+}
+
+.play .titleWrap {
+  animation: ignite 1.2s ease-out 2.8s both;
+}
+
+.play .subtitleWrap {
+  animation: fade-up 0.8s ease-out 3.5s both;
+}
+
+.play .ambient {
+  animation: drift var(--dur) ease-out calc(4.5s + var(--delay)) infinite;
+}
+
+/* ================= .done: end state, letters keep floating ================= */
+
+.done .ambient {
+  animation: drift var(--dur) ease-out var(--delay) infinite;
+}
+
+/* ---- Small screens: one column, a shorter scroll ---- */
+
+@media (max-width: 520px) {
+  .stage {
+    height: 200px;
+  }
+
+  .column.second {
+    display: none;
+  }
+
+  .column,
+  .letters {
+    font-size: 16px;
+  }
+}
+
+/* ---- Reduced motion: the open scroll, nothing moves ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .root * {
+    animation: none !important;
+  }
+
+  .pending .rollerRight {
+    right: 0;
+  }
+
+  .pending .rollerLeft {
+    left: 0;
+  }
+
+  .pending .parchment {
+    clip-path: none;
+  }
+
+  .pending .light,
+  .pending .titleWrap,
+  .pending .subtitleWrap {
+    opacity: 1;
+  }
+
+  .rising,
+  .ambient {
+    display: none;
+  }
+}

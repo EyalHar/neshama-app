@@ -71,6 +71,7 @@ neshama-app/
 │   │   ├── VerseStructure.tsx  ← Per-verse accent tree panel (+ TreeIcon)
 │   │   ├── NotebookCollector.tsx ← Global: collect selected text / verses / notes into the active notebook page
 │   │   ├── VerseText.tsx       ← Renders a verse with special letters + highlighted words
+│   │   ├── ScrollIntro.tsx     ← Home hero: animated Torah scroll whose letters rise into the title (+ .module.css)
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
 │   ├── admin/seed/page.tsx
 │   ├── advanced/page.tsx
@@ -139,7 +140,7 @@ neshama-app/
 
 | Route | Purpose |
 |---|---|
-| `/` | Home — feature cards linking to all sections |
+| `/` | Home — an animated Torah scroll hero (opens, Genesis 1:1–5 is written, letters rise and kindle the title; once per session, click to skip, static with reduced motion), then feature cards linking to all sections |
 | `/discover` | "גלה": the study tools as cards in three topic groups (words and letters, text and structure, people/places/events), from `app/discover/tools.tsx` |
 | `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti, notes, leitwords, commentaries |
 | `/community` | Shared notes/insights from all users, with likes and threaded comments (signed-in only) |

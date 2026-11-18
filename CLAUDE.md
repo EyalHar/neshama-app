@@ -54,6 +54,9 @@ The root `body` is viewport-height with `overflow-hidden`, so the Sidebar can't 
 ### Page titles
 Every page's title is `app/components/PageHeader.tsx`: the title and a thin gold rule across the page. Study tools also get a category line, "גלה · <group>", from the URL via `pageCategory()` in `nav.ts`, so a new tool gets it for free once it is in `TOOL_GROUPS`. Sidebar pages have none (the sidebar already marks them). `/neshama` keeps its own emotion-themed title.
 
+### Home hero animation
+`app/components/ScrollIntro.tsx` is CSS-only animation driven by one class on its root (`pending` = closed scroll before hydration, `play`, `done`); the base CSS rules are the end state, so reduced motion only has to switch animations off. Whether to play is decided once per page load (`sessionStorage` + a module variable), so returning to `/` in the same session shows the open scroll. The rising letters are golden copies placed over measured letters of the text (`[data-rise]`); the Torah text itself is never altered.
+
 ### Root search BFS
 `GET /api/verses/root` resolves a Hebrew root to a Strong's number, then does a BFS through `StrongsEntry.derivedFrom` (comma-separated Strong's numbers) to build a family tree. "Direct" view shows only the queried root's verses; "etymological" view includes all descendants.
 

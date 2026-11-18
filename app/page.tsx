@@ -1,5 +1,9 @@
+import { Frank_Ruhl_Libre } from "next/font/google";
 import { TOOL_GROUPS } from "./discover/tools";
 import ToolCard from "./discover/ToolCard";
+import ScrollIntro from "./components/ScrollIntro";
+
+const scrollFont = Frank_Ruhl_Libre({ subsets: ["hebrew"], weight: ["500", "700"] });
 
 const FEATURES = [
   {
@@ -57,15 +61,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-amber-50" dir="rtl">
       <div className="max-w-3xl mx-auto px-6 py-16">
-        {/* Hero */}
-        <div className="text-center mb-16">
-          <h1 className="flame-title text-5xl font-bold mb-4 leading-tight">
-            שַׁלְהֶבֶתְ יָֽה
-          </h1>
-          <p className="text-stone-500 text-xl leading-relaxed max-w-xl mx-auto">
-            חיבור אישי לתורה נביאים וכתובים — כלים שמחברים בין הלב לבין המילה הנצחית
-          </p>
-          <div className="mt-6 w-16 h-1 bg-amber-400 mx-auto rounded-full" />
+        <div className="mb-16">
+          <ScrollIntro
+            title="שַׁלְהֶבֶתְ יָֽה"
+            subtitle="חיבור אישי לתורה נביאים וכתובים — כלים שמחברים בין הלב לבין המילה הנצחית"
+            fontClassName={scrollFont.className}
+          />
         </div>
 
         {/* Feature cards */}
