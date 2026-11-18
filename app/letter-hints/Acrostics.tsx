@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { AcrosticLetterStatus, AcrosticLine, AcrosticView } from "@/lib/letterHintsShared";
 import { MarkedWords } from "./MarkedVerseText";
+import { CollectButton } from "./common";
 
 const LETTER_STYLE: Record<AcrosticLetterStatus, string> = {
   ok: "bg-amber-600 text-white",
@@ -82,7 +83,10 @@ function AcrosticCard({ a }: { a: AcrosticView }) {
                 <p data-collect-source={line.ref} data-collect-href={line.href} className="text-stone-800 text-lg leading-relaxed">
                   <MarkedWords words={line.words} marks={[[0, 0]]} />
                 </p>
-                <Link href={line.href} className="text-xs text-stone-400 hover:text-amber-700 hover:underline">{line.ref}</Link>
+                <div className="flex items-center gap-1.5">
+                  <Link href={line.href} className="text-xs text-stone-400 hover:text-amber-700 hover:underline">{line.ref}</Link>
+                  <CollectButton text={line.words.join(" ")} source={line.ref} href={line.href} title="הוסף לדף במחברת" />
+                </div>
               </div>
             </li>
           ))}

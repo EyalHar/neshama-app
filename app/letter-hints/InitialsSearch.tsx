@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Segmented from "@/app/quiz/Segmented";
 import type { InitialsDir, InitialsMode, InitialsResult } from "@/lib/letterHintsShared";
-import MarkedVerseText from "./MarkedVerseText";
-import { ChanceNote, SCOPES } from "./common";
+import MarkedVerseText, { markedWords, readerHref, versesText, withFinal } from "./MarkedVerseText";
+import { ChanceNote, CollectButton, SCOPES } from "./common";
 
 const MODES: { id: InitialsMode; label: string }[] = [
   { id: "first", label: "ראשי תיבות" },
@@ -27,7 +27,7 @@ export default function InitialsSearch() {
   const [dir, setDir] = useState<InitialsDir>("forward");
   const [cross, setCross] = useState(false);
   const [scope, setScope] = useState("tanakh");
-  const [result, setResult] = useState<InitialsResult | null>(null);
+  const [result, setResult] = useState<(InitialsResult & { mode: InitialsMode }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,7 +38,7 @@ export default function InitialsSearch() {
     setError("");
     fetch(`/api/letter-hints/initials?${params}`)
       .then(async (r) => (r.ok ? r.json() : Promise.reject((await r.json()).error)))
-      .then(setResult, (e) => {
+      .then((r: InitialsResult) => setResult({ ...r, mode: next.mode ?? mode }), (e) => {
         setResult(null);
         setError(typeof e === "string" && e.includes("3–20") ? "הקלידו מילה של 3 עד 20 אותיות" : "שגיאה בחיפוש, נסו שוב");
       })
@@ -111,7 +111,16 @@ export default function InitialsSearch() {
           <div className="flex flex-col gap-3">
             {result.matches.map((m, i) => (
               <article key={i} className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
-                {m.reversed && <span className="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 mb-1 inline-block">בהיפוך</span>}
+                <div className="flex items-center justify-between gap-2 mb-1 min-h-7">
+                  <span>{m.reversed && <span className="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">בהיפוך</span>}</span>
+                  <CollectButton
+                    label="הוסף למחברת"
+                    title="הוסף את המופע ואת הפסוק לדף במחברת"
+                    text={`״${withFinal(result.query)}״ ב${result.mode === "first" ? "ראשי" : "סופי"} תיבות${m.reversed ? ", בהיפוך" : ""}: ${markedWords(m.verses).map((x) => x.word).join(" ")}\n\n${versesText(m.verses)}`}
+                    source={m.verses.map((v) => v.ref).join(" – ")}
+                    href={readerHref(m.verses[0])}
+                  />
+                </div>
                 <div className="flex flex-col gap-2">
                   {m.verses.map((v) => <MarkedVerseText key={v.ref} v={v} />)}
                 </div>

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TANAKH_BOOKS } from "@/lib/tanakh";
 import { ELS_LIMITS, type ElsGrid, type ElsMatch, type ElsResult, type MarkedVerse } from "@/lib/letterHintsShared";
-import MarkedVerseText from "./MarkedVerseText";
-import { ChanceNote } from "./common";
+import MarkedVerseText, { markedWords, versesText, withFinal } from "./MarkedVerseText";
+import { ChanceNote, CollectButton } from "./common";
 
 export default function ElsSearch() {
   const [q, setQ] = useState("");
@@ -94,7 +94,7 @@ export default function ElsSearch() {
             {result.matches.map((m) => {
               const key = `${m.start}:${m.skip}`;
               return (
-                <ElsRow key={key} m={m} length={result.query.length} open={openKey === key} onToggle={() => setOpenKey(openKey === key ? null : key)} />
+                <ElsRow key={key} m={m} query={result.query} open={openKey === key} onToggle={() => setOpenKey(openKey === key ? null : key)} />
               );
             })}
           </ul>
@@ -104,7 +104,7 @@ export default function ElsSearch() {
   );
 }
 
-function ElsRow({ m, length, open, onToggle }: { m: ElsMatch; length: number; open: boolean; onToggle: () => void }) {
+function ElsRow({ m, query, open, onToggle }: { m: ElsMatch; query: string; open: boolean; onToggle: () => void }) {
   return (
     <li className="bg-white border border-stone-200 rounded-xl">
       <button type="button" onClick={onToggle} aria-expanded={open} className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-start hover:bg-stone-50 rounded-xl">
@@ -115,12 +115,13 @@ function ElsRow({ m, length, open, onToggle }: { m: ElsMatch; length: number; op
         </span>
         <span className="text-stone-400 text-sm">{open ? "▲" : "▼"}</span>
       </button>
-      {open && <ElsDetail m={m} length={length} />}
+      {open && <ElsDetail m={m} query={query} />}
     </li>
   );
 }
 
-function ElsDetail({ m, length }: { m: ElsMatch; length: number }) {
+function ElsDetail({ m, query }: { m: ElsMatch; query: string }) {
+  const length = query.length;
   const [data, setData] = useState<{ grid: ElsGrid; verses: MarkedVerse[] } | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -156,6 +157,15 @@ function ElsDetail({ m, length }: { m: ElsMatch; length: number }) {
           </tbody>
         </table>
       </div>
+      <div className="flex justify-end mb-2">
+        <CollectButton
+          label="הוסף את הדילוג למחברת"
+          title="הוסף את הדילוג, האותיות והפסוקים לדף במחברת"
+          text={elsQuote(m, query, data.verses)}
+          source={m.from === m.to ? m.from : `${m.from} – ${m.to}`}
+          href={data.grid.verses[0].href}
+        />
+      </div>
       <div className="flex flex-col gap-3">
         {data.verses.map((v) => <MarkedVerseText key={v.ref} v={v} />)}
       </div>
@@ -166,4 +176,13 @@ function ElsDetail({ m, length }: { m: ElsMatch; length: number }) {
       )}
     </div>
   );
+}
+
+function elsQuote(m: ElsMatch, query: string, verses: MarkedVerse[]): string {
+  const letters = markedWords(verses);
+  if (m.skip < 0) letters.reverse();
+  const where = m.from === m.to ? `ב${m.from}` : `מ${m.from} עד ${m.to}`;
+  const head = `״${withFinal(query)}״ בדילוג של ${Math.abs(m.skip).toLocaleString("he-IL")} אותיות${m.skip < 0 ? " לאחור" : ""}, ${where}.`;
+  const list = `האותיות: ${letters.map((x) => `${x.letter} (${x.word})`).join(" · ")}`;
+  return `${head}\n\n${list}\n\n${versesText(verses)}`;
 }
