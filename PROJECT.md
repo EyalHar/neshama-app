@@ -39,6 +39,7 @@ neshama-app/
 │   │   ├── characters/         ← People of a book and the chapters each pair shares
 │   │   ├── hapax/              ← Words occurring once in the Tanakh
 │   │   ├── jerusalem-names/    ← Names of Jerusalem with source verses
+│   │   ├── passage-text/       ← A verse range's text with nikud from VerseText (opens a song/prayer in place)
 │   │   ├── letter-pairs/       ← All triliteral verb roots + meanings, for the letter-pairs wheel
 │   │   ├── loanwords/verses/   ← Verses a loanword occurs in
 │   │   ├── unknown-roots/      ← Crowdsourced missing Strong's roots
@@ -81,6 +82,8 @@ neshama-app/
 │   ├── events/page.tsx
 │   ├── favorites/page.tsx
 │   ├── jerusalem-names/page.tsx
+│   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
+│   ├── divine-names/page.tsx   ← Names and titles of God with key verses and counts (server component)
 │   ├── letter-pairs/           ← page.tsx + LetterWheel (231-gate wheel of letter pairs)
 │   ├── characters/             ← page.tsx + CharacterGraph (force-directed network)
 │   ├── word-shifts/page.tsx    ← "גלגולי מילים": biblical vs modern meaning
@@ -127,6 +130,9 @@ neshama-app/
 │   ├── wordStats.ts            ← WordEntry parsing + Tanakh-wide frequency counts (cached)
 │   ├── gematria.ts             ← Gematria methods (standard, gadol, katan, ordinal)
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
+│   ├── prayersSongs.ts         ← Curated songs/prayers/laments/blessings outside Psalms (checked against the text)
+│   ├── psalmTitles.ts          ← Reads a psalm's superscription (attribution + tags) from its first verse
+│   ├── divineNames.ts          ← Curated names/titles of God, key verses, findMatch() (client-safe)
 │   ├── rootFamily.ts           ← Strong's family-tree helpers
 │   ├── special-letters.ts      ← Special-letter types, labels, styles
 │   └── special-letters.json    ← Snapshot of all special letters in the Tanakh (from Sefaria)
@@ -158,6 +164,8 @@ neshama-app/
 | `/special-letters` | All large, small and suspended letters and inverted nuns, linked to the reader |
 | `/version-notes` | "חילופי נוסח": the 31 version notes of Sefaria's MAM text (Sephardi/Ashkenazi, Yemenite, Aleppo Codex), each with its verse and word, from `data/version-notes/` |
 | `/jerusalem-names` | Names of Jerusalem with their source verses |
+| `/prayers-songs` | "תפילות ושירות": 57 songs, prayers, laments and blessings in the narrative and prophetic books (filter by kind, each opens in full), and all 150 psalms grouped by their superscription's attribution, filterable by title word |
+| `/divine-names` | "שמות ה׳": 33 names and titles of God in three groups (the names, titles, names given to a place/altar/city), each with key verses (name highlighted) and its verse count |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
 | `/parallels` | "נוסחים מקבילים": 102 passages told twice (Samuel–Kings / Chronicles, II Sam 22 / Ps 18, Decalogue…), each side by side with word differences marked |
 | `/characters` | "רשת הדמויות": the 30 most-named people of a book as a network; edge = chapters they share |
@@ -239,6 +247,7 @@ neshama-app/
 ### Content Pages
 - `GET /api/hapax?section=&page=&mergeSpelling=&mergeDerived=` — Hapax legomena
 - `GET /api/jerusalem-names` — Names of Jerusalem with source verses
+- `GET /api/passage-text?book=&from=c:v&to=c:v` — A range's verses with nikud (no ta'amim) from VerseText, up to 400
 - `GET /api/letter-pairs` — Every triliteral verb root (`lib/rootLetters.ts`) with its count and Strong's meaning
 - `GET /api/loanwords/verses?strongs=` — Verses a loanword occurs in (up to 100), with the word's position in `VerseText.text`
 - `GET /api/unknown-roots` / `PATCH /api/unknown-roots` — List / suggest missing roots
@@ -367,6 +376,13 @@ neshama-app/
 ### Loanwords (`/loanwords`)
 - 229 Tanakh words Strong's (1894) marks as of Persian / Egyptian / Greek / Babylonian / foreign origin, with its "probably" / "perhaps" hedges; proper names hidden by default
 - Snapshot `data/loanwords/loanwords.json`, built by `node scripts/build-loanwords.mjs`. Strong's misses loans identified later (Akkadian הֵיכָל, כִּסֵּא); the page says so
+
+### Prayers and Songs (`/prayers-songs`)
+- 57 songs, prayers, laments and blessings outside Psalms (`lib/prayersSongs.ts`), from שירת למך to תפילת יהושפט, each with who said it, its range, its opening verse and a button that loads the whole text in place. Filters by kind (שירה / תפילה / קינה / ברכה). Notes how a scroll writes the songs (אריח על גבי לבנה; האזינו in two columns) and the two lists written אריח על גבי אריח (Megillah 16b)
+- All 150 psalms grouped by attribution (לדוד 73, לבני קרח, לאסף…, without attribution), read from each psalm's first verse by `readPsalmTitle()`, with title-word filters (מזמור, שיר המעלות, תפילה, משכיל…)
+
+### Names of God (`/divine-names`)
+- 33 names and titles (`lib/divineNames.ts`), written in full with nikud: the names (with the seven that may not be erased, per Rambam), titles (אֵל עֶלְיוֹן, קְדוֹשׁ יִשְׂרָאֵל…), and names given to a place, altar or city (יְהוָה נִסִּי…). Each with key verses, the name highlighted (prefixes allowed), and its verse count: by Strong's number, or by the exact phrase
 
 ### Names of Jerusalem (`/jerusalem-names`)
 - 29 traditional names of Jerusalem with their source verses — some resolved live from the DB, others fixed citations

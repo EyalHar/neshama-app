@@ -118,6 +118,9 @@ Tanakh-wide counts per Strong's number (`getCorpusCounts()`, one `GROUP BY lemma
 - `lib/characters.ts` keeps OSHB `Np` words whose Strong's definition starts with a capital and whose main sense (before "also") isn't a place or month; `SAME_PERSON` merges renamed people (אברם→אברהם, שרי→שרה, יונתן→יהונתן). Cached per server process.
 - `lib/wordShifts.ts` is a curated list: add a word only after checking its Strong's definition and verses in the data, not from memory.
 
+### Prayers, songs and names of God: curated, checked against the text
+`lib/prayersSongs.ts` and `lib/divineNames.ts` are hand-made lists, but every entry was checked against VerseText: a song's `opening` must occur in its first verse and its last verse must exist; a name's `match` must occur (prefixes allowed, `findMatch()`) in each key verse; and claims in the descriptions (אֱלוֹהַּ mostly in Job, יְהוָה צְבָאוֹת first in I Sam 1:3 and never in the Torah) were counted from the data. Do the same for any new entry, not from memory. The psalms are not curated: `readPsalmTitle()` reads the superscription up to the first יהוה/אלהים (except "לעבד יהוה", Ps 18 and 36), which gives 73 psalms "לדוד", the Masoretic count. The user chose full forms with nikud for the names in labels.
+
 ### Loanwords and letter pairs
 `/loanwords` reads `data/loanwords/loanwords.json`, a snapshot built by `node scripts/build-loanwords.mjs` from Strong's `derivation` field (the seeder doesn't store it). Strong's is from 1894 and misses many loans known today, which the page states; don't present the list as complete. `/letter-pairs` uses `listTriliteralRoots()` from the cached root list in `lib/rootLetters.ts` (restart after seeding). It shows roots that share letters, not related meanings: keep that framing.
 
