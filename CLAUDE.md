@@ -81,6 +81,8 @@ The `/version-notes` page lists them from a snapshot, `data/version-notes/versio
 ### Reader passages: chapter or verse range
 The reader (`app/tanakh/page.tsx`) shows a *passage*: either a chapter or, in division mode, a verse range (a parasha in the Torah, a parashiya elsewhere; Psalms has no division mode). Everything per-verse — read status, favorites, notes, special-letter marks, leitword forms, DOM ids — is keyed by chapter **and** verse (`"c:v"`), because a parasha spans chapters. Position is stored as a book + anchor verse: chapter mode shows the anchor's chapter, division mode the unit containing it, so switching modes or following a verse link keeps the place.
 
+`?book=&chapter=&verse=` is a one-time jump, not the reader's state: the reader reads it with `useSearchParams()` (so a link from the reader to another verse, such as an echo, works without a remount), then clears the URL to `/tanakh`; the position itself lives in localStorage. That is also why the page is wrapped in `Suspense`.
+
 Chapter completion stays chapter-based: the client sends each verse's own chapter length (`chapterVerseCounts`) with `POST /api/tanakh`, and `completeRange` completes every chapter the range covers to its end. Parasha and parashiya completion are detected client-side from the read set. Division data is static (`lib/parashot.json`, `lib/parashiyot.json`, built once from Sefaria); `lib/divisions.ts` clips parashiyot to a range (a parasha can start mid-parashiya — Vayechi).
 
 ### Mishkal search: snapshot files, built by scripts

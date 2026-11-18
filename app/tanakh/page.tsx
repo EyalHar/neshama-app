@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useSyncExternalStore, Fragment } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore, Fragment, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import VerseText, { findWordRanges } from "@/app/components/VerseText";
@@ -70,7 +71,16 @@ function unitFor(units: DivisionUnit[], anchor: VerseRef): DivisionUnit | undefi
   return units.find((u) => inRef(anchor, u.start, u.end)) ?? (units.length && inRef(units.at(-1)!.end, [0, 0], anchor) ? units.at(-1) : units[0]);
 }
 
+// useSearchParams needs a Suspense boundary, or the production build fails on this prerendered page
 export default function TanakhPage() {
+  return (
+    <Suspense>
+      <TanakhReader />
+    </Suspense>
+  );
+}
+
+function TanakhReader() {
   const { data: session } = useSession();
 
   // Position: book + an anchor verse. Chapter mode shows the anchor's chapter; division mode
@@ -154,21 +164,29 @@ export default function TanakhPage() {
     toastTimer.current = setTimeout(() => setToast(null), 2800);
   }
 
-  // Restore position — URL params take priority over localStorage
+  // Restore position — URL params take priority over localStorage. Also runs when the params
+  // change while the reader is open (a link from the reader to another verse, e.g. an echo):
+  // the page isn't remounted then. The params are a one-time jump, so they are cleared after
+  // use; otherwise following the same link again later would not change the URL at all.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const restoredRef = useRef(false);
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlBook = TANAKH_BOOKS.find((b) => b.id === urlParams.get("book"));
+    const urlBook = TANAKH_BOOKS.find((b) => b.id === searchParams.get("book"));
     if (urlBook) {
-      const chapter = parseInt(urlParams.get("chapter") ?? "1") || 1;
-      const verse = parseInt(urlParams.get("verse") ?? "");
+      const chapter = parseInt(searchParams.get("chapter") ?? "1") || 1;
+      const verse = parseInt(searchParams.get("verse") ?? "");
       setSelectedBook(urlBook);
       setSelectedChapter(chapter);
       setAnchorVerse(verse || 1);
       setActiveSection(urlBook.section);
       if (verse) setPendingVerseParam([chapter, verse]);
       setRestored(true);
+      restoredRef.current = true;
+      router.replace("/tanakh", { scroll: false });
       return;
     }
+    if (restoredRef.current) return;
     try {
       const { bookId, chapter, verse } = JSON.parse(localStorage.getItem("tanakh-position") ?? "{}");
       const book = TANAKH_BOOKS.find((b) => b.id === bookId);
@@ -180,7 +198,8 @@ export default function TanakhPage() {
       }
     } catch {}
     setRestored(true);
-  }, []);
+    restoredRef.current = true;
+  }, [searchParams, router]);
 
   useEffect(() => {
     if (!restored) return;
