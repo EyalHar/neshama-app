@@ -83,6 +83,7 @@ neshama-app/
 │   ├── favorites/page.tsx
 │   ├── jerusalem-names/page.tsx
 │   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
+│   ├── letter-hints/           ← page.tsx (server, acrostics) + LetterHintsTabs, InitialsSearch, Acrostics, ElsSearch, MarkedVerseText
 │   ├── divine-names/page.tsx   ← Names and titles of God with key verses and counts (server component)
 │   ├── letter-pairs/           ← page.tsx + LetterWheel (231-gate wheel of letter pairs)
 │   ├── characters/             ← page.tsx + CharacterGraph (force-directed network)
@@ -132,6 +133,9 @@ neshama-app/
 │   ├── jerusalemNames.ts       ← Static Jerusalem-names dataset
 │   ├── prayersSongs.ts         ← Curated songs/prayers/laments/blessings outside Psalms (checked against the text)
 │   ├── psalmTitles.ts          ← Reads a psalm's superscription (attribution + tags) from its first verse
+│   ├── letterHints.ts          ← Initials/finals search, ELS search + grid, acrostic alignment (cached letter index)
+│   ├── letterHintsShared.ts    ← Client-safe types, normalizeLetters(), ALEF_BET, ELS limits
+│   ├── acrostics.ts            ← Curated acrostic ranges / line starts (letters are read from the text)
 │   ├── divineNames.ts          ← Curated names/titles of God, key verses, findMatch() (client-safe)
 │   ├── rootFamily.ts           ← Strong's family-tree helpers
 │   ├── special-letters.ts      ← Special-letter types, labels, styles
@@ -165,6 +169,7 @@ neshama-app/
 | `/version-notes` | "חילופי נוסח": the 31 version notes of Sefaria's MAM text (Sephardi/Ashkenazi, Yemenite, Aleppo Codex), each with its verse and word, from `data/version-notes/` |
 | `/jerusalem-names` | Names of Jerusalem with their source verses |
 | `/prayers-songs` | "תפילות ושירות": 57 songs, prayers, laments and blessings in the narrative and prophetic books (filter by kind, each opens in full), and all 150 psalms grouped by their superscription's attribution, filterable by title word |
+| `/letter-hints` | "רמזים באותיות": three tabs — words spelled by the first/last letters of consecutive words (forward/reversed), the 13 alphabetic acrostics with missing/out-of-order letters read from the text, and equidistant letter sequences (ELS) with a grid view; searches show the count expected by chance |
 | `/divine-names` | "שמות ה׳": 33 names and titles of God in three groups (the names, titles, names given to a place/altar/city), each with key verses (name highlighted) and its verse count |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
 | `/parallels` | "נוסחים מקבילים": 102 passages told twice (Samuel–Kings / Chronicles, II Sam 22 / Ps 18, Decalogue…), each side by side with word differences marked |
@@ -260,6 +265,11 @@ neshama-app/
 - `GET` / `POST /api/shares/[id]/comments` — List (flat; tree built client-side) / add `{ text, parentId? }`
 - `DELETE /api/comments/[id]` — Comment author, share author or admin; soft delete when it has replies
 - `GET` / `PATCH /api/profile` — Display name
+
+### Letter hints
+- `GET /api/letter-hints/initials?q=&mode=first|last&dir=forward|backward|both&cross=1&scope=` — Consecutive words whose first (or last) letters spell `q` (3–20 letters), up to 200 shown, with `total` and `expected` (count by chance at the scope's letter frequencies)
+- `GET /api/letter-hints/els?q=&min=&max=&scope=torah|tanakh|<book id>` — Equidistant letter sequences (3–12 letters, skip 2–10,000, both directions), 200 shortest skips shown, with `total` and `expected`
+- `GET /api/letter-hints/els/grid?start=&skip=&length=` — The text in rows of |skip| letters around one sequence, and its verses with the letters marked
 
 ### Characters
 - `GET /api/characters?book=` — `{ nodes: { id, name, definition, count, chapters }[], edges: { a, b, chapters }[] }` for the 30 most-named people of the book
@@ -380,6 +390,11 @@ neshama-app/
 ### Prayers and Songs (`/prayers-songs`)
 - 57 songs, prayers, laments and blessings outside Psalms (`lib/prayersSongs.ts`), from שירת למך to תפילת יהושפט, each with who said it, its range, its opening verse and a button that loads the whole text in place. Filters by kind (שירה / תפילה / קינה / ברכה). Notes how a scroll writes the songs (אריח על גבי לבנה; האזינו in two columns) and the two lists written אריח על גבי אריח (Megillah 16b)
 - All 150 psalms grouped by attribution (לדוד 73, לבני קרח, לאסף…, without attribution), read from each psalm's first verse by `readPsalmTitle()`, with title-word filters (מזמור, שיר המעלות, תפילה, משכיל…)
+
+### Letter Hints (`/letter-hints`)
+- **Initials / finals:** a word spelled by the first or last letters of consecutive words (יבוא המלך והמן היום, Esther 5:4; reversed זה איננו שוה לי, Esther 5:13), within a verse or across verses, letters marked in the pointed text
+- **Acrostics:** Psalms 9–10, 25, 34, 37, 111, 112, 119, 145, Proverbs 31:10–31, Lamentations 1–4. Each line's letter is read from the text and aligned to the alphabet, so missing letters (נ in Ps 145) and order changes (פ before ע in Lam 2–4) show up
+- **Letter skips (ELS):** with a grid placing the word in one column; framed as "occurrences", with the count expected by chance shown beside every result, never as hidden messages
 
 ### Names of God (`/divine-names`)
 - 33 names and titles (`lib/divineNames.ts`), written in full with nikud: the names (with the seven that may not be erased, per Rambam), titles (אֵל עֶלְיוֹן, קְדוֹשׁ יִשְׂרָאֵל…), and names given to a place, altar or city (יְהוָה נִסִּי…). Each with key verses, the name highlighted (prefixes allowed), and its verse count: by Strong's number, or by the exact phrase
