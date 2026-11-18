@@ -51,6 +51,7 @@ neshama-app/
 │   │   │   ├── analyze/        ← Word analysis: lexeme, morphology, Strong's chain to the root
 │   │   │   ├── etymology/      ← Word-family (etymological) search
 │   │   │   ├── letters/        ← Search by first/last letter
+│   │   │   ├── leitwords/      ← Passages holding several typed words, ranked by how many and how close
 │   │   │   ├── root/           ← Search by Hebrew root and/or verb stem (+ etymological)
 │   │   │   ├── roots/          ← Verb roots matching a letter pattern (roots-by-letters tab)
 │   │   │   ├── mishkal/        ← Nouns/adjectives by mishkal (Gesenius), from data/noun-patterns
@@ -107,6 +108,7 @@ neshama-app/
 │   ├── wordAnalysis.ts         ← "מה השורש?": OSHB morph → Hebrew description + derivedFrom chain
 │   ├── loanwords.ts            ← Loanword types, labels + data/loanwords snapshot (client-safe)
 │   ├── leitwords.ts            ← Leitwort (מילה מנחה) detection per passage and per parashiya
+│   ├── leitwordSearch.ts       ← "מילים מנחות" search: lexemes → chapters / parashot / parashiyot, ranked (cached index)
 │   ├── echoes.ts               ← "מאין ההד": rare shared lexeme pairs / phrases between verses (cached index)
 │   ├── parallels.ts            ← Parallel passages snapshot (data/parallels) + labels, parallelOf()
 │   ├── taamim.ts               ← Verse structure by disjunctive accents (client-safe parser)
@@ -145,7 +147,7 @@ neshama-app/
 | `/tanakh` | Main Tanakh reader: chapter selector, verse marking, progress, confetti, notes, leitwords, commentaries |
 | `/community` | Shared notes/insights from all users, with likes and threaded comments (signed-in only) |
 | `/letters` | Redirects to `/advanced?tab=letters` (the letter search is now a search tab) |
-| `/advanced` | Multi-tab search: basic, substring, root + binyan (direct/etymological), word family, first/last letter. `?tab=` opens a tab directly |
+| `/advanced` | Multi-tab search: basic, substring, leitwords (passages holding several words), root + binyan (direct/etymological), word family, first/last letter. `?tab=` opens a tab directly |
 | `/quiz` | Four tabs: fill-in-the-blank verse quiz (AI), grammar quiz (root/binyan), missing letters (letter bank or full keyboard) and who said to whom; the last three in 3 levels |
 | `/neshama` | AI feature: describe emotional state → get matching Tanakh verses |
 | `/unknown-roots` | Crowdsourced table to fill in missing Strong's roots |
@@ -195,7 +197,7 @@ neshama-app/
 ## API Routes Summary
 
 ### Tanakh Progress
-- `GET /api/tanakh?book=&chapter=` or `?book=&from=c:v&to=c:v` — Fetch a chapter or a verse range (parasha/parashiya) from Sefaria + user's read/favorite status, all keyed by chapter:verse; a range also returns `sections` (parashiyot with per-section leitwords) and `chapterVerseCounts`; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `versionNotes` (`{ chapter, verse, at, text }[]`, Sefaria's version notes taken out of the verse text), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
+- `GET /api/tanakh?book=&chapter=` or `?book=&from=c:v&to=c:v` (`&kq=qere|ketiv` shows only one side of ketiv/qere) — Fetch a chapter or a verse range (parasha/parashiya) from Sefaria + user's read/favorite status, all keyed by chapter:verse; a range also returns `sections` (parashiyot with per-section leitwords) and `chapterVerseCounts`; also returns `specialLetters` (`{ verse, start, end, kind }[]` offsets of large/small/suspended letters and inverted nuns), `versionNotes` (`{ chapter, verse, at, text }[]`, Sefaria's version notes taken out of the verse text), `leitwords` (`{ strongs, lemmaHe, count, ratio, forms }[]`) and the user's `notes`
 - `POST /api/tanakh` — Toggle single verse read
 - `POST /api/tanakh/bulk` — Mark/clear a chapter, or a verse range (`completeRange` / `clearRange`)
 - `GET /api/tanakh/units?book=` — Parashot (Torah) or parashiyot (other books) for division mode
@@ -210,6 +212,7 @@ neshama-app/
 - `GET /api/verses/roots?l1=&l2=&l3=&l4=&scope=` — Verb roots whose letters match (empty = any; `l4` empty = triliteral, `*`/letter = quadriliteral; at least one required), with occurrence counts in the scope
 - `GET /api/verses/root-hint?root=` — For a typed 4+ letter root (e.g. כלכל), the triliteral roots its verb forms are filed under (כול)
 - `GET /api/verses/letters?first=&last=` — First/last Hebrew letter match
+- `GET /api/verses/leitwords?q=&unit=chapters|divisions&scope=&offset=&exclude=` — Chapters, or parashot (Torah) / parashiyot (elsewhere; Psalms by chapter), holding the typed words in any of their forms (each word → its Strong's lexemes; `exclude` drops lexemes). Ranked by words found, then the smallest run of verses holding them, then occurrences; 20 per page, each with that run's verses and the matched words marked
 - `GET /api/verses/etymology?word=&scope=&group=&page=` — Etymological word-family search
 - `GET /api/verses/analyze?q=&whole=1&scope=` — For each typed word (with prefixes/suffixes, no nikud needed): its lexemes, forms, per form a Hebrew parse per occurrence pattern (`describeMorph()`) with up to 50 verse refs, and the Strong's `derivedFrom` chain to the root (several parents → `candidates`). `whole=0` analyzes every word containing the text
 - `substring`, `root` and `etymology` accept `favoritesOnly=1` to restrict results to the user's favorites
@@ -279,6 +282,7 @@ neshama-app/
 - Division toggle: chapters ↔ parashot with parashiyot (Torah) or parashiyot (Nevi'im/Ketuvim; Psalms stays by chapter). Parashiyot shown with פ/ס breaks, per-parashiya leitwords (≥4 verses), a small toast + chime on finishing a parashiya, and a confetti modal for a finished parasha
 - Favorite verses and chapters (heart icons)
 - "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
+- "קרי וכתיב" setting — both (Sefaria's "(כתיב) [קרי]", the default), only the qere, or only the ketiv, without brackets. Lone קרי ולא כתיב / כתיב ולא קרי words appear only in their own mode
 - "סמן קמץ קטן" checkbox — colors every letter carrying a qamats qatan (U+05C7 in Sefaria's text, which most fonts draw like a regular qamats), so כׇּל reads differently from כָּל
 - "חישוב גימטריה" checkbox — hovering a word (tapping, on touch screens) shows its gematria; selecting letters, even across verses, shows their sum while selecting. A settings popover picks the methods shown: standard, gadol (final letters 500–900), katan, ordinal (`lib/gematria.ts`). Words joined by maqaf count separately; verse numbers in a selection are ignored
 - Leitwords (מילים מנחות) — up to 5 roots the chapter repeats far above their Tanakh-wide rate (log-likelihood vs. corpus frequency); clicking one highlights all its occurrences in the chapter
@@ -289,6 +293,7 @@ neshama-app/
 - **Roots by Letters** — Three letter selectors (one per root position, each "any" or one of 22 letters) list every matching verb root with its count in the chosen scope; clicking a root runs the root search
 - **What is the root? (`?tab=analyze`)** — Type a word as it appears in a verse (רדידי) → its dictionary entry (רָדִיד), how it is built (noun, construct + possessive "שלי"), and Strong's chain to the root (← רָדַד), with a button opening the root's whole family. The same analysis appears above the substring search results (not the basic search, to keep it light)
 - **First/Last Letter in Verse** — Verses starting and/or ending with chosen Hebrew letters
+- **Leitwords (`?tab=leitwords`)** — Several words ("שה עולה ירא") → the chapters, or parashot/parashiyot (default: the reader's setting), holding them, not necessarily together: more of the words first, then the shortest run of verses holding them (בראשית כב, ח for the example). Each word counts in all its forms (Strong's lexemes; הלך includes OSHB's יָלַךְ), shown as chips that can be switched off. Each result shows the run's verses with the words in the word's color and links to the reader
 
 ### Neshama (Soul)
 - User writes their emotional state and optional wish in Hebrew
@@ -370,7 +375,7 @@ neshama-app/
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; custom (Ashkenazi/Sephardi: weekly haftarah and accent names in the accent tree, `lib/custom.ts`) as `tanakh-custom`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; ketiv/qere mode as `tanakh-ketiv-qere`; custom (Ashkenazi/Sephardi: weekly haftarah and accent names in the accent tree, `lib/custom.ts`) as `tanakh-custom`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)

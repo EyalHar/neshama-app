@@ -6,7 +6,7 @@ import { getPassageLeitwords } from "@/lib/leitwords";
 import type { PassageMark, PassageNote, PassageSection, PassageVerse } from "@/lib/passage";
 import { compareRefs, getParashiyot, parseRef, refKey, type VerseRef } from "@/lib/divisions";
 import { getCompletionEvents } from "@/lib/progress";
-import { fetchChapterWithMarks, TANAKH_BOOKS, type Section } from "@/lib/tanakh";
+import { fetchChapterWithMarks, KETIV_QERE_MODES, TANAKH_BOOKS, type KetivQere, type Section } from "@/lib/tanakh";
 
 
 // First three words, without ta'amim — how an unnamed parashiya is referred to
@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
   const rangeFrom = parseRef(searchParams.get("from"));
   const rangeTo = parseRef(searchParams.get("to"));
   const isRange = !!(rangeFrom && rangeTo);
+  const kqParam = searchParams.get("kq") as KetivQere | null;
+  const kq: KetivQere = kqParam && KETIV_QERE_MODES.includes(kqParam) ? kqParam : "both";
 
   if (!book || !TANAKH_BOOKS.some((b) => b.id === book) || (!isRange && isNaN(chapterParam))) {
     return NextResponse.json({ error: "Missing book, chapter or range" }, { status: 400 });
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
     const firstChapter = isRange ? rangeFrom![0] : chapterParam;
     const lastChapter = isRange ? rangeTo![0] : chapterParam;
     const chapterNums = Array.from({ length: lastChapter - firstChapter + 1 }, (_, i) => firstChapter + i);
-    const chapters = await Promise.all(chapterNums.map((c) => fetchChapterWithMarks(book, c)));
+    const chapters = await Promise.all(chapterNums.map((c) => fetchChapterWithMarks(book, c, kq)));
 
     const chapterVerseCounts: Record<number, number> = {};
     chapterNums.forEach((c, i) => { chapterVerseCounts[c] = chapters[i].verses.length; });

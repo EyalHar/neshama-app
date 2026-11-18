@@ -8,6 +8,7 @@ import HeartIcon from "@/app/components/HeartIcon";
 import LetterSearch from "./LetterSearch";
 import RootLetters from "./RootLetters";
 import WordAnalysis from "./WordAnalysis";
+import LeitwordSearch from "./LeitwordSearch";
 import type { RootItem } from "@/lib/rootLetterPattern";
 import PageHeader from "@/app/components/PageHeader";
 
@@ -38,11 +39,12 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "root" | "analyze" | "rootLetters" | "etymology" | "mishkal" | "letters";
+type Tab = "basic" | "substring" | "leitwords" | "root" | "analyze" | "rootLetters" | "etymology" | "mishkal" | "letters";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "basic", label: "חיפוש בסיסי" },
   { id: "substring", label: "חיפוש תת-מחרוזת" },
+  { id: "leitwords", label: "מילים מנחות" },
   { id: "root", label: "חיפוש לפי שורש ובניין" },
   { id: "analyze", label: "מה השורש?" },
   { id: "rootLetters", label: "שורשים לפי אותיות" },
@@ -447,7 +449,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
           </button>
         ))}
 
-        {session && tab !== "rootLetters" && tab !== "analyze" && (
+        {session && tab !== "rootLetters" && tab !== "analyze" && tab !== "leitwords" && (
           <label className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -475,6 +477,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
 
       {/* Roots by letters — lists roots, not verses; picking one switches to the root tab */}
       {tab === "rootLetters" && <RootLetters scope={scope} onPick={pickRoot} />}
+      {tab === "leitwords" && <LeitwordSearch scope={scope} />}
 
       {/* What is the root of a word */}
       {tab === "analyze" && (

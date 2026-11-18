@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useSyncExternalStore, Fragment, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral } from "@/lib/tanakh";
+import { TANAKH_BOOKS, randomBook, randomChapter, toHebrewNumeral, type KetivQere } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import VerseText, { findWordRanges } from "@/app/components/VerseText";
 import NoteIcon from "@/app/components/NoteIcon";
@@ -29,6 +29,13 @@ import PageHeader from "@/app/components/PageHeader";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const QAMATS_QATAN_KEY = "tanakh-show-qamats-qatan";
+const KETIV_QERE_KEY = "tanakh-ketiv-qere";
+const KETIV_QERE_OPTIONS: { id: KetivQere; label: string; title: string }[] = [
+  { id: "both", label: "שניהם", title: "הכתיב בסוגריים עגולים והקרי בסוגריים מרובעים" },
+  { id: "qere", label: "קרי", title: "רק המילים כפי שקוראים אותן" },
+  { id: "ketiv", label: "כתיב", title: "רק המילים כפי שהן כתובות" },
+];
+const parseKetivQere = (v: string | null): KetivQere => KETIV_QERE_OPTIONS.find((o) => o.id === v)?.id ?? "both";
 const GEMATRIA_KEY = "tanakh-show-gematria";
 const GEMATRIA_METHODS_KEY = "tanakh-gematria-methods";
 const DIVISION_KEY = "tanakh-division";
@@ -128,10 +135,11 @@ function TanakhReader() {
 
   const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
   const showQamatsQatan = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(QAMATS_QATAN_KEY) === "1", () => false);
+  const ketivQere = useSyncExternalStore(subscribePrefs, () => parseKetivQere(localStorage.getItem(KETIV_QERE_KEY)), () => "both" as const);
   const custom = useSyncExternalStore(subscribePrefs, () => parseCustom(localStorage.getItem(CUSTOM_KEY)), () => "ashkenazi" as const);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
   const showGematria = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_KEY) === "1", () => false);
-  const activeSettings = [showSpecialLetters, showQamatsQatan, showGematria].filter(Boolean).length;
+  const activeSettings = [showSpecialLetters, showQamatsQatan, showGematria, ketivQere !== "both"].filter(Boolean).length;
   const gematriaMethods = parseGematriaMethods(
     useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_METHODS_KEY) ?? "", () => "")
   );
@@ -149,12 +157,13 @@ function TanakhReader() {
   const unitNoun = kind === "parashot" ? "בפרשה" : kind === "parashiyot" ? "בפרשייה" : "בפרק";
   const unitName = kind === "parashot" ? "פרשה" : kind === "parashiyot" ? "פרשייה" : "פרק";
 
-  const passageKey = currentUnit
+  const kqParam = ketivQere === "both" ? "" : `&kq=${ketivQere}`;
+  const passageKey = (currentUnit
     ? `${selectedBook.id}|${currentUnit.start.join(":")}-${currentUnit.end.join(":")}`
-    : `${selectedBook.id}|${selectedChapter}`;
-  const passageUrl = currentUnit
+    : `${selectedBook.id}|${selectedChapter}`) + kqParam;
+  const passageUrl = (currentUnit
     ? `/api/tanakh?book=${encodeURIComponent(selectedBook.id)}&from=${currentUnit.start.join(":")}&to=${currentUnit.end.join(":")}`
-    : `/api/tanakh?book=${encodeURIComponent(selectedBook.id)}&chapter=${selectedChapter}`;
+    : `/api/tanakh?book=${encodeURIComponent(selectedBook.id)}&chapter=${selectedChapter}`) + kqParam;
   // In division mode wait for the book's units before loading anything
   const passageReady = restored && (!wantUnits || unitsLoaded);
 
@@ -884,6 +893,24 @@ function TanakhReader() {
                   onToggle={(on) => setPref(GEMATRIA_KEY, on ? "1" : "0")}
                   onMethodsChange={(methods) => setPref(GEMATRIA_METHODS_KEY, methods.join(","))}
                 />
+                <div className="flex items-center gap-1.5 pt-1.5 mt-0.5 border-t border-stone-100 text-xs text-stone-500">
+                  קרי וכתיב:
+                  <div className="flex rounded-lg border border-stone-200 overflow-hidden" role="radiogroup" aria-label="קרי וכתיב">
+                    {KETIV_QERE_OPTIONS.map((o) => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={ketivQere === o.id}
+                        title={o.title}
+                        onClick={() => setPref(KETIV_QERE_KEY, o.id)}
+                        className={`px-2 py-0.5 transition-colors ${ketivQere === o.id ? "bg-amber-600 text-white" : "bg-white hover:bg-stone-100"}`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="flex items-center gap-1.5 pt-1.5 mt-0.5 border-t border-stone-100 text-xs text-stone-500" title="קובע את הפטרת השבוע ואת שמות הטעמים בעץ הטעמים">
                   מנהג:
                   <div className="flex rounded-lg border border-stone-200 overflow-hidden" role="radiogroup" aria-label="מנהג">

@@ -194,9 +194,43 @@ function extractMarks(marked: string, verse: number): { text: string; marks: Spe
   return { text, marks, notes };
 }
 
+// Ketiv/qere (כתיב/קרי): which of the two the reader shows. Sefaria (MAM) marks a pair as
+// <span class="mam-kq"> holding <span class="mam-kq-k">(כתיב)</span> and <span class="mam-kq-q">[קרי]</span>,
+// in either order. Either one also stands alone, unwrapped: קרי ולא כתיב (read, not written) and
+// כתיב ולא קרי (written, not read). A side can end in a maqaf (יִסְלַח־(נא)־יְהֹוָה) and a qere can
+// hold a paseq tag ([וְהָיוּ <b>׀</b>]).
+export type KetivQere = "both" | "qere" | "ketiv";
+export const KETIV_QERE_MODES: KetivQere[] = ["both", "qere", "ketiv"];
+const KQ_SPAN = String.raw`<span class="mam-kq-([kq])">((?:[^<]|<(?!/span>))*)</span>`;
+// The two sides are separated by a space, or by a maqaf: עַד־(יעבור)־[יַעֲבׇר־]זָעַם
+const KQ_PAIR_RE = new RegExp(String.raw`<span class="mam-kq">\s*${KQ_SPAN}[\s־]*${KQ_SPAN}\s*</span>`, "g");
+const KQ_LONE_RE = new RegExp(String.raw`(־?)(\s*)${KQ_SPAN}`, "g");
+const unbracket = (s: string) => s.replace(/^[(\[]/, "").replace(/[)\]](־?)$/, "$1");
+
+// "both" keeps Sefaria's (כתיב) [קרי]. Otherwise a pair becomes the chosen side without its brackets,
+// and a lone side is kept the same way or dropped together with what only joined it to the text: a
+// maqaf before it (יִשְׁאַל־[אִישׁ] בִּדְבַר → יִשְׁאַל בִּדְבַר), unless it carries its own maqaf, which then
+// is the one dropped (יִסְלַח־(נא)־יְהֹוָה → יִסְלַח־יְהֹוָה). Done on the HTML before any mark is
+// located, so special-letter and note offsets are computed on the text as shown.
+export function applyKetivQere(html: string, kq: KetivQere): string {
+  if (kq === "both") return html;
+  const side = kq === "ketiv" ? "k" : "q";
+  return html
+    .replace(KQ_PAIR_RE, (_, kind1: string, inner1: string, kind2: string, inner2: string) => {
+      const kept = unbracket(kind1 === side ? inner1 : inner2);
+      // A pair ending in a maqaf is joined to the next word; a kept side without one needs a space
+      return unbracket(inner2).endsWith("־") && !kept.endsWith("־") ? kept + " " : kept;
+    })
+    .replace(KQ_LONE_RE, (_, maqaf: string, space: string, kind: string, inner: string) => {
+      if (kind === side) return maqaf + space + unbracket(inner);
+      return inner.endsWith("־") ? maqaf + space : space;
+    });
+}
+
 export async function fetchChapterWithMarks(
   bookId: string,
-  chapter: number
+  chapter: number,
+  kq: KetivQere = "both"
 ): Promise<{ verses: string[]; specialLetters: SpecialLetterMark[]; notes: VersionNote[] }> {
   const ref = `${bookId} ${chapter}`;
   const encoded = encodeURIComponent(ref);
@@ -211,7 +245,7 @@ export async function fetchChapterWithMarks(
   const specialLetters: SpecialLetterMark[] = [];
   const notes: VersionNote[] = [];
   raw.forEach((html, i) => {
-    const extracted = extractMarks(stripHtml(markSpecialLetters(markNotes(html))), i + 1);
+    const extracted = extractMarks(stripHtml(markSpecialLetters(markNotes(applyKetivQere(html, kq)))), i + 1);
     verses.push(extracted.text);
     specialLetters.push(...extracted.marks);
     notes.push(...extracted.notes);

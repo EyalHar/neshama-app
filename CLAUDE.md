@@ -73,6 +73,9 @@ Large/small/suspended letters and inverted nuns come from Sefaria's markup (`<bi
 - **Reader (live):** `fetchChapterWithMarks()` in `lib/tanakh.ts` replaces those tags with private-use sentinel characters before `stripHtml()`, then walks the stripped text to compute `{ verse, start, end, kind }` offsets. `fetchChapter()` is a thin wrapper that drops the marks. `<small>` around a paseq (׀) and tags inside version notes are not counted.
 - **`/special-letters` page (static):** `lib/special-letters.json` is a one-time snapshot built by scanning all 39 books via Sefaria API v3 with the same rules. If the rules change, regenerate it so the two stay consistent.
 
+### Ketiv/qere
+Sefaria marks a pair as `<span class="mam-kq">` holding `mam-kq-k` "(כתיב)" and `mam-kq-q` "[קרי]", in either order, separated by a space or a maqaf; a side can end in a maqaf or hold a paseq tag, and either side also stands alone (קרי ולא כתיב, כתיב ולא קרי). `applyKetivQere()` in `lib/tanakh.ts` rewrites the HTML for the reader's mode (`kq` on `GET /api/tanakh`) **before** special letters and version notes are marked, so their offsets match the text shown. It was checked on all 1,064 verses with ketiv/qere (no brackets, stray maqaf or merged words left); re-check them all after changing it.
+
 ### Version notes (חילופי נוסח)
 Sefaria's MAM text puts 31 version notes inline after a word (`<sup class="footnote-marker">*</sup><i class="footnote">(בספרי ספרד ואשכנז …)</i>`): readings of Sephardi/Ashkenazi or Yemenite books, or the Aleppo Codex. They are not verse text. `fetchChapterWithMarks()` takes them out with a sentinel pass like the special letters and returns them as `notes` (`{ verse, at, text }`, `at` = offset right after the word); the reader shows a `*` marker (`app/components/VersionNoteMark.tsx`) there, outside the gematria word spans. Any other Sefaria verse fetch must go through `stripVerseHtml()`, or the note text ends up inside the verse.
 
@@ -90,6 +93,9 @@ The "חיפוש לפי משקל" tab (`/api/verses/mishkal`, `lib/mishkal.ts`) r
 
 ### Leitwords: OSHB words matched onto Sefaria text
 `lib/leitwords.ts` (`getPassageLeitwords()`) scores a passage's content words (nouns/verbs/adjectives, no proper names, minus a small `STOPLIST` of very general words) against Tanakh-wide frequency with log-likelihood (G²), merging a word into its single `derivedFrom` parent when both appear in the passage. It also scores each parashiya of at least `MIN_SECTION_VERSES` (4) verses — below that, measured over the Torah, results are mostly list structure rather than leitwords.
+
+### Leitword search
+`lib/leitwordSearch.ts` keeps one index per server process (about 2 s to build; restart after seeding): each lexeme's verses, each surface form's lexemes with counts, and every verse's chapter / division unit (`getUnits()`, as in the reader). A typed word maps to the lexemes of that surface form (prefixes included), keeping only those with at least 10% of the form's occurrences, plus dictionary forms spelled exactly so; this drops prefix accidents (מים → מִ+יָּם). `SAME_LEXEME` folds יָלַךְ (H3212) into הָלַךְ. Ranking: terms found, then `smallestWindow()` over verseIndex (contiguous across chapters), then occurrences. Matched words are marked by `wordNum` in `VerseText.text` (same invariant as the grammar quiz).
 
 ### WordEntry parsing and in-memory caches (`lib/wordStats.ts`)
 `lemma` and `morph` are parallel `/`-separated chains (prefixes + main word), e.g. `c/7200` ↔ `HC/Vqw3ms`. The segment of `lemma` that starts with a digit is the Strong's number, and the `morph` segment at the same index (after the leading language letter `H`/`A`) describes that word: part of speech, then for verbs binyan, tense, person, gender, number (`Vqw3ms`). `parseWord()` does this; use it rather than re-parsing.
