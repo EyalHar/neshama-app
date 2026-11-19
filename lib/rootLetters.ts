@@ -73,6 +73,30 @@ function getRoots(): Promise<RootRow[]> {
   return rootsPromise;
 }
 
+let resolverPromise: Promise<(num: string) => string | null> | null = null;
+
+// Maps a verb's Strong's number to its root's letters (finals folded) by the same rules as the root
+// list above, or null if it isn't a root; for counting verb forms by root elsewhere (lib/frequencies.ts)
+export function getVerbRootResolver(): Promise<(num: string) => string | null> {
+  resolverPromise ??= prisma.strongsEntry.findMany({ select: { number: true, lemmaPlain: true } }).then((strongs) => {
+    const plainOf = new Map(strongs.map((s) => [s.number.replace(/^H/, ""), s.lemmaPlain]));
+    return (raw: string) => {
+      const num = MERGE_INTO[raw] ?? raw;
+      const plain = plainOf.get(num);
+      if (!plain || NOT_A_VERB.has(num)) return null;
+      const letters = [...plain].map((ch) => FINAL_TO_REGULAR[ch] ?? ch).join("");
+      return /^[א-ת]{3}$/.test(letters) || (QUADRILITERALS.has(num) && /^[א-ת]{4}$/.test(letters)) ? letters : null;
+    };
+  });
+  return resolverPromise;
+}
+
+// Display data of every root (its most frequent homonym's spelling and meaning), by letters
+export async function getRootInfo(): Promise<Map<string, { plain: string; lemmaHe: string; definition: string }>> {
+  const roots = await getRoots();
+  return new Map(roots.map((r) => [r.letters, { plain: r.plain, lemmaHe: r.lemmaHe, definition: r.definition }]));
+}
+
 // Roots matching the pattern, with counts in `scope`. Positions 1–3: a letter, or "" for any.
 // Position 4: "" for triliteral roots only, ANY_LETTER or a letter for quadriliteral roots.
 export async function findRootsByLetters(pattern: RootPattern, scope: RootScope): Promise<RootItem[]> {

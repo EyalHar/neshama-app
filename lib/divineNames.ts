@@ -37,7 +37,9 @@ export const DIVINE_NAMES: DivineName[] = [
       { book: "Exodus", chapter: 3, verse: 15 },
       { book: "Exodus", chapter: 6, verse: 3 },
     ],
-    count: { strongs: ["H3068", "H3069"] },
+    // Every word written יהוה: H3068, יֱהוִה after אֲדֹנָי (H3069) and ״יְהוָה נִסִּי״ (H3071, Ex 17:15) —
+    // 6,828 words in 5,790 verses, the traditional count
+    count: { strongs: ["H3068", "H3069", "H3071"] },
     seven: true,
   },
   {

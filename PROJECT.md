@@ -85,6 +85,7 @@ neshama-app/
 │   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
 │   ├── letter-hints/           ← page.tsx (server, acrostics) + LetterHintsTabs, InitialsSearch, Acrostics, ElsSearch, MarkedVerseText
 │   ├── verse-patterns/         ← page.tsx + VersePatternsTabs (chiasm, repeats), tabs.ts
+│   ├── frequencies/            ← page.tsx + FrequenciesView (words / roots tabs, occurrences on demand)
 │   ├── doublets/               ← page.tsx (server: verses, name counts, parallels link) + DoubletsView
 │   ├── middot/                 ← page.tsx (server: examples' verses) + MiddotView (Sefaria sources on demand)
 │   ├── divine-names/page.tsx   ← Names and titles of God with key verses and counts (server component)
@@ -140,6 +141,7 @@ neshama-app/
 │   ├── letterHintsShared.ts    ← Client-safe types, normalizeLetters(), ALEF_BET, ELS limits
 │   ├── acrostics.ts            ← Curated acrostic ranges / line starts (letters are read from the text)
 │   ├── versePatterns.ts        ← Chiasm (mirrored lexemes) + repeated words per verse (cached; types in versePatternsShared.ts)
+│   ├── frequencies.ts          ← Word (lexeme / written form) and verb-root frequencies per section, occurrences (cached index)
 │   ├── doublets.ts             ← Curated doublets: sides, cited differences (checked), views by approach (client-safe)
 │   ├── middot.ts               ← The 13 middot: baraita wording, explanations, checked examples, search phrases (client-safe)
 │   ├── middotVerses.ts         ← Loads an example verse with its phrase marked
@@ -172,6 +174,7 @@ neshama-app/
 | `/notebook` | "המחברת שלי": personal pages (TipTap editor) for a dvar Torah or summary, collecting verses, notes and commentary excerpts with their sources |
 | `/favorites` | The user's favorite verses and chapters, grouped by book |
 | `/events` | Enter a biblical event → all source verses that mention it |
+| `/frequencies` | "המילים והשורשים השכיחים": the top 500 words (shown 100 at a time, more on scroll) (by dictionary entry or written form, optionally content words only) and verb roots, per section or the whole Tanakh, with counts, share, first occurrence and all occurrences on demand |
 | `/unique-words` | Hapax legomena — words occurring only once in the Tanakh |
 | `/special-letters` | All large, small and suspended letters and inverted nuns, linked to the reader |
 | `/version-notes` | "חילופי נוסח": the 31 version notes of Sefaria's MAM text (Sephardi/Ashkenazi, Yemenite, Aleppo Codex), each with its verse and word, from `data/version-notes/` |
@@ -286,6 +289,9 @@ neshama-app/
 - `GET /api/letter-hints/first-letters?book=` — Where each of the 27 letter forms is first written in a book
 - `GET /api/verse-patterns` — Chiasms (mirrored content lexemes, 2+ pairs) and back-to-back repeated words, Tanakh-wide (cached)
 - `GET /api/middot/sources?id=&from=` — Passages of the Bavli and halakhic midrashim naming a middah, via Sefaria's search, 5 per page; text only from editions in `ALLOWED_LICENSES`, verses from Sefaria links
+- `GET /api/frequencies?kind=lexeme|form|root&scope=&limit=1..500&content=1` — Most frequent words / verb roots with counts and first occurrence (cached index)
+- `GET /api/frequencies/compare?kind=lexeme|form|root&content=1` — The Tanakh's 10 most frequent words / roots with their count in each section and the section sizes (the page charts them per 1,000 words)
+- `GET /api/frequencies/occurrences?kind=&key=&scope=&offset=` — A word's or root's verses, 10 at a time, the word marked
 - `GET /api/letter-hints/els/grid?start=&skip=&length=` — The text in rows of |skip| letters around one sequence, and its verses with the letters marked
 
 ### Characters
