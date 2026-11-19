@@ -84,6 +84,8 @@ neshama-app/
 │   ├── jerusalem-names/page.tsx
 │   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
 │   ├── letter-hints/           ← page.tsx (server, acrostics) + LetterHintsTabs, InitialsSearch, Acrostics, ElsSearch, MarkedVerseText
+│   ├── verse-patterns/         ← page.tsx + VersePatternsTabs (chiasm, repeats), tabs.ts
+│   ├── middot/                 ← page.tsx (server: examples' verses) + MiddotView (Sefaria sources on demand)
 │   ├── divine-names/page.tsx   ← Names and titles of God with key verses and counts (server component)
 │   ├── letter-pairs/           ← page.tsx + LetterWheel (231-gate wheel of letter pairs)
 │   ├── characters/             ← page.tsx + CharacterGraph (force-directed network)
@@ -136,6 +138,10 @@ neshama-app/
 │   ├── letterHints.ts          ← Initials/finals search, ELS search + grid, acrostic alignment (cached letter index)
 │   ├── letterHintsShared.ts    ← Client-safe types, normalizeLetters(), ALEF_BET, ELS limits
 │   ├── acrostics.ts            ← Curated acrostic ranges / line starts (letters are read from the text)
+│   ├── versePatterns.ts        ← Chiasm (mirrored lexemes) + repeated words per verse (cached; types in versePatternsShared.ts)
+│   ├── middot.ts               ← The 13 middot: baraita wording, explanations, checked examples, search phrases (client-safe)
+│   ├── middotVerses.ts         ← Loads an example verse with its phrase marked
+│   ├── middotSources.ts        ← Sefaria search for passages naming a middah; license-gated snippet + linked verses
 │   ├── divineNames.ts          ← Curated names/titles of God, key verses, findMatch() (client-safe)
 │   ├── rootFamily.ts           ← Strong's family-tree helpers
 │   ├── special-letters.ts      ← Special-letter types, labels, styles
@@ -169,7 +175,9 @@ neshama-app/
 | `/version-notes` | "חילופי נוסח": the 31 version notes of Sefaria's MAM text (Sephardi/Ashkenazi, Yemenite, Aleppo Codex), each with its verse and word, from `data/version-notes/` |
 | `/jerusalem-names` | Names of Jerusalem with their source verses |
 | `/prayers-songs` | "תפילות ושירות": 57 songs, prayers, laments and blessings in the narrative and prophetic books (filter by kind, each opens in full), and all 150 psalms grouped by their superscription's attribution, filterable by title word |
-| `/letter-hints` | "רמזים באותיות": four tabs — words spelled by the first/last letters of consecutive words (forward/reversed), the 13 alphabetic acrostics with missing/out-of-order letters read from the text, word squares (אמת מארץ תצמח), and equidistant letter sequences (ELS) with a grid view; searches show the count expected by chance |
+| `/letter-hints` | "רמזים באותיות": seven tabs — words spelled by the first/last letters of consecutive words (forward/reversed), the 13 alphabetic acrostics with missing/out-of-order letters read from the text, word squares (אמת מארץ תצמח), the first appearance of each letter, and equidistant letter sequences (ELS) with a grid view; searches show the count expected by chance |
+| `/verse-patterns` | "תבניות בפסוק": verses whose content words repeat in mirrored order (chiasm, by lexeme), and words said twice in a row (with the four double calls by name) |
+| `/middot` | "י״ג מידות": the 13 middot of R. Yishmael's baraita, each with its wording, an explanation, the baraita's own example (verses highlighted), checked extra examples, and further sources found by Sefaria's search (text only from openly licensed editions) |
 | `/divine-names` | "שמות ה׳": 33 names and titles of God in three groups (the names, titles, names given to a place/altar/city), each with key verses (name highlighted) and its verse count |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
 | `/parallels` | "נוסחים מקבילים": 102 passages told twice (Samuel–Kings / Chronicles, II Sam 22 / Ps 18, Decalogue…), each side by side with word differences marked |
@@ -270,6 +278,11 @@ neshama-app/
 - `GET /api/letter-hints/initials?q=&mode=first|last&dir=forward|backward|both&cross=1&scope=` — Consecutive words whose first (or last) letters spell `q` (3–20 letters), up to 200 shown, with `total` and `expected` (count by chance at the scope's letter frequencies)
 - `GET /api/letter-hints/els?q=&min=&max=&scope=torah|tanakh|<book id>` — Equidistant letter sequences (3–12 letters, skip 2–10,000, both directions), 200 shortest skips shown, with `total` and `expected`
 - `GET /api/letter-hints/squares` — Every run of three words that reads the same across and down (one-letter cells off the diagonal), `strong` when the first word is also their initials (אמת מארץ תצמח), and the average count with each verse's words shuffled (5 runs); cached
+- `GET /api/letter-hints/atbash` — Same-verse atbash pairs (3+ letters); `?q=` a word's (or words') atbash, its counts and up to 60 verses
+- `GET /api/letter-hints/mirror` — Same-verse reversed-word pairs, palindromic words (3+ letters) and phrases (7+ letters)
+- `GET /api/letter-hints/first-letters?book=` — Where each of the 27 letter forms is first written in a book
+- `GET /api/verse-patterns` — Chiasms (mirrored content lexemes, 2+ pairs) and back-to-back repeated words, Tanakh-wide (cached)
+- `GET /api/middot/sources?id=&from=` — Passages of the Bavli and halakhic midrashim naming a middah, via Sefaria's search, 5 per page; text only from editions in `ALLOWED_LICENSES`, verses from Sefaria links
 - `GET /api/letter-hints/els/grid?start=&skip=&length=` — The text in rows of |skip| letters around one sequence, and its verses with the letters marked
 
 ### Characters

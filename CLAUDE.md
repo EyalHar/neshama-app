@@ -128,6 +128,15 @@ Word squares (`getWordSquares()`): every run of 3 words in a verse split into a 
 
 Acrostics (`lib/acrostics.ts`): only ranges, title words to skip and, for Ps 111/112 (a letter per half-verse), each line's first word are curated. `getAcrostics()` reads each line's letter from the text and aligns the lines to the alphabet by LCS: unmatched alphabet letters are "missing" or, if some line starts with them, "out of order". A new entry's starts throw if the word isn't in the verse.
 
+### Letter hints: atbash, mirrors, first letters
+Same corpus as above. Pair lists (atbash, reversed letters) keep words of 3+ letters in one verse; shorter pairs are noise (כל/לך). `PairGroups` shows one card per pair, rarest first. A server page can't import values from a "use client" file, so tab ids live in `app/letter-hints/tabs.ts`; the atbash and mirror tabs are built but hidden (`HIDDEN` there) until the user asks to show them. The Genesis notes on ט and ס (`FirstLettersTab.tsx`) were checked on Sefaria: the data puts the first ס at "הסבב" (2:11), which Bereshit Rabbah 17:6 itself answers.
+
+### Verse patterns (`lib/versePatterns.ts`)
+Chiasm = the longest perfect mirror of content lexemes (N/V/A) in a verse with 2+ pairs of 2+ different lexemes; adjacent words of one name (מבעל שלשה) are a center, not a pair. Repeats need the same letters *and* lexeme. Built from WordEntry + VerseText (same-word invariant), so restart after seeding.
+
+### Thirteen middot (`/middot`)
+Curated data in `lib/middot.ts`: every verse is checked (match phrases highlighted, 39/39), and the extra examples cite sources checked on Sefaria. "More sources" calls Sefaria's search (`lib/middotSources.ts`) for the middah's own wording in the Bavli and halakhic midrashim. Text is shown only from editions whose license is in `ALLOWED_LICENSES` (the Bavli's Wikisource edition is CC-BY-SA), as plain text with edition + license, else just a link. Do not add LLM-suggested examples: in testing, Groq's citations and quotes did not match the sources.
+
 ### Loanwords and letter pairs
 `/loanwords` reads `data/loanwords/loanwords.json`, a snapshot built by `node scripts/build-loanwords.mjs` from Strong's `derivation` field (the seeder doesn't store it). Strong's is from 1894 and misses many loans known today, which the page states; don't present the list as complete. `/letter-pairs` uses `listTriliteralRoots()` from the cached root list in `lib/rootLetters.ts` (restart after seeding). It shows roots that share letters, not related meanings: keep that framing.
 

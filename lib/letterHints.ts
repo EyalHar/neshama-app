@@ -5,9 +5,16 @@ import { ACROSTICS, type Acrostic } from "@/lib/acrostics";
 import {
   ALEF_BET,
   ELS_LIMITS,
+  atbash,
   normalizeLetters,
+  reverseLetters,
   type AcrosticLine,
   type AcrosticView,
+  type AtbashSearch,
+  type FirstLetter,
+  type MirrorResult,
+  type PairHit,
+  type PalindromeWord,
   type ElsGrid,
   type ElsMatch,
   type ElsResult,
@@ -452,3 +459,107 @@ async function buildSquares(): Promise<WordSquaresResult> {
 }
 
 export const getWordSquares = () => (squaresPromise ??= buildSquares().catch((e) => ((squaresPromise = null), Promise.reject(e))));
+
+// ---- Atbash, reversed words, palindromes, first letters ----
+
+const PAIR_MIN = 3;
+
+const wholeWordMarks = (v: Verse, at: number[]): [number, number][] => at.flatMap((i) => [...v.plain[i]].map((_, k): [number, number] => [i, k]));
+
+// Pairs of different words in one verse where f(a) === b (3+ letters; shorter ones are mostly noise, כל/לך)
+function sameVersePairs(c: Corpus, f: (w: string) => string): PairHit[] {
+  const out: PairHit[] = [];
+  for (const v of c.verses) {
+    const norm = v.plain.map(normalizeLetters);
+    const set = new Set(norm);
+    const seen = new Set<string>();
+    for (const w of norm) {
+      if (w.length < PAIR_MIN || seen.has(w)) continue;
+      seen.add(w);
+      const b = f(w);
+      if (b === w || !set.has(b) || b < w) continue;
+      const at = norm.flatMap((x, i) => (x === w || x === b ? [i] : []));
+      out.push({ a: v.plain[norm.indexOf(w)], b: v.plain[norm.indexOf(b)], verse: markedVerse(v, wholeWordMarks(v, at)) });
+    }
+  }
+  return out;
+}
+
+let atbashPairsPromise: Promise<PairHit[]> | null = null;
+export const getAtbashPairs = () => (atbashPairsPromise ??= getCorpus().then((c) => sameVersePairs(c, atbash)));
+
+const ATBASH_VERSES_MAX = 60;
+
+export async function searchAtbash(query: string): Promise<AtbashSearch> {
+  const c = await getCorpus();
+  // The query may be several words ("לב קמי" = כשדים): it occurs where that many words spell it
+  const span = Math.max(1, query.trim().split(/\s+/).length);
+  const q = normalizeLetters(query);
+  const a = atbash(q);
+  let queryCount = 0, atbashCount = 0;
+  const verses: MarkedVerse[] = [];
+  for (const v of c.verses) {
+    const norm = v.plain.map(normalizeLetters);
+    const at: number[] = [];
+    norm.forEach((w, i) => {
+      if (norm.slice(i, i + span).join("") === q) queryCount++;
+      if (w === a) {
+        atbashCount++;
+        at.push(i);
+      }
+    });
+    if (at.length && verses.length < ATBASH_VERSES_MAX) verses.push(markedVerse(v, wholeWordMarks(v, at)));
+  }
+  const sameVerse = (await getAtbashPairs()).filter((p) => normalizeLetters(p.a) === q || normalizeLetters(p.b) === q);
+  return { query: q, atbash: a, queryCount, atbashCount, verses, sameVerse };
+}
+
+const PALINDROME_WORD_MIN = 3;
+const PALINDROME_PHRASE_MIN = 7;
+const PHRASE_MAX_WORDS = 6;
+
+async function buildMirror(): Promise<MirrorResult> {
+  const c = await getCorpus();
+  const reversed = sameVersePairs(c, reverseLetters);
+  const words = new Map<string, PalindromeWord>();
+  const phrases: { len: number; v: MarkedVerse }[] = [];
+  for (const v of c.verses) {
+    const norm = v.plain.map(normalizeLetters);
+    norm.forEach((w, i) => {
+      if (w.length < PALINDROME_WORD_MIN || reverseLetters(w) !== w) return;
+      const e = words.get(w);
+      if (e) e.count++;
+      else words.set(w, { word: v.plain[i], count: 1, example: markedVerse(v, wholeWordMarks(v, [i])) });
+    });
+    for (let i = 0; i < norm.length; i++)
+      for (let n = 2; n <= PHRASE_MAX_WORDS && i + n <= norm.length; n++) {
+        const s = norm.slice(i, i + n).join("");
+        if (s.length >= PALINDROME_PHRASE_MIN && reverseLetters(s) === s)
+          phrases.push({ len: s.length, v: markedVerse(v, wholeWordMarks(v, Array.from({ length: n }, (_, k) => i + k))) });
+      }
+  }
+  return {
+    reversed,
+    words: [...words.values()].sort((a, b) => normalizeLetters(b.word).length - normalizeLetters(a.word).length || b.count - a.count),
+    phrases: phrases.sort((a, b) => b.len - a.len).map((p) => p.v),
+  };
+}
+
+let mirrorPromise: Promise<MirrorResult> | null = null;
+export const getMirror = () => (mirrorPromise ??= buildMirror().catch((e) => ((mirrorPromise = null), Promise.reject(e))));
+
+// Where each letter form (finals counted separately) is first written in a book
+export async function getFirstLetters(book: string): Promise<FirstLetter[]> {
+  const c = await getCorpus();
+  const range = c.bookRange.get(book);
+  if (!range) return [];
+  const found = new Map<string, FirstLetter>();
+  for (let i = range[0]; i < range[1] && found.size < 27; i++) {
+    const ch = c.rawLetters[i];
+    if (found.has(ch)) continue;
+    const v = c.verses[c.letterVerse[i]];
+    const w = c.letterWord[i];
+    found.set(ch, { letter: ch, position: i - range[0] + 1, word: v.plain[w], verse: markedVerse(v, [[w, c.letterInWord[i]]]) });
+  }
+  return [...found.values()].sort((a, b) => a.position - b.position);
+}

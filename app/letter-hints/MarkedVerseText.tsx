@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { splitGraphemes } from "@/lib/hebrewLetters";
-import type { MarkedVerse } from "@/lib/letterHintsShared";
+import type { MarkedVerse, PairHit } from "@/lib/letterHintsShared";
 import { CollectButton } from "./common";
 
 const FINAL: Record<string, string> = { כ: "ך", מ: "ם", נ: "ן", פ: "ף", צ: "ץ" };
@@ -63,5 +64,43 @@ export default function MarkedVerseText({ v }: { v: MarkedVerse }) {
         <CollectButton text={v.words.join(" ")} source={v.ref} href={readerHref(v)} title="הוסף פסוק לדף במחברת" />
       </div>
     </div>
+  );
+}
+
+// Two words that mirror each other (atbash, reversed letters), with every verse holding both:
+// one card per pair, rarest pairs first (the frequent ones, אביו/ויבא, are mostly grammar)
+export function PairGroups({ pairs, sign }: { pairs: PairHit[]; sign: string }) {
+  const groups = new Map<string, PairHit[]>();
+  for (const p of pairs) {
+    const key = `${p.a}|${p.b}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(p);
+  }
+  const sorted = [...groups.values()].sort((x, y) => x.length - y.length);
+  return (
+    <div className="grid gap-3">
+      {sorted.map((g) => <PairGroup key={g[0].a + g[0].b} hits={g} sign={sign} />)}
+    </div>
+  );
+}
+
+function PairGroup({ hits, sign }: { hits: PairHit[]; sign: string }) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? hits : hits.slice(0, 1);
+  return (
+    <article className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+      <p className="font-bold text-amber-800 mb-1 text-lg">
+        {hits[0].a} <span className="text-stone-400 font-normal">{sign}</span> {hits[0].b}
+        {hits.length > 1 && <span className="text-xs font-normal text-stone-400 ms-2">{hits.length} פסוקים</span>}
+      </p>
+      <div className="flex flex-col gap-3">
+        {shown.map((p) => <MarkedVerseText key={p.verse.ref} v={p.verse} />)}
+      </div>
+      {hits.length > 1 && (
+        <button type="button" onClick={() => setOpen((o) => !o)} className="text-sm text-amber-700 hover:underline mt-2">
+          {open ? "הסתר" : `ועוד ${hits.length - 1} פסוקים`}
+        </button>
+      )}
+    </article>
   );
 }

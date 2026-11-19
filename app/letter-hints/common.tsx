@@ -1,7 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { collect } from "@/lib/notebook";
+
+// Loads a JSON endpoint once on mount (tabs mount on first visit)
+export function useJson<T>(url: string): { data: T | null; error: boolean } {
+  const [state, setState] = useState<{ url: string; data: T | null; error: boolean }>({ url, data: null, error: false });
+  useEffect(() => {
+    let live = true;
+    fetch(url)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(
+        (data: T) => live && setState({ url, data, error: false }),
+        () => live && setState({ url, data: null, error: true })
+      );
+    return () => {
+      live = false;
+    };
+  }, [url]);
+  return state.url === url ? state : { data: null, error: false };
+}
+
+export function Loading({ error, text = "טוען..." }: { error: boolean; text?: string }) {
+  return error ? <p className="text-red-500 text-sm">שגיאה בטעינה</p> : <p className="text-stone-400 text-sm py-6 text-center">{text}</p>;
+}
 
 export const SCOPES = [
   { id: "tanakh", label: "כל התנ״ך" },

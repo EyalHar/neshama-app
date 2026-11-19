@@ -40,3 +40,13 @@ export const ELS_LIMITS = { minLength: 3, maxLength: 12, maxSkip: 10000 };
 // it is also the three words' initials (אמת מארץ תצמח).
 export type WordSquare = { book: string; chapter: number; verse: number; ref: string; href: string; verseText: string; grid: string[][]; strong: boolean };
 export type WordSquaresResult = { squares: WordSquare[]; baseline: { runs: number; all: number; strong: number } };
+
+// Atbash: א↔ת, ב↔ש, … (finals folded first)
+export const atbash = (w: string) => [...normalizeLetters(w)].map((c) => ALEF_BET[21 - ALEF_BET.indexOf(c)]).join("");
+export const reverseLetters = (w: string) => [...normalizeLetters(w)].reverse().join("");
+
+export type PairHit = { a: string; b: string; verse: MarkedVerse };
+export type AtbashSearch = { query: string; atbash: string; queryCount: number; atbashCount: number; verses: MarkedVerse[]; sameVerse: PairHit[] };
+export type PalindromeWord = { word: string; count: number; example: MarkedVerse };
+export type MirrorResult = { reversed: PairHit[]; words: PalindromeWord[]; phrases: MarkedVerse[] };
+export type FirstLetter = { letter: string; position: number; word: string; verse: MarkedVerse };
