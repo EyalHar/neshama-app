@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/apiGuards";
 
 // Canonical Tanakh order: [OSHB filename, Sefaria book ID]
 const TORAH: [string, string][] = [
@@ -116,6 +117,8 @@ async function insertWords(words: WordData[]) {
 }
 
 export async function GET(req: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const scope = req.nextUrl.searchParams.get("scope") ?? "all";
   const books = SCOPE_MAP[scope] ?? ALL_BOOKS;
 

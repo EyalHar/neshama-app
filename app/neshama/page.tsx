@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import SignInNotice from "@/app/components/SignInNotice";
 
 interface Verse {
   reference: string;
   text: string;
   why: string;
+  // Present only when the reference is a real verse (checked on the server)
+  book?: string;
+  chapter?: number;
+  verse?: number;
 }
 
 interface NeshamaResponse {
@@ -49,7 +56,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-blue-300",
     msgBg: "from-blue-700 to-indigo-700",
     msgLabel: "text-blue-200",
-    button: "bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300",
+    button: "bg-blue-700 hover:bg-blue-800 disabled:bg-blue-100 disabled:text-blue-400 disabled:cursor-not-allowed",
     outlineButton: "border-blue-700 text-blue-700",
     outlineButtonHover: "hover:bg-blue-50",
   },
@@ -67,7 +74,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-violet-300",
     msgBg: "from-violet-700 to-purple-700",
     msgLabel: "text-violet-200",
-    button: "bg-violet-700 hover:bg-violet-800 disabled:bg-violet-300",
+    button: "bg-violet-700 hover:bg-violet-800 disabled:bg-violet-100 disabled:text-violet-400 disabled:cursor-not-allowed",
     outlineButton: "border-violet-700 text-violet-700",
     outlineButtonHover: "hover:bg-violet-50",
   },
@@ -85,7 +92,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-slate-300",
     msgBg: "from-slate-600 to-gray-700",
     msgLabel: "text-slate-300",
-    button: "bg-slate-700 hover:bg-slate-800 disabled:bg-slate-300",
+    button: "bg-slate-700 hover:bg-slate-800 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed",
     outlineButton: "border-slate-700 text-slate-700",
     outlineButtonHover: "hover:bg-slate-50",
   },
@@ -103,7 +110,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-yellow-400",
     msgBg: "from-yellow-600 to-amber-600",
     msgLabel: "text-yellow-200",
-    button: "bg-yellow-700 hover:bg-yellow-800 disabled:bg-yellow-300",
+    button: "bg-yellow-700 hover:bg-yellow-800 disabled:bg-yellow-100 disabled:text-yellow-400 disabled:cursor-not-allowed",
     outlineButton: "border-yellow-700 text-yellow-700",
     outlineButtonHover: "hover:bg-yellow-50",
   },
@@ -121,7 +128,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-gray-400",
     msgBg: "from-gray-700 to-gray-800",
     msgLabel: "text-gray-300",
-    button: "bg-gray-700 hover:bg-gray-800 disabled:bg-gray-300",
+    button: "bg-gray-700 hover:bg-gray-800 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed",
     outlineButton: "border-gray-700 text-gray-700",
     outlineButtonHover: "hover:bg-gray-50",
   },
@@ -139,7 +146,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-red-300",
     msgBg: "from-red-700 to-orange-700",
     msgLabel: "text-red-200",
-    button: "bg-red-700 hover:bg-red-800 disabled:bg-red-300",
+    button: "bg-red-700 hover:bg-red-800 disabled:bg-red-100 disabled:text-red-400 disabled:cursor-not-allowed",
     outlineButton: "border-red-700 text-red-700",
     outlineButtonHover: "hover:bg-red-50",
   },
@@ -157,7 +164,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-rose-300",
     msgBg: "from-rose-600 to-pink-700",
     msgLabel: "text-rose-200",
-    button: "bg-rose-700 hover:bg-rose-800 disabled:bg-rose-300",
+    button: "bg-rose-700 hover:bg-rose-800 disabled:bg-rose-100 disabled:text-rose-400 disabled:cursor-not-allowed",
     outlineButton: "border-rose-700 text-rose-700",
     outlineButtonHover: "hover:bg-rose-50",
   },
@@ -175,7 +182,7 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-teal-300",
     msgBg: "from-teal-700 to-emerald-700",
     msgLabel: "text-teal-200",
-    button: "bg-teal-700 hover:bg-teal-800 disabled:bg-teal-300",
+    button: "bg-teal-700 hover:bg-teal-800 disabled:bg-teal-100 disabled:text-teal-400 disabled:cursor-not-allowed",
     outlineButton: "border-teal-700 text-teal-700",
     outlineButtonHover: "hover:bg-teal-50",
   },
@@ -193,13 +200,14 @@ const THEMES: Record<string, Theme> = {
     verseBorder: "border-amber-400",
     msgBg: "from-amber-700 to-orange-700",
     msgLabel: "text-amber-200",
-    button: "bg-amber-700 hover:bg-amber-800 disabled:bg-amber-300",
+    button: "bg-amber-700 hover:bg-amber-800 disabled:bg-amber-100 disabled:text-amber-400 disabled:cursor-not-allowed",
     outlineButton: "border-amber-700 text-amber-700",
     outlineButtonHover: "hover:bg-amber-50",
   },
 };
 
 export default function NeshamaPage() {
+  const { status } = useSession();
   const [story, setStory] = useState("");
   const [wish, setWish] = useState("");
   const [result, setResult] = useState<NeshamaResponse | null>(null);
@@ -287,6 +295,9 @@ export default function NeshamaPage() {
               <p className="text-red-600 text-center bg-red-50 rounded-xl p-3">{error}</p>
             )}
 
+            {status === "unauthenticated" ? (
+              <SignInNotice what="נשמה" />
+            ) : (
             <button
               type="submit"
               disabled={loading || !story.trim()}
@@ -304,6 +315,7 @@ export default function NeshamaPage() {
                 "שלח"
               )}
             </button>
+            )}
           </form>
         ) : (
           <div className="space-y-6">
@@ -315,7 +327,17 @@ export default function NeshamaPage() {
             <div className="space-y-4">
               {result.verses.map((verse, i) => (
                 <div key={i} className={`bg-white rounded-2xl shadow-sm border ${theme.cardBorder} p-6`}>
-                  <p className={`${theme.verseRef} text-sm font-medium mb-3`}>{verse.reference}</p>
+                  <div className="flex items-baseline justify-between gap-3 mb-3">
+                    <p className={`${theme.verseRef} text-sm font-medium`}>{verse.reference}</p>
+                    {verse.book && (
+                      <Link
+                        href={`/tanakh?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&verse=${verse.verse}`}
+                        className={`${theme.verseRef} text-sm hover:underline shrink-0`}
+                      >
+                        פתח בקורא ←
+                      </Link>
+                    )}
+                  </div>
                   <blockquote className={`text-gray-800 text-xl font-medium leading-relaxed mb-4 border-r-4 ${theme.verseBorder} pr-4`}>
                     {verse.text}
                   </blockquote>

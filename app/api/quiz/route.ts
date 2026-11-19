@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 import { TANAKH_BOOKS, fetchChapter, toHebrewNumeral } from "@/lib/tanakh";
+import { requireSignedIn } from "@/lib/apiGuards";
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -159,6 +160,8 @@ async function generateQuiz() {
 }
 
 export async function POST() {
+  const denied = await requireSignedIn();
+  if (denied) return denied;
   for (let attempt = 1; attempt <= 4; attempt++) {
     try {
       const result = await generateQuiz();

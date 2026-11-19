@@ -21,6 +21,9 @@ npx prisma studio            # Open DB browser UI
 
 No test suite exists in this project.
 
+### Opening the dev server from a phone
+`next.config.ts` allows `192.168.1.*` in `allowedDevOrigins`; Next 16 otherwise blocks dev resources (HMR, chunks) for any host but `localhost`, so pages load without being interactive. Google sign-in cannot work on a private-IP address (Google rejects such redirect URIs); it needs a public HTTPS domain such as an ngrok tunnel, not set up yet. Before exposing the site publicly, every route that writes or costs must be guarded (see *Guarded routes*); `PATCH /api/unknown-roots` is still open, pending the user's decision.
+
 ---
 
 ## Next.js Version Warning
@@ -167,6 +170,11 @@ There is no word-level mapping between the reader's Sefaria text and OSHB's word
 - **Lifecycle:** a `Share` of type `"note"` points at a `VerseNote` (`noteId`, unique, cascade). The feed always renders the note's current text, flagged "נערך" when `note.updatedAt` is after `share.createdAt`. Deleting the note, including via unfavoriting, deletes the share with its likes and comments.
 - **Comments:** comments form a tree via `parentId` with no depth limit. The API returns them flat, and `app/community/CommentThread.tsx` builds the tree, indenting up to 4 levels. Deleting a comment that has replies soft-deletes it (`deleted = true`, text cleared). Deleting a leaf removes it and walks up, removing soft-deleted ancestors left without replies.
 - **Permissions:** checked server-side via `getViewer()`. Admins are the emails listed in `ADMIN_EMAILS`.
+
+### Guarded routes (`lib/apiGuards.ts`)
+The Groq-backed routes (`/api/neshama`, `/api/events`, `POST /api/quiz`) start with `requireSignedIn()`: each call costs Groq quota, so signed-out requests get 401 with `needSignIn`, and their pages show `app/components/SignInNotice.tsx` instead of calling them. Give any new AI route the same guard.
+
+Seeding rewrites the database, so `/api/admin/*` starts with `requireAdmin()` (`lib/apiGuards.ts`: 401 when signed out, 403 when not in `ADMIN_EMAILS`), and `app/admin/layout.tsx` shows the `/admin` pages to admins only. Give any new admin route the same guard.
 
 ### Notebook: collecting from anywhere
 `app/components/NotebookCollector.tsx` (mounted in the root layout) turns a text selection inside any element with `data-collect-source` (plus optional `data-collect-href`, `data-collect-attribution`) into a "הוסף לדף" button. Inside the selection, `button` and `[data-collect-skip]` elements are dropped, so mark verse numbers, ✓ marks and labels with `data-collect-skip`. Explicit buttons call `collect()` from `lib/notebook.ts`. Quotes go to the active page (localStorage, `app/notebook/activeDoc.ts`) via `POST /api/notebook/[id]/append`, as a `sourceQuote` node (`app/notebook/SourceQuote.tsx`). Quote links are restricted to same-site paths (not `//`) and Sefaria, on both server and client. After an append, a `BroadcastChannel` message lets an editor open in another tab insert the same node, so its autosave doesn't overwrite it. The editor uses `immediatelyRender: false` (required for SSR).

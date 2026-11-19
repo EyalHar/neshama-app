@@ -1,6 +1,8 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
-import { stripVerseHtml } from "@/lib/tanakh";
+import { prisma } from "@/lib/prisma";
+import { TANAKH_BOOKS, stripVerseHtml } from "@/lib/tanakh";
+import { requireSignedIn } from "@/lib/apiGuards";
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -39,6 +41,24 @@ const SYSTEM_PROMPT = `אתה עוזר רוחני שמתמחה בתנ"ך העב�
 - כל שאר הטקסט - בעברית בלבד
 - טון: חם, אוהב, מחזק`;
 
+// The model's "Book 12:3" (or "Book 12:3-5") as a place in the reader — only if the verse is really in
+// the Tanakh (VerseText), so a wrong reference from the model gets no link rather than a broken one
+const BOOK_IDS = new Set(TANAKH_BOOKS.map((b) => b.id));
+// Spellings the model may use for our book ids ("Psalm 23:4", "1 Samuel 1:27")
+const BOOK_ALIASES: Record<string, string> = { Psalm: "Psalms", "Song of Solomon": "Song of Songs", Canticles: "Song of Songs", Qohelet: "Ecclesiastes" };
+const bookId = (name: string) => {
+  const roman = name.replace(/^([12])\s+/, (_, n: string) => (n === "1" ? "I " : "II "));
+  return [name, roman, BOOK_ALIASES[name]].find((n) => n && BOOK_IDS.has(n)) ?? null;
+};
+async function readerLocation(ref: string): Promise<{ book: string; chapter: number; verse: number } | null> {
+  const m = ref?.trim().match(/^(.+?)\s+(\d+):(\d+)/);
+  const book = m && bookId(m[1]);
+  if (!m || !book) return null;
+  const [chapter, verse] = [Number(m[2]), Number(m[3])];
+  const row = await prisma.verseText.findUnique({ where: { book_chapter_verse: { book, chapter, verse } }, select: { id: true } });
+  return row ? { book, chapter, verse } : null;
+}
+
 async function fetchVerseFromSefaria(ref: string): Promise<string | null> {
   try {
     const encoded = encodeURIComponent(ref);
@@ -56,6 +76,8 @@ async function fetchVerseFromSefaria(ref: string): Promise<string | null> {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireSignedIn();
+  if (denied) return denied;
   try {
     const { story, wish } = await request.json();
 
@@ -83,11 +105,12 @@ export async function POST(request: NextRequest) {
 
     const versesWithText = await Promise.all(
       groqResult.verses.map(async (v: { sefaria_ref: string; reference_he: string; why: string }) => {
-        const hebrewText = await fetchVerseFromSefaria(v.sefaria_ref);
+        const [hebrewText, location] = await Promise.all([fetchVerseFromSefaria(v.sefaria_ref), readerLocation(v.sefaria_ref)]);
         return {
           reference: v.reference_he,
           text: hebrewText ?? "לא נמצא טקסט",
           why: v.why,
+          ...(location ?? {}),
         };
       })
     );

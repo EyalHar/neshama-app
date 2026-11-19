@@ -58,11 +58,12 @@ neshama-app/
 │   │   │   ├── mishkal/        ← Nouns/adjectives by mishkal (Gesenius), from data/noun-patterns
 │   │   │   └── substring/      ← Substring / basic word search
 │   │   └── admin/
-│   │       ├── seed-oshb/      ← Seed morphology data
-│   │       └── seed-strongs/   ← Seed Strong's dictionary
+│   │       ├── seed-oshb/      ← Seed morphology data (admins only)
+│   │       └── seed-strongs/   ← Seed Strong's dictionary (admins only)
 │   ├── components/
 │   │   ├── Sidebar.tsx         ← Main navigation (right side, RTL)
 │   │   ├── SessionWrapper.tsx  ← NextAuth provider
+│   │   ├── SignInNotice.tsx    ← "Sign in to use…" card shown instead of the AI features when signed out
 │   │   ├── Confetti.tsx        ← Milestone celebration animation
 │   │   ├── HeartIcon.tsx       ← Favorite toggle icon
 │   │   ├── NoteIcon.tsx        ← Verse-notes icon
@@ -75,7 +76,7 @@ neshama-app/
 │   │   ├── VerseText.tsx       ← Renders a verse with special letters + highlighted words
 │   │   ├── ScrollIntro.tsx     ← Home hero: animated Torah scroll whose letters rise into the title (+ .module.css)
 │   │   └── TempleIcon.tsx      ← SVG of Herod's Temple (Jerusalem names icon)
-│   ├── admin/seed/page.tsx
+│   ├── admin/                  ← layout.tsx (admins only: ADMIN_EMAILS) + seed/page.tsx
 │   ├── advanced/page.tsx
 │   ├── notebook/               ← page.tsx (list), [id]/page.tsx, NotebookEditor (TipTap), SourceQuote, activeDoc
 │   ├── community/              ← page.tsx (feed), ShareCard, CommentThread, format (dates/avatar)
@@ -105,6 +106,7 @@ neshama-app/
 │   ├── page.tsx                ← Home / landing page
 │   └── layout.tsx              ← Root layout: RTL, Sidebar, SessionWrapper
 ├── lib/
+│   ├── apiGuards.ts            ← requireAdmin() (seeding) and requireSignedIn() (AI routes) for API handlers
 │   ├── prisma.ts               ← Singleton PrismaClient
 │   ├── tanakh.ts               ← Book metadata, Hebrew numerals, Sefaria fetch + special-letter marks
 │   ├── favorites.ts            ← Current user + favorite-verse helpers
@@ -191,7 +193,7 @@ neshama-app/
 | `/word-shifts` | "גלגולי מילים": biblical words with a different meaning today (חַשְׁמַל, אֶקְדָּח, מְדִינָה…), each with a verse |
 | `/loanwords` | Words borrowed from Persian, Egyptian, Greek etc., per Strong's, with their verses |
 | `/login` | Google OAuth login |
-| `/admin/seed` | Database seeding UI (OSHB morphology + Strong's dictionary) |
+| `/admin/seed` | Database seeding UI (OSHB morphology + Strong's dictionary); admins only (`ADMIN_EMAILS`), others see "דף למנהלים בלבד" |
 
 ---
 
@@ -303,8 +305,8 @@ neshama-app/
 ### Commentaries
 - `GET /api/commentaries?book=&chapter=&verse=` — Classic commentators on a verse from Sefaria; only Public Domain / CC0 / CC-BY / CC-BY-SA editions are returned with text, others as a Sefaria link
 
-### AI
-- `POST /api/neshama` — Groq: detect emotion → return 2–3 matching verses with message
+### AI (signed-in users only: 401 otherwise)
+- `POST /api/neshama` — Groq: detect emotion → return 2–3 matching verses with message; each verse carries `book`/`chapter`/`verse` for a reader link only if the model's reference is a real verse in VerseText
 - `POST /api/quiz` — Groq: generate fill-in-the-blank quiz from random Tanakh verse
 - `GET /api/quiz/grammar?type=root|binyan|mixed&level=easy|medium|hard` — Root/binyan question generated from OSHB morphology (no AI)
 - `GET /api/quiz/letters?level=easy|medium|hard` — A verse with letters blanked out: `{ words, blanks: { word, letter, answer, marks }[], distractors }` (no AI)
@@ -428,6 +430,17 @@ neshama-app/
 
 ---
 
+## Access control
+- **Admin only** (`requireAdmin()` in `lib/apiGuards.ts`; 401 signed out, 403 if not in `ADMIN_EMAILS`): `GET /api/admin/seed-oshb`, `GET /api/admin/seed-strongs`; the `/admin` pages via `app/admin/layout.tsx`
+- **Signed-in only** (`requireSignedIn()`; 401 with `needSignIn`): the Groq-backed `POST /api/neshama`, `POST /api/events`, `POST /api/quiz` — each call costs Groq quota. Their pages show `SignInNotice` and make no call when signed out
+- **Per-user data** (progress, favorites, notes, notebook, community) checks the session in each route, as before
+- **Still open by design (decision pending):** `PATCH /api/unknown-roots` — crowdsourced root suggestions, writable without signing in
+
+## Running on a phone (home network)
+- `next.config.ts` sets `allowedDevOrigins: ["192.168.1.*"]`: without it Next 16 blocks its dev resources for any host but `localhost`, and pages load but are not interactive
+- Open `http://<the computer's IPv4>:3000` from a device on the same Wi-Fi (`ipconfig` → IPv4 Address; it was 192.168.1.189)
+- **Google sign-in does not work there:** Google only accepts redirect URIs on `localhost` or a public domain, never a private IP. Signing in from a phone needs a public HTTPS address, e.g. an ngrok tunnel (free plan: one fixed dev domain, 1 GB/month) registered once in Google Cloud Console — not set up yet. Lock any open route before exposing the site
+
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
 - **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; ketiv/qere mode as `tanakh-ketiv-qere`; custom (Ashkenazi/Sephardi: weekly haftarah and accent names in the accent tree, `lib/custom.ts`) as `tanakh-custom`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
@@ -446,7 +459,7 @@ AUTH_GOOGLE_ID        # Google OAuth client ID (read automatically by the Google
 AUTH_GOOGLE_SECRET    # Google OAuth client secret
 GROQ_API_KEY          # Groq LLM API key
 ANTHROPIC_API_KEY     # Anthropic API key (installed, reserved for future use)
-ADMIN_EMAILS          # Comma-separated emails allowed to delete any share/comment on /community
+ADMIN_EMAILS          # Comma-separated admin emails: may delete any share/comment on /community, and use /admin/seed and the seeding API
 ```
 
 ---

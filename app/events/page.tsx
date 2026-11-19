@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import SignInNotice from "@/app/components/SignInNotice";
 import PageHeader from "@/app/components/PageHeader";
 
 const STORAGE_KEY = "events-search-state";
@@ -25,7 +26,7 @@ type EventResult = {
 
 export default function EventsPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [eventInput, setEventInput] = useState("");
   const [searchedEvent, setSearchedEvent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -188,6 +189,9 @@ export default function EventsPage() {
               </div>
             )}
 
+            {status === "unauthenticated" ? (
+              <SignInNotice what="חיפוש אירועים" />
+            ) : (
             <button
               type="submit"
               disabled={loading || !eventInput.trim()}
@@ -205,6 +209,7 @@ export default function EventsPage() {
                 "חפש מקורות"
               )}
             </button>
+            )}
           </form>
         )}
 

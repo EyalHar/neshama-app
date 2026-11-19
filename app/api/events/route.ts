@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { stripVerseHtml } from "@/lib/tanakh";
+import { requireSignedIn } from "@/lib/apiGuards";
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -52,6 +53,8 @@ function parseSefRef(ref: string): { book: string; chapter: number; verse: numbe
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireSignedIn();
+  if (denied) return denied;
   try {
     const { event, exclude } = await request.json();
 
