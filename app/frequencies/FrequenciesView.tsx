@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Segmented from "@/app/quiz/Segmented";
 import CompareChart from "./CompareChart";
+import CustomCompare from "./CustomCompare";
 import { FREQ_TOTAL, FREQ_PAGE, type FreqItem, type FreqKind, type FreqList, type FreqOccurrences, type FreqScope, type FreqVerse } from "@/lib/frequenciesShared";
 
-type Tab = "words" | "roots";
+export type Tab = "words" | "roots" | "custom";
+const TAB_LABEL: Record<Tab, string> = { words: "מילים", roots: "שורשים", custom: "השוואה משלי" };
 
 const SCOPES: { id: FreqScope; label: string }[] = [
   { id: "tanakh", label: "כל התנ״ך" },
@@ -23,7 +25,7 @@ const WORD_MODE_NOTE: Record<string, string> = {
   form: "כל צורה כתובה נספרת לבדה, כולל התחיליות: ״וַיֹּאמֶר״ ו״לֵאמֹר״ הן שתי שורות נפרדות.",
 };
 
-export default function FrequenciesView({ initialTab }: { initialTab: Tab }) {
+export default function FrequenciesView({ initialTab, initialItems }: { initialTab: Tab; initialItems: string[] | null }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [scope, setScope] = useState<FreqScope>("tanakh");
   const [mode, setMode] = useState<FreqKind>("lexeme");
@@ -33,6 +35,7 @@ export default function FrequenciesView({ initialTab }: { initialTab: Tab }) {
   const [state, setState] = useState<{ url: string; data: FreqList | null; error: boolean }>({ url: "", data: null, error: false });
 
   useEffect(() => {
+    if (tab === "custom") return; // the own-list tab fetches its own data
     let live = true;
     fetch(url)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -43,7 +46,7 @@ export default function FrequenciesView({ initialTab }: { initialTab: Tab }) {
     return () => {
       live = false;
     };
-  }, [url]);
+  }, [url, tab]);
 
   function selectTab(t: Tab) {
     setTab(t);
@@ -57,7 +60,7 @@ export default function FrequenciesView({ initialTab }: { initialTab: Tab }) {
   return (
     <>
       <div className="flex gap-1 sm:gap-2 mb-5 border-b border-stone-200 overflow-x-auto overflow-y-hidden" role="tablist">
-        {(["words", "roots"] as Tab[]).map((t) => (
+        {(["words", "roots", "custom"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -68,11 +71,15 @@ export default function FrequenciesView({ initialTab }: { initialTab: Tab }) {
               tab === t ? "border-amber-600 text-amber-700 bg-amber-50" : "border-transparent text-stone-500 hover:text-stone-700"
             }`}
           >
-            {t === "words" ? "מילים" : "שורשים"}
+            {TAB_LABEL[t]}
           </button>
         ))}
       </div>
 
+      {tab === "custom" ? (
+        <CustomCompare initialIds={initialItems} />
+      ) : (
+      <>
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <Segmented options={SCOPES} value={scope} onChange={setScope} />
       </div>
@@ -104,6 +111,8 @@ export default function FrequenciesView({ initialTab }: { initialTab: Tab }) {
           </p>
           <RankedList key={url} items={data.items} total={data.totalWords} kind={kind} scope={scope} />
         </>
+      )}
+      </>
       )}
     </>
   );

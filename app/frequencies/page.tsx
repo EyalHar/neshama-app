@@ -1,8 +1,9 @@
 import PageHeader from "@/app/components/PageHeader";
-import FrequenciesView from "./FrequenciesView";
+import FrequenciesView, { type Tab } from "./FrequenciesView";
 
-export default async function FrequenciesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const { tab } = await searchParams;
+export default async function FrequenciesPage({ searchParams }: { searchParams: Promise<{ tab?: string; items?: string }> }) {
+  const { tab, items } = await searchParams;
+  const initialTab: Tab = tab === "roots" || tab === "custom" ? tab : "words";
   return (
     <div className="max-w-4xl mx-auto px-4 py-8" dir="rtl">
       <PageHeader title="המילים והשורשים השכיחים" />
@@ -11,7 +12,7 @@ export default async function FrequenciesPage({ searchParams }: { searchParams: 
         לפתוח כל מילה ולראות את הפסוקים שלה. הספירה לפי חלוקת המילים של OSHB (מילים המחוברות במקף נספרות בנפרד), ולכן
         אינה זהה למניין המסורתי של תיבות התורה.
       </p>
-      <FrequenciesView initialTab={tab === "roots" ? "roots" : "words"} />
+      <FrequenciesView initialTab={initialTab} initialItems={items ? items.split(",").filter(Boolean) : null} />
     </div>
   );
 }

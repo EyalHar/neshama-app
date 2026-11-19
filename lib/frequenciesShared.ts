@@ -24,5 +24,12 @@ export type FreqOccurrences = { verses: FreqVerse[]; total: number; next: number
 
 // The top words / roots of the whole Tanakh, with their count in each section, to compare sections
 export const COMPARE_TOP = 10;
-export type CompareItem = { key: string; label: string; counts: Record<FreqScope, number> };
+// `tag` / `rank` are set for the user's own list: what kind of item it is, and its place in the Tanakh
+export type CompareItem = { key: string; label: string; counts: Record<FreqScope, number>; tag?: string; rank?: number };
 export type FreqCompare = { totals: Record<FreqScope, number>; items: CompareItem[] };
+
+// "השוואה משלי": words / roots the user picks. An id is "kind:key" (lexeme:7965, form:שלום, root:שוב).
+export const CUSTOM_MAX = 15;
+export const KIND_TAG: Record<FreqKind, string> = { lexeme: "ערך מילוני", form: "כפי שנכתבה", root: "שורש" };
+export const itemId = (kind: FreqKind, key: string) => `${kind}:${key}`;
+export type FreqCandidate = { id: string; kind: FreqKind; label: string; sub: string; pos: string; counts: Record<FreqScope, number>; rank: number };

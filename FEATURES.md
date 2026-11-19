@@ -684,7 +684,17 @@
 - **צבעים:** שלושת הצבעים הראשונים של פלטת ה־dataviz, שנבדקו לעיוורון צבעים בכל הזוגות. לאקווה ניגודיות 2.74 מול הרקע, ולכן חובה טבלה ומקרא.
 - **המילים בגרף:** הוא עוקב אחרי מצב הספירה ואחרי הסינון ״רק שמות עצם, פעלים ותארים״.
 
-**קוד:** `lib/frequencies.ts` (אינדקס לכל תהליך שרת, כ־4 שניות בבנייה), `lib/frequenciesShared.ts`, `app/frequencies/`, `GET /api/frequencies`, `GET /api/frequencies/occurrences`, `GET /api/frequencies/compare`, `app/frequencies/CompareChart.tsx`.
+**לשונית ״השוואה משלי״ (`?tab=custom`):** השוואה בין חלקי התנ״ך לכל מילה או שורש, גם כאלה שאינם ב־500 השכיחים.
+- **חיפוש:** מקלידים מילה, עם ניקוד או בלי, וכל מה שהיא יכולה להיות מוצג לבחירה:
+  - ערכים מילוניים באותו כתיב. ״דבר״ מחזירה את דָּבָר, דָבַר ודֶּבֶר בנפרד.
+  - הצורה הכתובה עצמה.
+  - הערך שרוב מופעי הצורה שייכים לו. ״ויאמר״ מציעה גם את אָמַר.
+  - שורש פועל באותן אותיות.
+  - ליד כל אפשרות מוצגים חלק הדיבר, הפירוש, מספר המופעים והדירוג בתנ״ך.
+- **הרשימה:** אפשר לערבב מילים ושורשים, עד 15 פריטים. היא נשמרת בדפדפן (localStorage) ובכתובת (`?items=lexeme:7965,root:שוב`). קישור משותף פותח בדיוק את הפריטים שבו.
+- **הגרף:** אותו גרף השוואה של 10 השכיחים (`CompareFigure`), ומתחת לכל מילה מופיעים הסוג והדירוג בתנ״ך.
+
+**קוד:** `lib/frequencies.ts` (אינדקס לכל תהליך שרת, כ־4 שניות בבנייה), `lib/frequenciesShared.ts`, `app/frequencies/`, `GET /api/frequencies`, `GET /api/frequencies/occurrences`, `GET /api/frequencies/compare`, `GET /api/frequencies/search`, `GET /api/frequencies/items`, `app/frequencies/CompareChart.tsx`, `app/frequencies/CustomCompare.tsx`.
 
 ## הגנה על נתיבים — [תאריך: 2026-11-19]
 

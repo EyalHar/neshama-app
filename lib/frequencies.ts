@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS, toHebrewNumeral } from "@/lib/tanakh";
 import { parseWord } from "@/lib/wordStats";
 import { getRootInfo, getVerbRootResolver } from "@/lib/rootLetters";
-import { COMPARE_TOP, OCCURRENCES_PAGE, type FreqCompare, type FreqItem, type FreqKind, type FreqList, type FreqOccurrences, type FreqScope, type FreqVerse } from "@/lib/frequenciesShared";
+import { COMPARE_TOP, CUSTOM_MAX, KIND_TAG, OCCURRENCES_PAGE, itemId, type FreqCandidate, type FreqCompare, type FreqItem, type FreqKind, type FreqList, type FreqOccurrences, type FreqScope, type FreqVerse } from "@/lib/frequenciesShared";
 
 // Word and root frequencies over the Tanakh, from OSHB (one index per server process; restart after seeding).
 // Three ways to count a word: its dictionary entry (Strong's number of the main word, prefixes and
@@ -11,6 +11,9 @@ import { COMPARE_TOP, OCCURRENCES_PAGE, type FreqCompare, type FreqItem, type Fr
 // words, so word n of a verse is text.split(" ")[n - 1].
 
 const SECTIONS: FreqScope[] = ["torah", "nevi", "ketuvim"];
+const FINALS: Record<string, string> = { ך: "כ", ם: "מ", ן: "נ", ף: "פ", ץ: "צ" };
+// Letters only, finals folded: how typed words, dictionary forms and roots are compared
+const fold = (s: string) => s.replace(/[^א-ת]/g, "").replace(/[ךםןףץ]/g, (c) => FINALS[c]);
 const SECTION_OF: Record<string, number> = { תורה: 0, נביאים: 1, כתובים: 2 };
 const BOOK = new Map(TANAKH_BOOKS.map((b) => [b.id, b]));
 // הָלַךְ: Strong's files its imperfect (וַיֵּלֶךְ) as יָלַךְ, H3212 (as in lib/leitwordSearch.ts)
@@ -33,7 +36,16 @@ const POS_HE: Record<string, string> = {
   S: "סיומת",
 };
 
-type Entry = { counts: number[]; positions: number[]; content: boolean; label: string; sub: string; pos: string; searchHref?: string };
+type Entry = {
+  counts: number[];
+  positions: number[];
+  content: boolean;
+  label: string;
+  sub: string;
+  pos: string;
+  searchHref?: string;
+  letters: string; // what a typed query is matched against: the dictionary form / written form / root, finals folded
+};
 type Verse = { ref: string; href: string; words: string[] };
 type Index = {
   verseOf: Int32Array; // row → verse index
@@ -42,6 +54,7 @@ type Index = {
   verses: Map<number, Verse>;
   totals: number[];
   kinds: Record<FreqKind, Map<string, Entry>>;
+  formLexeme: Map<string, string>; // written form → the entry most of its occurrences belong to
 };
 
 let indexPromise: Promise<Index> | null = null;
@@ -58,7 +71,7 @@ async function build(): Promise<Index> {
       orderBy: [{ verseIndex: "asc" }, { wordNum: "asc" }],
     }),
     prisma.verseText.findMany({ select: { verseIndex: true, book: true, chapter: true, verse: true, text: true } }),
-    prisma.strongsEntry.findMany({ select: { number: true, lemmaHe: true, definition: true } }),
+    prisma.strongsEntry.findMany({ select: { number: true, lemmaHe: true, lemmaPlain: true, definition: true } }),
     getVerbRootResolver(),
     getRootInfo(),
   ]);
@@ -81,6 +94,7 @@ async function build(): Promise<Index> {
   const formSpellings = new Map<string, Map<string, number>>();
   // Function words are shown as written (אֶל, not Strong's אֵל): their most frequent prefix-less spelling
   const bareSpellings = new Map<string, Map<string, number>>();
+  const formNums = new Map<string, Map<string, number>>();
 
   const add = (kind: FreqKind, key: string, row: number, section: number, init: () => Omit<Entry, "counts" | "positions">) => {
     let e = kinds[kind].get(key);
@@ -103,10 +117,15 @@ async function build(): Promise<Index> {
     if (num) {
       add("lexeme", num, i, section, () => {
         const m = meta.get(num);
-        return { content, label: m?.lemmaHe ?? r.word, sub: m ? shortGloss(m.definition) : "", pos };
+        return { content, label: m?.lemmaHe ?? r.word, sub: m ? shortGloss(m.definition) : "", pos, letters: fold(m?.lemmaPlain ?? r.plain) };
       });
     }
-    add("form", r.plain, i, section, () => ({ content, label: r.plain, sub: num ? meta.get(num)?.lemmaHe ?? "" : "", pos }));
+    add("form", r.plain, i, section, () => ({ content, label: r.plain, sub: num ? meta.get(num)?.lemmaHe ?? "" : "", pos, letters: fold(r.plain) }));
+    if (num) {
+      const nums = formNums.get(r.plain) ?? new Map<string, number>();
+      nums.set(num, (nums.get(num) ?? 0) + 1);
+      formNums.set(r.plain, nums);
+    }
     const spellings = formSpellings.get(r.plain) ?? new Map<string, number>();
     const pointed = r.word.replace(/ֽ/g, "").replace(/\//g, "");
     spellings.set(pointed, (spellings.get(pointed) ?? 0) + 1);
@@ -129,6 +148,7 @@ async function build(): Promise<Index> {
             sub: info ? shortGloss(info.definition) : "",
             pos: "",
             searchHref: `/advanced?tab=root&root=${encodeURIComponent(info?.plain ?? root)}`,
+            letters: root,
           };
         });
       }
@@ -139,7 +159,8 @@ async function build(): Promise<Index> {
   const mostFrequent = (m: Map<string, number> | undefined) => [...(m ?? [])].sort((a, b) => b[1] - a[1])[0]?.[0];
   for (const [plain, e] of kinds.form) e.label = mostFrequent(formSpellings.get(plain)) ?? e.label;
   for (const [num, e] of kinds.lexeme) if (!e.content) e.label = mostFrequent(bareSpellings.get(num)) ?? e.label;
-  return { verseOf, wordAt, sectionOf, verses, totals, kinds };
+  const formLexeme = new Map([...formNums].map(([form, nums]) => [form, mostFrequent(nums)!]));
+  return { verseOf, wordAt, sectionOf, verses, totals, kinds, formLexeme };
 }
 
 const getIndex = () => (indexPromise ??= build().catch((e) => ((indexPromise = null), Promise.reject(e))));
@@ -179,11 +200,68 @@ export async function getOccurrences(kind: FreqKind, key: string, scope: FreqSco
 // The COMPARE_TOP most frequent words (or roots) of the whole Tanakh and their count in each section
 export async function getComparison(kind: FreqKind, contentOnly: boolean): Promise<FreqCompare> {
   const ix = await getIndex();
-  const byScope = (c: number[]): Record<FreqScope, number> => ({ tanakh: c[0] + c[1] + c[2], torah: c[0], nevi: c[1], ketuvim: c[2] });
   const items = [...ix.kinds[kind]]
     .filter(([, e]) => !contentOnly || e.content)
     .sort((a, b) => countIn(b[1], -1) - countIn(a[1], -1))
     .slice(0, COMPARE_TOP)
     .map(([key, e]) => ({ key, label: e.label, counts: byScope(e.counts) }));
+  return { totals: byScope(ix.totals), items };
+}
+
+// ---- "השוואה משלי": search for any word or root, and fetch a list of them ----
+
+const byScope = (c: number[]): Record<FreqScope, number> => ({ tanakh: c[0] + c[1] + c[2], torah: c[0], nevi: c[1], ketuvim: c[2] });
+
+const rankCache = new Map<FreqKind, Map<string, number>>();
+async function rankOf(kind: FreqKind, key: string): Promise<number> {
+  if (!rankCache.has(kind)) {
+    const ix = await getIndex();
+    const sorted = [...ix.kinds[kind]].sort((a, b) => countIn(b[1], -1) - countIn(a[1], -1));
+    rankCache.set(kind, new Map(sorted.map(([k], i) => [k, i + 1])));
+  }
+  return rankCache.get(kind)!.get(key) ?? 0;
+}
+
+const SEARCH_MAX = 8;
+
+// Everything a typed word can mean: dictionary entries spelled so (homonyms apart), the written form
+// itself, the entry most of that form's occurrences belong to, and a verb root of those letters
+export async function searchFrequencyItems(query: string): Promise<FreqCandidate[]> {
+  const ix = await getIndex();
+  const q = fold(query);
+  if (!q) return [];
+  const found: [FreqKind, string][] = [];
+  const push = (kind: FreqKind, key: string) => {
+    if (ix.kinds[kind].has(key) && !found.some(([k, x]) => k === kind && x === key)) found.push([kind, key]);
+  };
+  for (const [key, e] of ix.kinds.lexeme) if (e.letters === q) push("lexeme", key);
+  for (const [key, e] of ix.kinds.form) {
+    if (e.letters !== q) continue;
+    push("form", key);
+    const main = ix.formLexeme.get(key);
+    if (main) push("lexeme", main);
+  }
+  push("root", q);
+  const candidates = await Promise.all(
+    found.map(async ([kind, key]) => {
+      const e = ix.kinds[kind].get(key)!;
+      return { id: itemId(kind, key), kind, label: e.label, sub: e.sub, pos: e.pos, counts: byScope(e.counts), rank: await rankOf(kind, key) };
+    })
+  );
+  return candidates.sort((a, b) => b.counts.tanakh - a.counts.tanakh).slice(0, SEARCH_MAX);
+}
+
+// The user's list, in its own order, with each item's count per section
+export async function getFrequencyItems(ids: string[]): Promise<FreqCompare> {
+  const ix = await getIndex();
+  const items = [];
+  for (const id of ids.slice(0, CUSTOM_MAX)) {
+    const i = id.indexOf(":");
+    const kind = id.slice(0, i) as FreqKind;
+    const key = id.slice(i + 1);
+    const e = ix.kinds[kind]?.get(key);
+    if (!e) continue;
+    items.push({ key: id, label: e.label, counts: byScope(e.counts), tag: KIND_TAG[kind], rank: await rankOf(kind, key) });
+  }
   return { totals: byScope(ix.totals), items };
 }

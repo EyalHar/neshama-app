@@ -28,8 +28,6 @@ function axis(max: number): { top: number; step: number } {
 export default function CompareChart({ kind, contentOnly, what }: { kind: FreqKind; contentOnly: boolean; what: string }) {
   const url = `/api/frequencies/compare?kind=${kind}&content=${contentOnly ? 1 : 0}`;
   const [state, setState] = useState<{ url: string; data: FreqCompare | null; error: boolean }>({ url: "", data: null, error: false });
-  const [asTable, setAsTable] = useState(false);
-  const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -45,11 +43,18 @@ export default function CompareChart({ kind, contentOnly, what }: { kind: FreqKi
   }, [url]);
 
   const data = state.url === url ? state.data : null;
+  const error = state.url === url && state.error;
+  return <CompareFigure title={`השוואה בין חלקי התנ״ך: 10 ${what}`} data={data} error={error} />;
+}
 
+// The comparison card itself (title, bars or table, toggle) — also used by the user's own list
+export function CompareFigure({ title, data, error, children }: { title: string; data: FreqCompare | null; error: boolean; children?: React.ReactNode }) {
+  const [asTable, setAsTable] = useState(false);
+  const [hover, setHover] = useState<string | null>(null);
   return (
     <section className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 shadow-sm mb-6" aria-label="השוואה בין חלקי התנ״ך">
       <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
-        <h2 className="text-lg font-bold text-stone-800">השוואה בין חלקי התנ״ך: 10 {what}</h2>
+        <h2 className="text-lg font-bold text-stone-800">{title}</h2>
         <button
           type="button"
           onClick={() => setAsTable((t) => !t)}
@@ -60,10 +65,10 @@ export default function CompareChart({ kind, contentOnly, what }: { kind: FreqKi
         </button>
       </div>
       <p className="text-xs text-stone-500 mb-4">מופעים לכל 1,000 מילים בכל חלק, כי החלקים שונים מאוד באורכם.</p>
-
-      {state.url === url && state.error && <p className="text-red-500 text-sm">שגיאה בטעינה</p>}
-      {!data && !(state.url === url && state.error) && <p className="text-stone-400 text-sm py-6 text-center">טוען...</p>}
-      {data && (asTable ? <CompareTable data={data} /> : <Bars data={data} hover={hover} setHover={setHover} />)}
+      {children}
+      {error && <p className="text-red-500 text-sm">שגיאה בטעינה</p>}
+      {!data && !error && <p className="text-stone-400 text-sm py-6 text-center">טוען...</p>}
+      {data && data.items.length > 0 && (asTable ? <CompareTable data={data} /> : <Bars data={data} hover={hover} setHover={setHover} />)}
     </section>
   );
 }
@@ -110,7 +115,10 @@ function Bars({ data, hover, setHover }: { data: FreqCompare; hover: string | nu
           const active = hover === item.key;
           return (
             <div key={item.key} className="contents">
-              <div className={`flex items-center justify-end text-base font-semibold py-1.5 ${active ? "text-amber-800" : "text-stone-800"}`}>{item.label}</div>
+              <div className={`flex flex-col items-end justify-center text-base font-semibold py-1.5 leading-tight ${active ? "text-amber-800" : "text-stone-800"}`}>
+                {item.label}
+                {item.tag && <span className="text-[10px] font-normal text-stone-400">{item.tag}{item.rank ? ` · #${item.rank.toLocaleString("he-IL")}` : ""}</span>}
+              </div>
               <div
                 className={`relative py-1.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${active ? "bg-stone-50" : ""}`}
                 tabIndex={0}
@@ -142,7 +150,10 @@ function Bars({ data, hover, setHover }: { data: FreqCompare; hover: string | nu
 function Tooltip({ item, totals }: { item: CompareItem; totals: Record<FreqScope, number> }) {
   return (
     <div className="absolute left-0 top-full z-10 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg px-3 py-2 text-sm min-w-48 pointer-events-none">
-      <p className="font-bold text-stone-800 mb-1">{item.label}</p>
+      <p className="font-bold text-stone-800 mb-1">
+        {item.label}
+        {item.tag && <span className="font-normal text-xs text-stone-500 ms-2">{item.tag}{item.rank ? ` · דירוג בתנ״ך #${item.rank.toLocaleString("he-IL")}` : ""}</span>}
+      </p>
       {SERIES.map((s) => (
         <p key={s.scope} className="flex items-center gap-2 text-stone-700">
           <span className="w-2.5 h-2.5 rounded-sm" style={{ background: s.color }} aria-hidden />
@@ -170,7 +181,10 @@ function CompareTable({ data }: { data: FreqCompare }) {
         <tbody>
           {data.items.map((item) => (
             <tr key={item.key} className="border-b border-stone-100">
-              <td className="py-1.5 pe-3 font-semibold text-stone-800">{item.label}</td>
+              <td className="py-1.5 pe-3 font-semibold text-stone-800">
+                {item.label}
+                {item.tag && <span className="block text-[11px] font-normal text-stone-400">{item.tag}{item.rank ? ` · #${item.rank.toLocaleString("he-IL")}` : ""}</span>}
+              </td>
               {(["torah", "nevi", "ketuvim", "tanakh"] as FreqScope[]).map((s) => (
                 <td key={s} className="py-1.5 px-2 tabular-nums text-stone-700">
                   {fmt(rate(item, data.totals, s))}
