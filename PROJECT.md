@@ -271,7 +271,7 @@ neshama-app/
 - `GET /api/passage-text?book=&from=c:v&to=c:v` — A range's verses with nikud (no ta'amim) from VerseText, up to 400
 - `GET /api/letter-pairs` — Every triliteral verb root (`lib/rootLetters.ts`) with its count and Strong's meaning
 - `GET /api/loanwords/verses?strongs=` — Verses a loanword occurs in (up to 100), with the word's position in `VerseText.text`
-- `GET /api/unknown-roots` / `PATCH /api/unknown-roots` — List / suggest missing roots
+- `GET /api/unknown-roots` / `PATCH /api/unknown-roots` — List (public) / suggest missing roots (signed-in only)
 
 ### Community
 - `GET /api/shares?filter=all|mine|liked&book=&cursor=` — Feed, newest first (20/page)
@@ -356,7 +356,7 @@ neshama-app/
 - Table of Strong's entries with no `derivedFrom` parent
 - Shows one sample verse per entry for context
 - Filter (all / missing / filled) and sort (alphabetical / Tanakh order)
-- Users can propose a root; progress counter (X of Y filled)
+- Signed-in users can propose a root (signed out, the table is read-only with a sign-in prompt); progress counter (X of Y filled)
 
 ### Favorites
 - Heart icons on verses and chapters in the reader (signed-in users)
@@ -432,9 +432,8 @@ neshama-app/
 
 ## Access control
 - **Admin only** (`requireAdmin()` in `lib/apiGuards.ts`; 401 signed out, 403 if not in `ADMIN_EMAILS`): `GET /api/admin/seed-oshb`, `GET /api/admin/seed-strongs`; the `/admin` pages via `app/admin/layout.tsx`
-- **Signed-in only** (`requireSignedIn()`; 401 with `needSignIn`): the Groq-backed `POST /api/neshama`, `POST /api/events`, `POST /api/quiz` — each call costs Groq quota. Their pages show `SignInNotice` and make no call when signed out
+- **Signed-in only** (`requireSignedIn()`; 401 with `needSignIn`): the Groq-backed `POST /api/neshama`, `POST /api/events`, `POST /api/quiz` — each call costs Groq quota — and `PATCH /api/unknown-roots` (writes the shared suggestions table). Their pages show `SignInNotice` and make no call when signed out; `/unknown-roots` stays readable, its table read-only
 - **Per-user data** (progress, favorites, notes, notebook, community) checks the session in each route, as before
-- **Still open by design (decision pending):** `PATCH /api/unknown-roots` — crowdsourced root suggestions, writable without signing in
 
 ## Running on a phone (home network)
 - `next.config.ts` sets `allowedDevOrigins: ["192.168.1.*"]`: without it Next 16 blocks its dev resources for any host but `localhost`, and pages load but are not interactive

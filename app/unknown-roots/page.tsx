@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import SignInNotice from "@/app/components/SignInNotice";
 import { toHebrewNumeral, TANAKH_BOOKS } from "@/lib/tanakh";
 import PageHeader from "@/app/components/PageHeader";
 
@@ -25,6 +27,10 @@ export default function UnknownRootsPage() {
   const [sortBy, setSortBy] = useState<SortBy>("default");
   const [editing, setEditing] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState<number | null>(null);
+  const [failed, setFailed] = useState<number | null>(null);
+  // Suggesting needs a signed-in user; signed out, the table is read-only
+  const { status } = useSession();
+  const readOnly = status === "unauthenticated";
 
   useEffect(() => {
     fetch("/api/unknown-roots")
@@ -35,12 +41,14 @@ export default function UnknownRootsPage() {
   async function save(row: Row) {
     const val = editing[row.id] ?? row.suggestedRoot ?? "";
     setSaving(row.id);
-    await fetch("/api/unknown-roots", {
+    setFailed(null);
+    const res = await fetch("/api/unknown-roots", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: row.id, suggestedRoot: val }),
-    });
-    setRows((prev) => prev.map((r) => r.id === row.id ? { ...r, suggestedRoot: val || null } : r));
+    }).catch(() => null);
+    if (res?.ok) setRows((prev) => prev.map((r) => r.id === row.id ? { ...r, suggestedRoot: val || null } : r));
+    else setFailed(row.id);
     setSaving(null);
   }
 
@@ -72,14 +80,14 @@ export default function UnknownRootsPage() {
     <div className="max-w-5xl mx-auto px-4 py-8" dir="rtl">
       <PageHeader title="מילים ללא שורש ידוע" />
       <p className="text-stone-500 text-sm mb-6">
-        מילים שב-Strong's Hebrew Dictionary אין להן הפניה לשורש. עזור להשלים את המידע.
+        מילים שב-Strong&apos;s Hebrew Dictionary אין להן הפניה לשורש. עזור להשלים את המידע.
       </p>
 
       {loading ? (
         <p className="text-stone-400">טוען...</p>
       ) : rows.length === 0 ? (
         <p className="text-stone-400 text-center py-12">
-          הטבלה ריקה — יש לאכלס את מילון Strong's תחילה מדף <a href="/admin/seed" className="underline text-amber-700">האכלוס</a>.
+          הטבלה ריקה — יש לאכלס את מילון Strong&apos;s תחילה מדף <a href="/admin/seed" className="underline text-amber-700">האכלוס</a>.
         </p>
       ) : (
         <>
@@ -104,6 +112,12 @@ export default function UnknownRootsPage() {
               ))}
             </div>
           </div>
+
+          {readOnly && (
+            <div className="mb-4">
+              <SignInNotice what="הצעת שורשים" />
+            </div>
+          )}
 
           {/* Table */}
           <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
@@ -149,6 +163,9 @@ export default function UnknownRootsPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 align-top border-b border-stone-100">
+                      {readOnly ? (
+                        <span className="text-stone-700">{row.suggestedRoot ?? <span className="text-stone-300">—</span>}</span>
+                      ) : (
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
@@ -166,7 +183,9 @@ export default function UnknownRootsPage() {
                         >
                           {saving === row.id ? "..." : "שמור"}
                         </button>
+                        {failed === row.id && <span className="text-xs text-red-500">השמירה נכשלה</span>}
                       </div>
+                      )}
                     </td>
                   </tr>
                 ))}

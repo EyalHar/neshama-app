@@ -22,7 +22,7 @@ npx prisma studio            # Open DB browser UI
 No test suite exists in this project.
 
 ### Opening the dev server from a phone
-`next.config.ts` allows `192.168.1.*` in `allowedDevOrigins`; Next 16 otherwise blocks dev resources (HMR, chunks) for any host but `localhost`, so pages load without being interactive. Google sign-in cannot work on a private-IP address (Google rejects such redirect URIs); it needs a public HTTPS domain such as an ngrok tunnel, not set up yet. Before exposing the site publicly, every route that writes or costs must be guarded (see *Guarded routes*); `PATCH /api/unknown-roots` is still open, pending the user's decision.
+`next.config.ts` allows `192.168.1.*` in `allowedDevOrigins`; Next 16 otherwise blocks dev resources (HMR, chunks) for any host but `localhost`, so pages load without being interactive. Google sign-in cannot work on a private-IP address (Google rejects such redirect URIs); it needs a public HTTPS domain such as an ngrok tunnel, not set up yet. Before exposing the site publicly, every route that writes or costs must be guarded (see *Guarded routes*).
 
 ---
 
@@ -172,7 +172,7 @@ There is no word-level mapping between the reader's Sefaria text and OSHB's word
 - **Permissions:** checked server-side via `getViewer()`. Admins are the emails listed in `ADMIN_EMAILS`.
 
 ### Guarded routes (`lib/apiGuards.ts`)
-The Groq-backed routes (`/api/neshama`, `/api/events`, `POST /api/quiz`) start with `requireSignedIn()`: each call costs Groq quota, so signed-out requests get 401 with `needSignIn`, and their pages show `app/components/SignInNotice.tsx` instead of calling them. Give any new AI route the same guard.
+The Groq-backed routes (`/api/neshama`, `/api/events`, `POST /api/quiz`) and `PATCH /api/unknown-roots` (writes the shared suggestions) start with `requireSignedIn()`: each AI call costs Groq quota, so signed-out requests get 401 with `needSignIn`, and their pages show `app/components/SignInNotice.tsx` instead of calling them. Give any new AI route the same guard.
 
 Seeding rewrites the database, so `/api/admin/*` starts with `requireAdmin()` (`lib/apiGuards.ts`: 401 when signed out, 403 when not in `ADMIN_EMAILS`), and `app/admin/layout.tsx` shows the `/admin` pages to admins only. Give any new admin route the same guard.
 

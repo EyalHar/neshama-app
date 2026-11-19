@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { TANAKH_BOOKS } from "@/lib/tanakh";
+import { requireSignedIn } from "@/lib/apiGuards";
 
 const bookOrder = Object.fromEntries(TANAKH_BOOKS.map((b, i) => [b.id, i]));
 
@@ -111,7 +112,10 @@ export async function GET() {
   return NextResponse.json({ rows: await attachSampleVerses(rows) });
 }
 
+// Suggesting a root writes to the shared table: signed-in users only (reading stays public)
 export async function PATCH(req: NextRequest) {
+  const denied = await requireSignedIn();
+  if (denied) return denied;
   const { id, suggestedRoot } = await req.json();
   if (!id || typeof suggestedRoot !== "string") {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
