@@ -85,6 +85,7 @@ neshama-app/
 │   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
 │   ├── letter-hints/           ← page.tsx (server, acrostics) + LetterHintsTabs, InitialsSearch, Acrostics, ElsSearch, MarkedVerseText
 │   ├── verse-patterns/         ← page.tsx + VersePatternsTabs (chiasm, repeats), tabs.ts
+│   ├── doublets/               ← page.tsx (server: verses, name counts, parallels link) + DoubletsView
 │   ├── middot/                 ← page.tsx (server: examples' verses) + MiddotView (Sefaria sources on demand)
 │   ├── divine-names/page.tsx   ← Names and titles of God with key verses and counts (server component)
 │   ├── letter-pairs/           ← page.tsx + LetterWheel (231-gate wheel of letter pairs)
@@ -139,6 +140,7 @@ neshama-app/
 │   ├── letterHintsShared.ts    ← Client-safe types, normalizeLetters(), ALEF_BET, ELS limits
 │   ├── acrostics.ts            ← Curated acrostic ranges / line starts (letters are read from the text)
 │   ├── versePatterns.ts        ← Chiasm (mirrored lexemes) + repeated words per verse (cached; types in versePatternsShared.ts)
+│   ├── doublets.ts             ← Curated doublets: sides, cited differences (checked), views by approach (client-safe)
 │   ├── middot.ts               ← The 13 middot: baraita wording, explanations, checked examples, search phrases (client-safe)
 │   ├── middotVerses.ts         ← Loads an example verse with its phrase marked
 │   ├── middotSources.ts        ← Sefaria search for passages naming a middah; license-gated snippet + linked verses
@@ -177,6 +179,7 @@ neshama-app/
 | `/prayers-songs` | "תפילות ושירות": 57 songs, prayers, laments and blessings in the narrative and prophetic books (filter by kind, each opens in full), and all 150 psalms grouped by their superscription's attribution, filterable by title word |
 | `/letter-hints` | "רמזים באותיות": seven tabs — words spelled by the first/last letters of consecutive words (forward/reversed), the 13 alphabetic acrostics with missing/out-of-order letters read from the text, word squares (אמת מארץ תצמח), the first appearance of each letter, and equidistant letter sequences (ELS) with a grid view; searches show the count expected by chance |
 | `/verse-patterns` | "תבניות בפסוק": verses whose content words repeat in mirrored order (chiasm, by lexeme), and words said twice in a row (with the four double calls by name) |
+| `/doublets` | (hidden for now: 404, no card) "סיפורים כפולים בתורה": 10 stories told twice or three times (Creation, the Flood, wife-sister ×3, Hagar, names given twice, Joseph's sale, water from the rock, the spies, the judges, the Decalogue): each telling, the differences highlighted in the verses, and three approaches side by side (classic commentators, modern religious thinkers, academic source criticism) |
 | `/middot` | "י״ג מידות": the 13 middot of R. Yishmael's baraita, each with its wording, an explanation, the baraita's own example (verses highlighted), checked extra examples, and further sources found by Sefaria's search (text only from openly licensed editions) |
 | `/divine-names` | "שמות ה׳": 33 names and titles of God in three groups (the names, titles, names given to a place/altar/city), each with key verses (name highlighted) and its verse count |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |

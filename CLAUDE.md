@@ -134,6 +134,9 @@ Same corpus as above. Pair lists (atbash, reversed letters) keep words of 3+ let
 ### Verse patterns (`lib/versePatterns.ts`)
 Chiasm = the longest perfect mirror of content lexemes (N/V/A) in a verse with 2+ pairs of 2+ different lexemes; adjacent words of one name (מבעל שלשה) are a center, not a pair. Repeats need the same letters *and* lexeme. Built from WordEntry + VerseText (same-word invariant), so restart after seeding.
 
+### Doublets (`/doublets`)
+Hidden for now (`PUBLISHED = false` in `app/doublets/page.tsx` → 404, no /discover card) until the user asks to publish it. `lib/doublets.ts` is hand-made. Every cited `match` was checked against VerseText (59/59; Gen 20:12 is written "בת אבי הוא"), and every commentator's view was read on Sefaria before it was summarized, with `quote` kept verbatim. Check a new entry the same way. The user chose to show tradition and academic criticism side by side; keep the page neutral (no verdicts), and keep the caveat that the documentary hypothesis is disputed. The God-name counts use Strong's numbers 3068/430 over the side's verse range.
+
 ### Thirteen middot (`/middot`)
 Curated data in `lib/middot.ts`: every verse is checked (match phrases highlighted, 39/39), and the extra examples cite sources checked on Sefaria. "More sources" calls Sefaria's search (`lib/middotSources.ts`) for the middah's own wording in the Bavli and halakhic midrashim. Text is shown only from editions whose license is in `ALLOWED_LICENSES` (the Bavli's Wikisource edition is CC-BY-SA), as plain text with edition + license, else just a link. Do not add LLM-suggested examples: in testing, Groq's citations and quotes did not match the sources.
 
