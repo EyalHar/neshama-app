@@ -16,6 +16,8 @@ import {
   type InitialsMode,
   type InitialsResult,
   type MarkedVerse,
+  type WordSquare,
+  type WordSquaresResult,
 } from "@/lib/letterHintsShared";
 
 // One in-memory copy of the Tanakh per server process (restart after seeding): words in order
@@ -364,3 +366,89 @@ export async function getAcrostics(): Promise<AcrosticView[]> {
     };
   });
 }
+
+// Splits n words into an n×n grid with off-diagonal cells of one letter and seg[i][j] === seg[j][i].
+// Returns the split lengths per word, or null.
+function squareSplit(words: string[]): number[][] | null {
+  const n = words.length;
+  const seg: string[][] = Array.from({ length: n }, () => Array(n).fill(""));
+  const fill = (i: number, j: number, pos: number): boolean => {
+    const w = words[i];
+    if (j === n) return pos === w.length && row(i + 1);
+    if (j !== i) {
+      if (pos >= w.length) return false;
+      seg[i][j] = w[pos];
+      seg[j][i] = w[pos];
+      return fill(i, j + 1, pos + 1);
+    }
+    const after = n - j - 1;
+    for (let end = pos + 1; end <= w.length - after; end++) {
+      seg[i][i] = w.slice(pos, end);
+      if (fill(i, j + 1, end)) return true;
+    }
+    return false;
+  };
+  const row = (i: number): boolean => {
+    if (i === n) return true;
+    let pre = "";
+    for (let j = 0; j < i; j++) pre += seg[j][i];
+    return words[i].startsWith(pre) && fill(i, i, pre.length);
+  };
+  return row(0) ? seg.map((r) => r.map((c) => c.length)) : null;
+}
+
+const SQUARE_SIZE = 3;
+const BASELINE_RUNS = 5;
+
+function scanSquares(c: Corpus, order?: (words: number[]) => number[]): { vi: number; at: number[]; lengths: number[][] }[] {
+  const out: { vi: number; at: number[]; lengths: number[][] }[] = [];
+  c.verses.forEach((v, vi) => {
+    const plain = v.plain.map(normalizeLetters);
+    const idx = order ? order(plain.map((_, i) => i)) : plain.map((_, i) => i);
+    for (let k = 0; k + SQUARE_SIZE <= idx.length; k++) {
+      const at = idx.slice(k, k + SQUARE_SIZE);
+      const lengths = squareSplit(at.map((i) => plain[i]));
+      if (lengths) out.push({ vi, at, lengths });
+    }
+  });
+  return out;
+}
+
+const isStrong = (lengths: number[][]) => lengths[0][0] === 1;
+
+let squaresPromise: Promise<WordSquaresResult> | null = null;
+
+async function buildSquares(): Promise<WordSquaresResult> {
+  const c = await getCorpus();
+  const squares: WordSquare[] = scanSquares(c).map(({ vi, at, lengths }) => {
+    const v = c.verses[vi];
+    const grid = at.map((wi, r) => {
+      const g = splitGraphemes(v.words[wi]).map((x) => x.letter + x.marks);
+      const plainLen = normalizeLetters(v.plain[wi]).length;
+      const units = g.length === plainLen ? g : [...v.plain[wi]];
+      let pos = 0;
+      return lengths[r].map((len) => units.slice(pos, (pos += len)).join(""));
+    });
+    return { book: v.book, chapter: v.chapter, verse: v.verse, ref: verseRef(v), href: verseHref(v), verseText: v.words.join(" "), grid, strong: isStrong(lengths) };
+  });
+
+  // Chance level: the same scan with each verse's words in a random (seeded) order
+  let seed = 7;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const shuffle = (a: number[]) => {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  let all = 0, strong = 0;
+  for (let r = 0; r < BASELINE_RUNS; r++) {
+    const found = scanSquares(c, shuffle);
+    all += found.length;
+    strong += found.filter((f) => isStrong(f.lengths)).length;
+  }
+  return { squares, baseline: { runs: BASELINE_RUNS, all: all / BASELINE_RUNS, strong: strong / BASELINE_RUNS } };
+}
+
+export const getWordSquares = () => (squaresPromise ??= buildSquares().catch((e) => ((squaresPromise = null), Promise.reject(e))));

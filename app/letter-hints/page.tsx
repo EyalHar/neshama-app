@@ -2,7 +2,7 @@ import PageHeader from "@/app/components/PageHeader";
 import { getAcrostics } from "@/lib/letterHints";
 import LetterHintsTabs, { type HintsTab } from "./LetterHintsTabs";
 
-const TABS: HintsTab[] = ["initials", "acrostics", "els"];
+const TABS: HintsTab[] = ["initials", "acrostics", "squares", "els"];
 
 export default async function LetterHintsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab } = await searchParams;

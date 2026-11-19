@@ -5,20 +5,25 @@ import type { AcrosticView } from "@/lib/letterHintsShared";
 import InitialsSearch from "./InitialsSearch";
 import Acrostics from "./Acrostics";
 import ElsSearch from "./ElsSearch";
+import WordSquares from "./WordSquares";
 
-export type HintsTab = "initials" | "acrostics" | "els";
+export type HintsTab = "initials" | "acrostics" | "squares" | "els";
 
 const TABS: { id: HintsTab; label: string }[] = [
   { id: "initials", label: "ראשי וסופי תיבות" },
   { id: "acrostics", label: "אקרוסטיכונים" },
+  { id: "squares", label: "ריבועי מילים" },
   { id: "els", label: "דילוגי אותיות" },
 ];
 
 export default function LetterHintsTabs({ initial, acrostics }: { initial: HintsTab; acrostics: AcrosticView[] }) {
   const [tab, setTab] = useState(initial);
+  // A tab is mounted on first visit (the word squares scan the whole Tanakh), then kept
+  const [visited, setVisited] = useState<HintsTab[]>([initial]);
 
   function select(t: HintsTab) {
     setTab(t);
+    setVisited((v) => (v.includes(t) ? v : [...v, t]));
     window.history.replaceState(null, "", `?tab=${t}`);
   }
 
@@ -40,9 +45,10 @@ export default function LetterHintsTabs({ initial, acrostics }: { initial: Hints
           </button>
         ))}
       </div>
-      <div hidden={tab !== "initials"}><InitialsSearch /></div>
-      <div hidden={tab !== "acrostics"}><Acrostics items={acrostics} /></div>
-      <div hidden={tab !== "els"}><ElsSearch /></div>
+      <div hidden={tab !== "initials"}>{visited.includes("initials") && <InitialsSearch />}</div>
+      <div hidden={tab !== "acrostics"}>{visited.includes("acrostics") && <Acrostics items={acrostics} />}</div>
+      <div hidden={tab !== "squares"}>{visited.includes("squares") && <WordSquares />}</div>
+      <div hidden={tab !== "els"}>{visited.includes("els") && <ElsSearch />}</div>
     </>
   );
 }

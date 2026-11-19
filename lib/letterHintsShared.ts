@@ -34,3 +34,9 @@ export type AcrosticView = {
 };
 
 export const ELS_LIMITS = { minLength: 3, maxLength: 12, maxSkip: 10000 };
+
+// Three consecutive words that read the same across and down: cell [i][j] of the grid is part j of
+// word i, and [i][j] === [j][i] off the diagonal. `strong`: the first word is single letters, i.e.
+// it is also the three words' initials (אמת מארץ תצמח).
+export type WordSquare = { book: string; chapter: number; verse: number; ref: string; href: string; verseText: string; grid: string[][]; strong: boolean };
+export type WordSquaresResult = { squares: WordSquare[]; baseline: { runs: number; all: number; strong: number } };
