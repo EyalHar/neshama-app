@@ -86,6 +86,9 @@ neshama-app/
 │   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
 │   ├── letter-hints/           ← page.tsx (server, acrostics) + LetterHintsTabs, InitialsSearch, Acrostics, ElsSearch, MarkedVerseText
 │   ├── verse-patterns/         ← page.tsx + VersePatternsTabs (chiasm, repeats), tabs.ts
+│   ├── tanakh-map/             ← page.tsx (server: narrowing panel + rows, all state in URL params)
+│   ├── special-nikud/          ← page.tsx + parts.tsx (server-rendered; filters and open groups are URL params)
+│   ├── synonyms/               ← page.tsx + SynonymsView (pair chips, by-book bars, chapter strip, example verses)
 │   ├── frequencies/            ← page.tsx + FrequenciesView (words / roots / own-list tabs), CompareChart (+ CompareFigure), CustomCompare
 │   ├── doublets/               ← page.tsx (server: verses, name counts, parallels link) + DoubletsView
 │   ├── middot/                 ← page.tsx (server: examples' verses) + MiddotView (Sefaria sources on demand)
@@ -143,6 +146,9 @@ neshama-app/
 │   ├── letterHintsShared.ts    ← Client-safe types, normalizeLetters(), ALEF_BET, ELS limits
 │   ├── acrostics.ts            ← Curated acrostic ranges / line starts (letters are read from the text)
 │   ├── versePatterns.ts        ← Chiasm (mirrored lexemes) + repeated words per verse (cached; types in versePatternsShared.ts)
+│   ├── tanakhMap.ts            ← Parashiyot rows (lib/parashiyot.json) + descriptions (data/tanakh-map), units per book
+│   ├── specialNikud.ts         ← Special-nikud snapshot types, labels, grouping
+│   ├── synonyms.ts             ← Types + data/synonyms snapshot (built by scripts/build-synonyms.mjs) (client-safe)
 │   ├── frequencies.ts          ← Word (lexeme / written form) and verb-root frequencies per section, occurrences (cached index)
 │   ├── doublets.ts             ← Curated doublets: sides, cited differences (checked), views by approach (client-safe)
 │   ├── middot.ts               ← The 13 middot: baraita wording, explanations, checked examples, search phrases (client-safe)
@@ -186,6 +192,9 @@ neshama-app/
 | `/verse-patterns` | "תבניות בפסוק": verses whose content words repeat in mirrored order (chiasm, by lexeme), and words said twice in a row (with the four double calls by name) |
 | `/doublets` | (hidden for now: 404, no card) "סיפורים כפולים בתורה": 10 stories told twice or three times (Creation, the Flood, wife-sister ×3, Hagar, names given twice, Joseph's sale, water from the rock, the spies, the judges, the Decalogue): each telling, the differences highlighted in the verses, and three approaches side by side (classic commentators, modern religious thinkers, academic source criticism) |
 | `/middot` | "י״ג מידות": the 13 middot of R. Yishmael's baraita, each with its wording, an explanation, the baraita's own example (verses highlighted), checked extra examples, and further sources found by Sefaria's search (text only from openly licensed editions) |
+| `/tanakh-map` | "מפת התנ״ך": a one-line description of each of the 3,482 parashiyot, narrowed in a side panel (section → book → parasha in the Torah / chapter elsewhere → parashiya), each row linking to the reader; server-rendered, state in the URL. Descriptions: Torah complete; elsewhere the opening words until written |
+| `/special-nikud` | "ניקוד מיוחד": unusual nikud (dagesh in א ח ע ר, dots over letters, hatafim under other letters, דחיק / אתי מרחיק, notes), each in MAM and the Leningrad Codex side by side, from data/special-nikud/ |
+| `/synonyms` | "מילים נרדפות": 12 checked synonym pairs (אִתְּךָ/עִמְּךָ, אָנֹכִי/אֲנִי, לֵב/לֵבָב…): each word's share per book with 95% range, chapter by chapter in a chosen book, the nearest verses of each word in one book, and whether the choice differs between books or clusters within one (data only) |
 | `/divine-names` | "שמות ה׳": 33 names and titles of God in three groups (the names, titles, names given to a place/altar/city), each with key verses (name highlighted) and its verse count |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
 | `/parallels` | "נוסחים מקבילים": 102 passages told twice (Samuel–Kings / Chronicles, II Sam 22 / Ps 18, Decalogue…), each side by side with word differences marked |
