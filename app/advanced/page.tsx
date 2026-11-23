@@ -9,8 +9,9 @@ import LetterSearch from "./LetterSearch";
 import RootLetters from "./RootLetters";
 import WordAnalysis from "./WordAnalysis";
 import LeitwordSearch from "./LeitwordSearch";
-import type { RootItem } from "@/lib/rootLetterPattern";
+import type { RootItem } from "@/lib/rootLetterPattern";
 import PageHeader from "@/app/components/PageHeader";
+import NikudKeyboard, { NikudToggle, sortMarks } from "@/app/components/NikudKeyboard";
 
 const BINYANIM = [
   { id: "all", label: "כל הבניינים" },
@@ -77,6 +78,10 @@ const MISHKAL_SECTIONS = [
 // to flip the checkbox manually.
 const hasNikud = (s: string) => /[֑-ׇ]/.test(s);
 
+// VerseText.text has its marks in one order and no qamats qatan (U+05C7) — it writes a plain
+// qamats — so a typed or panel-made word is brought to the same form before an exact match
+const pointedQuery = (s: string) => sortMarks(s.trim()).replace(/ׇ/g, "ָ");
+
 const SCOPES = [
   { id: "tanakh", label: "כל התנ״ך" },
   { id: "torah", label: "תורה" },
@@ -141,6 +146,9 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
   const [lastFavoritesOnly, setLastFavoritesOnly] = useState(false);
   const [nikudMode, setNikudMode] = useState(false);
   const [lastNikudMode, setLastNikudMode] = useState(false);
+  const [nikudKeyboard, setNikudKeyboard] = useState(false);
+  const basicInputRef = useRef<HTMLInputElement>(null);
+  const substringInputRef = useRef<HTMLInputElement>(null);
   const [substringQ, setSubstringQ] = useState("");
   const [rootQ, setRootQ] = useState("");
   // For a typed 4+ letter "root" like כלכל: the triliteral roots its verb forms are filed under
@@ -269,6 +277,16 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     return `/api/verses/etymology?${params.toString()}`;
   }
 
+  function changeBasic(v: string) {
+    setBasicQ(v);
+    setNikudMode(hasNikud(v));
+  }
+
+  function changeSubstring(v: string) {
+    setSubstringQ(v);
+    setNikudMode(hasNikud(v));
+  }
+
   function handleBasic(e: React.FormEvent, p = 1) {
     e.preventDefault();
     if (basicQ.trim().length < 2) return;
@@ -277,7 +295,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     setLastFavoritesOnly(favoritesOnly);
     setLastNikudMode(nikudMode);
     setPage(p);
-    search(`/api/verses/substring?q=${encodeURIComponent(basicQ.trim())}&scope=${scope}&whole=1&page=${p}${favParam(favoritesOnly)}${nikudParam(nikudMode)}`, p === 1);
+    search(`/api/verses/substring?q=${encodeURIComponent(nikudMode ? pointedQuery(basicQ) : basicQ.trim())}&scope=${scope}&whole=1&page=${p}${favParam(favoritesOnly)}${nikudParam(nikudMode)}`, p === 1);
   }
 
   function handleSubstring(e: React.FormEvent, p = 1) {
@@ -288,7 +306,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     setLastFavoritesOnly(favoritesOnly);
     setLastNikudMode(nikudMode);
     setPage(p);
-    search(`/api/verses/substring?q=${encodeURIComponent(substringQ.trim())}&scope=${scope}&page=${p}${favParam(favoritesOnly)}${nikudParam(nikudMode)}`, p === 1);
+    search(`/api/verses/substring?q=${encodeURIComponent(nikudMode ? pointedQuery(substringQ) : substringQ.trim())}&scope=${scope}&page=${p}${favParam(favoritesOnly)}${nikudParam(nikudMode)}`, p === 1);
   }
 
   function goToPage(p: number) {
@@ -296,7 +314,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
     if (tab === "basic" || tab === "substring") {
       const q = tab === "basic" ? lastBasicQ : lastSubstringQ;
       const whole = tab === "basic" ? "&whole=1" : "";
-      search(`/api/verses/substring?q=${encodeURIComponent(q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}${nikudParam(lastNikudMode)}`, false);
+      search(`/api/verses/substring?q=${encodeURIComponent(lastNikudMode ? pointedQuery(q) : q)}&scope=${lastScope}${whole}&page=${p}${favParam(lastFavoritesOnly)}${nikudParam(lastNikudMode)}`, false);
     } else if (tab === "root") {
       search(rootUrl(lastRootQ, lastStem, lastVerbForm, lastScope, rootView, p, lastFavoritesOnly), false);
     } else if (tab === "etymology") {
@@ -519,16 +537,14 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
           <form onSubmit={handleBasic} className="flex gap-2 mb-4">
             <input
               type="text"
+              ref={basicInputRef}
               value={basicQ}
-              onChange={(e) => {
-                const v = e.target.value;
-                setBasicQ(v);
-                setNikudMode(hasNikud(v));
-              }}
+              onChange={(e) => changeBasic(e.target.value)}
               placeholder={nikudMode ? "לדוגמה: בְּרֵאשִׁית" : "חפש מילה או ביטוי..."}
-              className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
+              className="flex-1 min-w-0 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
             />
+            <NikudToggle open={nikudKeyboard} onToggle={() => setNikudKeyboard((o) => !o)} controls="nikud-keyboard" />
             <button
               type="submit"
               disabled={basicQ.trim().length < 2 || loading}
@@ -537,6 +553,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
               חפש
             </button>
           </form>
+          {nikudKeyboard && <NikudKeyboard id="nikud-keyboard" inputRef={basicInputRef} value={basicQ} onChange={changeBasic} />}
         </div>
       )}
 
@@ -551,16 +568,14 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
           <form onSubmit={handleSubstring} className="flex gap-2 mb-4">
             <input
               type="text"
+              ref={substringInputRef}
               value={substringQ}
-              onChange={(e) => {
-                const v = e.target.value;
-                setSubstringQ(v);
-                setNikudMode(hasNikud(v));
-              }}
+              onChange={(e) => changeSubstring(e.target.value)}
               placeholder={nikudMode ? "לדוגמה: רֵאשִׁי" : "לדוגמה: ראשי"}
-              className="flex-1 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
+              className="flex-1 min-w-0 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-right"
               autoFocus
             />
+            <NikudToggle open={nikudKeyboard} onToggle={() => setNikudKeyboard((o) => !o)} controls="nikud-keyboard" />
             <button
               type="submit"
               disabled={substringQ.trim().length < 2 || loading}
@@ -569,6 +584,7 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
               חפש
             </button>
           </form>
+          {nikudKeyboard && <NikudKeyboard id="nikud-keyboard" inputRef={substringInputRef} value={substringQ} onChange={changeSubstring} />}
         </div>
       )}
 

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import PageHeader from "@/app/components/PageHeader";
 import { TANAKH_BOOKS } from "@/lib/tanakh";
+import { TIMELINE, relLabel, type TimelineEvent } from "@/lib/timeline";
+import TimelineView, { type ShownEvent } from "./TimelineView";
 import {
   SECTIONS,
   booksOf,
@@ -8,6 +10,7 @@ import {
   isTorah,
   rowsOf,
   sectionOfBook,
+  rangeRef,
   totalParashiyot,
   unitsOf,
   type MapRow,
@@ -15,7 +18,7 @@ import {
 } from "@/lib/tanakhMap";
 
 // Server-rendered: every narrowing is a link (?section=&book=&unit=&p=), so the 3,482 rows never ship to the browser
-type Params = { section?: string; book?: string; unit?: string; p?: string };
+type Params = { section?: string; book?: string; unit?: string; p?: string; view?: string; mode?: string };
 
 const PREVIEW = 4; // rows per book when a whole section (or the Tanakh) is shown
 
@@ -27,8 +30,33 @@ function href(q: Params): string {
 
 const BOOK_HE = new Map(TANAKH_BOOKS.map((b) => [b.id, b.he]));
 
+// Timeline events by each parashiya they cover ("Genesis|7:11" → events), for the year chip on a row
+const EVENTS_AT = new Map<string, TimelineEvent[]>();
+for (const e of TIMELINE.events) {
+  const at = (r: [number, number]) => r[0] * 1000 + r[1];
+  for (const r of rowsOf(e.book)) {
+    const inside = at(r.start) >= at(e.from) && at(r.start) <= at(e.to);
+    if (!inside && `${r.start[0]}:${r.start[1]}` !== e.parashiya) continue;
+    const k = `${e.book}|${r.start[0]}:${r.start[1]}`;
+    EVENTS_AT.set(k, [...(EVENTS_AT.get(k) ?? []), e]);
+  }
+}
+const yearChip = (e: TimelineEvent) =>
+  e.axis === "exodus" && e.rel ? relLabel(e.rel.from) : e.am.to !== undefined && e.am.to !== e.am.from ? `שנים ${e.am.from}–${e.am.to}` : `שנת ${e.am.from}`;
+
+function TimelinePage({ mode }: { mode: "text" | "tradition" }) {
+  const events: ShownEvent[] = TIMELINE.events.map((e) => ({
+    ...e,
+    ref: rangeRef(e.book, e.from, e.to),
+    mapHref: href({ book: e.book, p: e.parashiya }),
+    readerHref: `/tanakh?book=${encodeURIComponent(e.book)}&chapter=${e.from[0]}&verse=${e.from[1]}`,
+  }));
+  return <TimelineView events={events} exodusAm={TIMELINE.exodusAm} initialMode={mode} />;
+}
+
 export default async function TanakhMapPage({ searchParams }: { searchParams: Promise<Params> }) {
   const q = await searchParams;
+  const timeline = q.view === "timeline";
   // Validate the path from the top down; anything that doesn't fit stops the narrowing there
   const book = q.book && BOOK_HE.has(q.book) ? q.book : undefined;
   const section: SectionId | undefined = book ? sectionOfBook(book)! : SECTIONS.find((s) => s.id === q.section)?.id;
@@ -48,6 +76,22 @@ export default async function TanakhMapPage({ searchParams }: { searchParams: Pr
   return (
     <div className="max-w-6xl mx-auto px-4 py-8" dir="rtl">
       <PageHeader title="מפת התנ״ך" />
+      <ViewTabs timeline={timeline} />
+      {timeline ? (
+        <>
+          <p className="text-stone-600 leading-relaxed mb-1 max-w-3xl">
+            הסיפורים שבתורה על ציר הזמן. פרשייה מופיעה רק כשהשנה שלה ידועה: מחושבת מהפסוקים (גילים, שנות חיים ותאריכים
+            שהכתוב נותן, וכל מספר נבדק מול לשון הפסוק), או נאמרת במקור מסורתי שנבדק בספריא. פרשייה בלי שנה ידועה לא מופיעה,
+            ואין כאן ניחושים.
+          </p>
+          <p className="text-xs text-stone-400 mb-6">
+            הסדר בציר הוא סדר הזמנים, ולא תמיד סדר הכתובים: ברית בין הבתרים, למשל, מסופרת אחרי יציאת אברם מחרן אך קדמה לה לפי
+            המסורת.
+          </p>
+          <TimelinePage mode={q.mode === "tradition" ? "tradition" : "text"} />
+        </>
+      ) : (
+      <>
       <p className="text-stone-600 leading-relaxed mb-1 max-w-3xl">
         שורה אחת לכל פרשה פתוחה או סתומה בתנ״ך, עם תיאור קצר של מה שמסופר בה. בצד אפשר לצמצם: חלק, ספר, פרשת השבוע או
         פרק, ופרשייה. לחיצה על שורה פותחת את הפסוקים בקורא.
@@ -77,7 +121,29 @@ export default async function TanakhMapPage({ searchParams }: { searchParams: Pr
           <Rows section={section} book={book} unit={unit} pRow={pRow} />
         </main>
       </div>
+      </>
+      )}
     </div>
+  );
+}
+
+function ViewTabs({ timeline }: { timeline: boolean }) {
+  const tab = (active: boolean, to: string, label: string) => (
+    <Link
+      href={to}
+      aria-current={active ? "page" : undefined}
+      className={`px-4 sm:px-6 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors border-b-2 ${
+        active ? "border-amber-600 text-amber-700 bg-amber-50" : "border-transparent text-stone-500 hover:text-stone-700"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+  return (
+    <nav className="flex gap-1 sm:gap-2 mb-5 border-b border-stone-200 overflow-x-auto overflow-y-hidden" aria-label="תצוגה">
+      {tab(!timeline, "/tanakh-map", "פרשיות")}
+      {tab(timeline, "/tanakh-map?view=timeline", "ציר הזמן (תורה)")}
+    </nav>
   );
 }
 
@@ -212,6 +278,11 @@ function RowList({ rows }: { rows: MapRow[] }) {
                 {r.description ?? r.incipit}
               </span>
               <span className="block text-xs text-stone-400 mt-0.5">
+                {EVENTS_AT.get(`${r.book}|${r.start[0]}:${r.start[1]}`)?.slice(0, 1).map((e) => (
+                  <span key={e.id} title={e.basis} className={`inline-block me-1.5 rounded px-1.5 py-px text-[11px] ${e.source === "tradition" ? "bg-violet-50 text-violet-700" : "bg-amber-50 text-amber-800"}`}>
+                    {yearChip(e)}
+                  </span>
+                ))}
                 {r.ref}
                 {r.description && <span className="text-stone-300"> · {r.incipit}…</span>}
               </span>

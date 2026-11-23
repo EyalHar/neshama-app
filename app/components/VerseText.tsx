@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { SpecialLetterKind, SpecialLetterMark } from "@/lib/tanakh";
 import { SPECIAL_LETTER_CLASS, SPECIAL_LETTER_KINDS } from "@/lib/special-letters";
+import type { SilentRange } from "@/lib/silentLetters";
 import VersionNoteMark from "./VersionNoteMark";
 
 const LABEL = Object.fromEntries(SPECIAL_LETTER_KINDS.map((k) => [k.kind, k.label]));
@@ -15,6 +16,10 @@ const CLUSTER_RE = /[א-ת][֑-ׇֽֿׁׂׅׄ]*/g;
 // Color only: a heavier weight than the verse's would draw these letters from another cut of the
 // font, so they would look smaller than their neighbors
 const QAMATS_QATAN_CLASS = "text-sky-700";
+// Letters written but not heard (lib/silentLetters.ts), and letters with unusual nikud
+const SILENT_CLASS = "text-stone-400";
+const SILENT_TITLE = "אות שאינה נהגית";
+const NIKUD_CLASS = "text-rose-700 bg-rose-50 rounded-sm";
 
 function qamatsQatanRanges(text: string): Range[] {
   if (!text.includes(QAMATS_QATAN)) return [];
@@ -36,7 +41,7 @@ export function findWordRanges(text: string, forms: Set<string>): Range[] {
   return ranges;
 }
 
-// Renders a verse with special letters (letter-level spans), qamats qatan letters and highlighted
+// Renders a verse with special letters (letter-level spans), qamats qatan, silent and special-nikud letters, and highlighted
 // words (word-level spans) layered together: the text is cut at every boundary of any of them.
 // With `words`, each word (split like findWordRanges) is also wrapped in a `data-word`
 // span, which the gematria overlay hovers over. Version notes are markers placed at their offset,
@@ -48,6 +53,8 @@ export default function VerseText({
   notes = [],
   words = false,
   qamatsQatan = false,
+  silent = [],
+  nikud = [],
 }: {
   text: string;
   marks?: SpecialLetterMark[];
@@ -55,16 +62,18 @@ export default function VerseText({
   notes?: { at: number; text: string }[];
   words?: boolean;
   qamatsQatan?: boolean;
+  silent?: SilentRange[];
+  nikud?: { start: number; end: number; label: string }[];
 }) {
   const qatan = qamatsQatan ? qamatsQatanRanges(text) : [];
-  if (marks.length === 0 && highlights.length === 0 && qatan.length === 0 && notes.length === 0 && !words) return <>{text}</>;
+  if (marks.length === 0 && highlights.length === 0 && qatan.length === 0 && silent.length === 0 && nikud.length === 0 && notes.length === 0 && !words) return <>{text}</>;
 
   const wordRanges = words
     ? [...text.matchAll(WORD_RE)].filter((m) => /[א-ת]/.test(m[0])).map((m) => ({ start: m.index, end: m.index + m[0].length }))
     : [];
 
   const cuts = new Set([0, text.length]);
-  for (const r of [...marks, ...highlights, ...qatan, ...wordRanges]) { cuts.add(r.start); cuts.add(r.end); }
+  for (const r of [...marks, ...highlights, ...qatan, ...silent, ...nikud, ...wordRanges]) { cuts.add(r.start); cuts.add(r.end); }
   for (const n of notes) cuts.add(n.at);
   const points = [...cuts].sort((a, b) => a - b);
 
@@ -85,12 +94,14 @@ export default function VerseText({
       const kind: SpecialLetterKind | undefined = marks.find((m) => m.start <= start && end <= m.end)?.kind;
       const lit = highlights.some((h) => h.start <= start && end <= h.end);
       const qq = qatan.some((q) => q.start <= start && end <= q.end);
-      if (!kind && !lit && !qq) { parts.push(piece); continue; }
+      const quiet = silent.some((q) => q.start <= start && end <= q.end);
+      const odd = nikud.find((q) => q.start <= start && end <= q.end);
+      if (!kind && !lit && !qq && !quiet && !odd) { parts.push(piece); continue; }
       parts.push(
         <span
           key={start}
-          className={[kind && SPECIAL_LETTER_CLASS[kind], lit && HIGHLIGHT_CLASS, qq && QAMATS_QATAN_CLASS].filter(Boolean).join(" ")}
-          title={kind ? LABEL[kind] : qq ? "קמץ קטן" : undefined}
+          className={[kind && SPECIAL_LETTER_CLASS[kind], lit && HIGHLIGHT_CLASS, qq && QAMATS_QATAN_CLASS, quiet && SILENT_CLASS, odd && NIKUD_CLASS].filter(Boolean).join(" ")}
+          title={kind ? LABEL[kind] : odd ? odd.label : qq ? "קמץ קטן" : quiet ? SILENT_TITLE : undefined}
         >
           {piece}
         </span>

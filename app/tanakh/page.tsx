@@ -14,7 +14,8 @@ import VerseStructure, { TreeIcon } from "@/app/components/VerseStructure";
 import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 import { collect } from "@/lib/notebook";
 import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
-import { inRef, type PassageMark, type PassageNote, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
+import { silentLetterRanges } from "@/lib/silentLetters";
+import { inRef, type PassageMark, type PassageNikudMark, type PassageNote, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
 import type { Leitword } from "@/lib/leitwords";
 import CelebrationModal, { type CelebrationData } from "./CelebrationModal";
 import LeitwordChips from "./LeitwordChips";
@@ -29,6 +30,8 @@ import PageHeader from "@/app/components/PageHeader";
 
 const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const QAMATS_QATAN_KEY = "tanakh-show-qamats-qatan";
+const SILENT_KEY = "tanakh-gray-silent-letters";
+const SPECIAL_NIKUD_KEY = "tanakh-show-special-nikud";
 const KETIV_QERE_KEY = "tanakh-ketiv-qere";
 const KETIV_QERE_OPTIONS: { id: KetivQere; label: string; title: string }[] = [
   { id: "both", label: "שניהם", title: "הכתיב בסוגריים עגולים והקרי בסוגריים מרובעים" },
@@ -102,6 +105,7 @@ function TanakhReader() {
   const [chapterVerseCounts, setChapterVerseCounts] = useState<Record<number, number>>({});
   const [sections, setSections] = useState<PassageSection[]>([]);
   const [specialLetters, setSpecialLetters] = useState<PassageMark[]>([]);
+  const [nikudMarks, setNikudMarks] = useState<PassageNikudMark[]>([]);
   const [versionNotes, setVersionNotes] = useState<PassageNote[]>([]);
   const [leitwords, setLeitwords] = useState<Leitword[]>([]);
   const [activeLeitword, setActiveLeitword] = useState<string | null>(null); // `${scope}|${strongs}`
@@ -135,11 +139,13 @@ function TanakhReader() {
 
   const showSpecialLetters = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SHOW_SPECIAL_KEY) === "1", () => false);
   const showQamatsQatan = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(QAMATS_QATAN_KEY) === "1", () => false);
+  const graySilent = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SILENT_KEY) === "1", () => false);
+  const showSpecialNikud = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SPECIAL_NIKUD_KEY) === "1", () => false);
   const ketivQere = useSyncExternalStore(subscribePrefs, () => parseKetivQere(localStorage.getItem(KETIV_QERE_KEY)), () => "both" as const);
   const custom = useSyncExternalStore(subscribePrefs, () => parseCustom(localStorage.getItem(CUSTOM_KEY)), () => "ashkenazi" as const);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
   const showGematria = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_KEY) === "1", () => false);
-  const activeSettings = [showSpecialLetters, showQamatsQatan, showGematria, ketivQere !== "both"].filter(Boolean).length;
+  const activeSettings = [showSpecialLetters, showQamatsQatan, graySilent, showSpecialNikud, showGematria, ketivQere !== "both"].filter(Boolean).length;
   const gematriaMethods = parseGematriaMethods(
     useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_METHODS_KEY) ?? "", () => "")
   );
@@ -242,6 +248,7 @@ function TanakhReader() {
       setChapterVerseCounts(data.chapterVerseCounts ?? {});
       setSections(data.sections ?? []);
       setSpecialLetters(data.specialLetters ?? []);
+      setNikudMarks(data.nikudMarks ?? []);
       setVersionNotes(data.versionNotes ?? []);
       setLeitwords(data.leitwords ?? []);
       setVersesLoadedFor(loadedKey);
@@ -677,6 +684,8 @@ function TanakhReader() {
                 highlights={activeForms?.[k] ? findWordRanges(v.text, new Set(activeForms[k])) : undefined}
                 notes={versionNotes.filter((n) => n.chapter === v.chapter && n.verse === v.verse)}
                 qamatsQatan={showQamatsQatan}
+                silent={graySilent ? silentLetterRanges(v.text) : undefined}
+                nikud={showSpecialNikud ? nikudMarks.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
               />
             </p>
             {session && (
@@ -886,6 +895,24 @@ function TanakhReader() {
                     className="accent-sky-600 w-3.5 h-3.5"
                   />
                   סמן קמץ קטן <span className="text-sm text-stone-700">(<span className="text-sky-700">כׇּ</span>ל)</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs text-stone-500 cursor-pointer select-none" title="אות שנכתבת ואינה נשמעת, כשזה לא מובן מאליו, נצבעת באפור בהיר: א׳ אחרי אות שימוש, כמו וֵאלֹהֵי ולֵאמֹר. א׳ רגילה כמו ברֹאשׁ ובלֹא נשארת רגילה">
+                  <input
+                    type="checkbox"
+                    checked={graySilent}
+                    onChange={(e) => setPref(SILENT_KEY, e.target.checked ? "1" : "0")}
+                    className="accent-stone-500 w-3.5 h-3.5"
+                  />
+                  אותיות שאינן נהגות באפור <span className="text-sm text-stone-700">(וֵ<span className="text-stone-400">א</span>לֹהֵי)</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs text-stone-500 cursor-pointer select-none" title="דגש באותיות גרוניות, נקודות על האותיות, חטף תחת אות שאינה גרונית, דחיק ואתי מרחיק; העבר את העכבר על האות לפירוט">
+                  <input
+                    type="checkbox"
+                    checked={showSpecialNikud}
+                    onChange={(e) => setPref(SPECIAL_NIKUD_KEY, e.target.checked ? "1" : "0")}
+                    className="accent-rose-600 w-3.5 h-3.5"
+                  />
+                  הדגש ניקוד מיוחד
                 </label>
                 <GematriaSettings
                   enabled={showGematria}

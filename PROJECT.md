@@ -63,6 +63,7 @@ neshama-app/
 │   ├── components/
 │   │   ├── Sidebar.tsx         ← Main navigation (right side, RTL)
 │   │   ├── SessionWrapper.tsx  ← NextAuth provider
+│   │   ├── NikudKeyboard.tsx   ← Nikud buttons that point the letter before an input's caret (+ NikudToggle, sortMarks); on the basic and substring search
 │   │   ├── SignInNotice.tsx    ← "Sign in to use…" card shown instead of the AI features when signed out
 │   │   ├── Confetti.tsx        ← Milestone celebration animation
 │   │   ├── HeartIcon.tsx       ← Favorite toggle icon
@@ -86,10 +87,11 @@ neshama-app/
 │   ├── prayers-songs/          ← page.tsx (server) + PrayersBrowser (filters) + PassageText (open in place)
 │   ├── letter-hints/           ← page.tsx (server, acrostics) + LetterHintsTabs, InitialsSearch, Acrostics, ElsSearch, MarkedVerseText
 │   ├── verse-patterns/         ← page.tsx + VersePatternsTabs (chiasm, repeats), tabs.ts
-│   ├── tanakh-map/             ← page.tsx (server: narrowing panel + rows, all state in URL params)
+│   ├── tanakh-map/             ← page.tsx (server: narrowing panel + rows, all state in URL params; ?view=timeline) + TimelineView
 │   ├── special-nikud/          ← page.tsx + parts.tsx (server-rendered; filters and open groups are URL params)
+│   ├── idioms/                 ← page.tsx (server: verses) + IdiomsBrowser (search, filters)
 │   ├── synonyms/               ← page.tsx + SynonymsView (pair chips, by-book bars, chapter strip, example verses)
-│   ├── frequencies/            ← page.tsx + FrequenciesView (words / roots / own-list tabs), CompareChart (+ CompareFigure), CustomCompare
+│   ├── frequencies/            ← page.tsx + FrequenciesView (words / roots / own-list tabs), CompareChart (+ CompareFigure), CustomCompare, SpellingVariants
 │   ├── doublets/               ← page.tsx (server: verses, name counts, parallels link) + DoubletsView
 │   ├── middot/                 ← page.tsx (server: examples' verses) + MiddotView (Sefaria sources on demand)
 │   ├── divine-names/page.tsx   ← Names and titles of God with key verses and counts (server component)
@@ -146,8 +148,10 @@ neshama-app/
 │   ├── letterHintsShared.ts    ← Client-safe types, normalizeLetters(), ALEF_BET, ELS limits
 │   ├── acrostics.ts            ← Curated acrostic ranges / line starts (letters are read from the text)
 │   ├── versePatterns.ts        ← Chiasm (mirrored lexemes) + repeated words per verse (cached; types in versePatternsShared.ts)
+│   ├── timeline.ts             ← Torah timeline events (data/timeline/torah.json, built by scripts/build-timeline.mjs) (client-safe)
 │   ├── tanakhMap.ts            ← Parashiyot rows (lib/parashiyot.json) + descriptions (data/tanakh-map), units per book
 │   ├── specialNikud.ts         ← Special-nikud snapshot types, labels, grouping
+│   ├── idioms.ts               ← Curated sayings from the Tanakh, checked by scripts/check-idioms.mjs (client-safe)
 │   ├── synonyms.ts             ← Types + data/synonyms snapshot (built by scripts/build-synonyms.mjs) (client-safe)
 │   ├── frequencies.ts          ← Word (lexeme / written form) and verb-root frequencies per section, occurrences (cached index)
 │   ├── doublets.ts             ← Curated doublets: sides, cited differences (checked), views by approach (client-safe)
@@ -192,8 +196,9 @@ neshama-app/
 | `/verse-patterns` | "תבניות בפסוק": verses whose content words repeat in mirrored order (chiasm, by lexeme), and words said twice in a row (with the four double calls by name) |
 | `/doublets` | (hidden for now: 404, no card) "סיפורים כפולים בתורה": 10 stories told twice or three times (Creation, the Flood, wife-sister ×3, Hagar, names given twice, Joseph's sale, water from the rock, the spies, the judges, the Decalogue): each telling, the differences highlighted in the verses, and three approaches side by side (classic commentators, modern religious thinkers, academic source criticism) |
 | `/middot` | "י״ג מידות": the 13 middot of R. Yishmael's baraita, each with its wording, an explanation, the baraita's own example (verses highlighted), checked extra examples, and further sources found by Sefaria's search (text only from openly licensed editions) |
-| `/tanakh-map` | "מפת התנ״ך": a one-line description of each of the 3,482 parashiyot, narrowed in a side panel (section → book → parasha in the Torah / chapter elsewhere → parashiya), each row linking to the reader; server-rendered, state in the URL. Descriptions: Torah complete; elsewhere the opening words until written |
+| `/tanakh-map` | "מפת התנ״ך": a one-line description of each of the 3,482 parashiyot, narrowed in a side panel (section → book → parasha in the Torah / chapter elsewhere → parashiya), each row linking to the reader; server-rendered, state in the URL. Descriptions: all 3,482 written. `?view=timeline`: the Torah's passages on a timeline, "לפי הכתוב בלבד" (two axes: from creation, from the Exodus) or "בצירוף המסורת" (one axis, Exodus in 2448), with a year chip on the list rows |
 | `/special-nikud` | "ניקוד מיוחד": unusual nikud (dagesh in א ח ע ר, dots over letters, hatafim under other letters, דחיק / אתי מרחיק, notes), each in MAM and the Leningrad Codex side by side, from data/special-nikud/ |
+| `/idioms` | "ניבים ופתגמים מן המקרא": 127 sayings from the Tanakh (verbatim / adapted / built later on a story), each with today's meaning, the source verse with the phrase highlighted, its sense there, and the first source of a later wording when verified; search and filters |
 | `/synonyms` | "מילים נרדפות": 12 checked synonym pairs (אִתְּךָ/עִמְּךָ, אָנֹכִי/אֲנִי, לֵב/לֵבָב…): each word's share per book with 95% range, chapter by chapter in a chosen book, the nearest verses of each word in one book, and whether the choice differs between books or clusters within one (data only) |
 | `/divine-names` | "שמות ה׳": 33 names and titles of God in three groups (the names, titles, names given to a place/altar/city), each with key verses (name highlighted) and its verse count |
 | `/letter-pairs` | "צירופי אותיות": Sefer Yetzirah's wheel of 231 letter pairs; pick two letters → the verb roots containing them, in both orders |
@@ -302,6 +307,7 @@ neshama-app/
 - `GET /api/middot/sources?id=&from=` — Passages of the Bavli and halakhic midrashim naming a middah, via Sefaria's search, 5 per page; text only from editions in `ALLOWED_LICENSES`, verses from Sefaria links
 - `GET /api/frequencies?kind=lexeme|form|root&scope=&limit=1..500&content=1` — Most frequent words / verb roots with counts and first occurrence (cached index)
 - `GET /api/frequencies/compare?kind=lexeme|form|root&content=1` — The Tanakh's 10 most frequent words / roots with their count in each section and the section sizes (the page charts them per 1,000 words)
+- `GET /api/frequencies/spellings?form=` — A written form's spelling variants (plene / defective: same Strong's, prefixes and morph, same letters without inner ו/י) with per-book counts, and the pointings of the same letters
 - `GET /api/frequencies/search?q=` — What a typed word can be (dictionary entries spelled so, the written form and its main entry, a verb root), with per-section counts and Tanakh rank
 - `GET /api/frequencies/items?ids=kind:key,…` — The user's own list (up to 15) counted per section, for the "השוואה משלי" chart
 - `GET /api/frequencies/occurrences?kind=&key=&scope=&offset=` — A word's or root's verses, 10 at a time, the word marked
@@ -338,6 +344,8 @@ neshama-app/
 - Favorite verses and chapters (heart icons)
 - "Show special letters" checkbox — renders large (רבתי), small (זעירות) and suspended (תלויות) letters and inverted nuns in their traditional form across all chapters
 - "קרי וכתיב" setting — both (Sefaria's "(כתיב) [קרי]", the default), only the qere, or only the ketiv, without brackets. Lone קרי ולא כתיב / כתיב ולא קרי words appear only in their own mode
+- "אותיות שאינן נהגות באפור" checkbox — grays (stone-400) silent letters whose silence isn't obvious: an alef after a prefix (וֵאלֹהֵי, לֵאמֹר, לַאדֹנָי) and bare letters inside a pointed word (יִשָּׂשכָר); the ordinary quiescent alef (רֹאשׁ, לֹא) stays normal (`lib/silentLetters.ts`)
+- "הדגש ניקוד מיוחד" checkbox — marks the /special-nikud cases found in the reader's MAM text (`nikudMarks` from `GET /api/tanakh`, `lib/readerNikudMarks.ts`)
 - "סמן קמץ קטן" checkbox — colors every letter carrying a qamats qatan (U+05C7 in Sefaria's text, which most fonts draw like a regular qamats), so כׇּל reads differently from כָּל
 - "חישוב גימטריה" checkbox — hovering a word (tapping, on touch screens) shows its gematria; selecting letters, even across verses, shows their sum while selecting. A settings popover picks the methods shown: standard, gadol (final letters 500–900), katan, ordinal (`lib/gematria.ts`). Words joined by maqaf count separately; verse numbers in a selection are ignored
 - Leitwords (מילים מנחות) — up to 5 roots the chapter repeats far above their Tanakh-wide rate (log-likelihood vs. corpus frequency); clicking one highlights all its occurrences in the chapter
@@ -453,7 +461,7 @@ neshama-app/
 
 ## State Management
 - **React hooks** (useState, useEffect) — all component state
-- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; ketiv/qere mode as `tanakh-ketiv-qere`; custom (Ashkenazi/Sephardi: weekly haftarah and accent names in the accent tree, `lib/custom.ts`) as `tanakh-custom`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
+- **localStorage** — reading position persisted as JSON key `tanakh-position`; special-letters toggle as `tanakh-show-special-letters`; qamats-qatan toggle as `tanakh-show-qamats-qatan`; silent letters as `tanakh-gray-silent-letters`; special nikud as `tanakh-show-special-nikud`; ketiv/qere mode as `tanakh-ketiv-qere`; custom (Ashkenazi/Sephardi: weekly haftarah and accent names in the accent tree, `lib/custom.ts`) as `tanakh-custom`; division mode as `tanakh-division`; gematria toggle and methods as `tanakh-show-gematria` / `tanakh-gematria-methods`
 - **Custom DOM events** — `tanakh-stats-update` dispatched on progress changes to refresh sidebar stats without prop drilling
 - **NextAuth / React Context** — global auth session via `useSession()`
 - **URL search params** — book/chapter passed between pages (e.g., `/tanakh?book=Genesis&chapter=1`)

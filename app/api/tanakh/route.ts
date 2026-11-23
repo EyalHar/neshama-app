@@ -3,9 +3,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NOTE_INCLUDE, toNoteItem, type VerseNoteItem } from "@/lib/notes";
 import { getPassageLeitwords } from "@/lib/leitwords";
-import type { PassageMark, PassageNote, PassageSection, PassageVerse } from "@/lib/passage";
+import type { PassageMark, PassageNikudMark, PassageNote, PassageSection, PassageVerse } from "@/lib/passage";
 import { compareRefs, getParashiyot, parseRef, refKey, type VerseRef } from "@/lib/divisions";
 import { getCompletionEvents } from "@/lib/progress";
+import { readerNikudMarks } from "@/lib/readerNikudMarks";
 import { fetchChapterWithMarks, KETIV_QERE_MODES, TANAKH_BOOKS, type KetivQere, type Section } from "@/lib/tanakh";
 
 
@@ -47,10 +48,12 @@ export async function GET(request: NextRequest) {
     const verses: PassageVerse[] = [];
     const specialLetters: PassageMark[] = [];
     const versionNotes: PassageNote[] = [];
+    const nikudMarks: PassageNikudMark[] = [];
     chapterNums.forEach((c, i) => {
       chapters[i].verses.forEach((text, vi) => { if (inRange(c, vi + 1)) verses.push({ chapter: c, verse: vi + 1, text }); });
       for (const m of chapters[i].specialLetters) if (inRange(c, m.verse)) specialLetters.push({ ...m, chapter: c });
       for (const n of chapters[i].notes) if (inRange(c, n.verse)) versionNotes.push({ ...n, chapter: c });
+      for (const m of readerNikudMarks(book, c, chapters[i].verses)) if (inRange(c, m.verse)) nikudMarks.push({ ...m, chapter: c });
     });
 
     const parashiyot = isRange ? getParashiyot(book, from, to) : [];
@@ -146,7 +149,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      verses, chapterVerseCounts, specialLetters, versionNotes, leitwords: leit.passage, sections,
+      verses, chapterVerseCounts, specialLetters, versionNotes, nikudMarks, leitwords: leit.passage, sections,
       readVerses, completedChapters, partialChapters, completedBooks, partialBooks, favoriteVerses, favoriteChapters, favoriteParashiyot, notes,
     });
   } catch {

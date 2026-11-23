@@ -268,11 +268,14 @@ async function main() {
   }
 
   // Lines written per book (written/<Book>.json), then the hand corrections on top
-  const written = fs.existsSync(WRITTEN)
-    ? Object.fromEntries(
-        fs.readdirSync(WRITTEN).filter((f) => f.endsWith(".json")).map((f) => [f.replace(/\.json$/, ""), readJson(path.join(WRITTEN, f), {})]),
-      )
-    : {};
+  // <Book>.json, or a long book split in parts: <Book>.part1.json, <Book>.part2.json …
+  const written = {};
+  if (fs.existsSync(WRITTEN)) {
+    for (const f of fs.readdirSync(WRITTEN).filter((f) => f.endsWith(".json"))) {
+      const book = f.replace(/(\.part\d+)?\.json$/, "");
+      Object.assign((written[book] ??= {}), readJson(path.join(WRITTEN, f), {}));
+    }
+  }
   const overrides = readJson(OVERRIDES, {});
   let applied = 0;
   for (const source of [written, overrides]) {

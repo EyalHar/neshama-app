@@ -18,6 +18,8 @@ export type FreqItem = {
   count: number;
   first: FreqVerse;
   searchHref?: string; // roots: the root search in /advanced
+  variants?: number; // written forms: other spellings of the same word (plene / defective)
+  pointings?: number; // written forms: how many different pointings these letters have
 };
 export type FreqList = { items: FreqItem[]; totalWords: number; distinct: number };
 export type FreqOccurrences = { verses: FreqVerse[]; total: number; next: number | null };
@@ -33,3 +35,10 @@ export const CUSTOM_MAX = 15;
 export const KIND_TAG: Record<FreqKind, string> = { lexeme: "ערך מילוני", form: "כפי שנכתבה", root: "שורש" };
 export const itemId = (kind: FreqKind, key: string) => `${kind}:${key}`;
 export type FreqCandidate = { id: string; kind: FreqKind; label: string; sub: string; pos: string; counts: Record<FreqScope, number>; rank: number };
+
+// "צורות כתיבה" of a written form: the same word spelled with or without ו / י (one group per
+// dictionary entry + morph the form mostly belongs to), and the pointings of the same letters
+export type SpellingForm = { plain: string; label: string; count: number; books: { book: string; count: number }[]; first: FreqVerse };
+export type SpellingGroupInfo = { id: string; lexeme: string; parse: string; total: number; forms: SpellingForm[] };
+export type PointingInfo = { pointed: string; label: string; count: number; first: FreqVerse; lexeme: string; parse: string };
+export type FreqSpellings = { form: string; total: number; groups: SpellingGroupInfo[]; pointings: PointingInfo[] };

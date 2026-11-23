@@ -1,12 +1,14 @@
 import type { Leitword } from "./leitwords";
 import type { Parashiya, VerseRef } from "./divisions";
 import type { SpecialLetterMark, VersionNote } from "./tanakh";
+import type { ReaderNikudMark } from "./readerNikudMarks";
 
 // Shapes returned by GET /api/tanakh for a chapter or a verse range (parasha / parashiya)
 
 export type PassageVerse = { chapter: number; verse: number; text: string };
 export type PassageMark = SpecialLetterMark & { chapter: number };
 export type PassageNote = VersionNote & { chapter: number };
+export type PassageNikudMark = ReaderNikudMark & { chapter: number };
 export type PassageSection = Parashiya & { leitwords: Leitword[] | null };
 
 export type PassageResponse = {
@@ -14,6 +16,7 @@ export type PassageResponse = {
   chapterVerseCounts: Record<number, number>;
   specialLetters: PassageMark[];
   versionNotes: PassageNote[];
+  nikudMarks: PassageNikudMark[];
   leitwords: Leitword[];
   sections: PassageSection[];
   readVerses: string[]; // "chapter:verse"

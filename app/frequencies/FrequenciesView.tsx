@@ -5,6 +5,7 @@ import Link from "next/link";
 import Segmented from "@/app/quiz/Segmented";
 import CompareChart from "./CompareChart";
 import CustomCompare from "./CustomCompare";
+import SpellingVariants from "./SpellingVariants";
 import { FREQ_TOTAL, FREQ_PAGE, type FreqItem, type FreqKind, type FreqList, type FreqOccurrences, type FreqScope, type FreqVerse } from "@/lib/frequenciesShared";
 
 export type Tab = "words" | "roots" | "custom";
@@ -22,7 +23,7 @@ const WORD_MODES: { id: FreqKind; label: string }[] = [
 ];
 const WORD_MODE_NOTE: Record<string, string> = {
   lexeme: "כל הצורות של אותה מילה נספרות יחד, בלי תחיליות וסיומות: ״וַיֹּאמֶר״, ״אָמְרוּ״ ו״לֵאמֹר״ הן כולן אָמַר.",
-  form: "כל צורה כתובה נספרת לבדה, כולל התחיליות: ״וַיֹּאמֶר״ ו״לֵאמֹר״ הן שתי שורות נפרדות.",
+  form: "כל צורה כתובה נספרת לבדה, כולל התחיליות: ״וַיֹּאמֶר״ ו״לֵאמֹר״ הן שתי שורות נפרדות. ליד מילה שנכתבת גם בכתיב מלא או חסר (תּוֹלְדֹת / תוֹלְדוֹת), או שאותן אותיות מנוקדות בה אחרת, מופיע תג; פתחו את השורה כדי לראות את כל הצורות.",
 };
 
 export default function FrequenciesView({ initialTab, initialItems }: { initialTab: Tab; initialItems: string[] | null }) {
@@ -30,8 +31,9 @@ export default function FrequenciesView({ initialTab, initialItems }: { initialT
   const [scope, setScope] = useState<FreqScope>("tanakh");
   const [mode, setMode] = useState<FreqKind>("lexeme");
   const [contentOnly, setContentOnly] = useState(false);
+  const [multiOnly, setMultiOnly] = useState(false);
   const kind: FreqKind = tab === "roots" ? "root" : mode;
-  const url = `/api/frequencies?kind=${kind}&scope=${scope}&limit=${FREQ_TOTAL}&content=${contentOnly && tab === "words" ? 1 : 0}`;
+  const url = `/api/frequencies?kind=${kind}&scope=${scope}&limit=${FREQ_TOTAL}&content=${contentOnly && tab === "words" ? 1 : 0}${multiOnly && kind === "form" ? "&multi=1" : ""}`;
   const [state, setState] = useState<{ url: string; data: FreqList | null; error: boolean }>({ url: "", data: null, error: false });
 
   useEffect(() => {
@@ -90,6 +92,12 @@ export default function FrequenciesView({ initialTab, initialItems }: { initialT
             <input type="checkbox" checked={contentOnly} onChange={(e) => setContentOnly(e.target.checked)} className="accent-amber-600" />
             רק שמות עצם, פעלים ותארים
           </label>
+          {mode === "form" && (
+            <label className="flex items-center gap-1.5 text-sm text-stone-600 cursor-pointer" title="מילים שנכתבות במקומות אחרים בכתיב מלא או חסר (תולדות / תולדת)">
+              <input type="checkbox" checked={multiOnly} onChange={(e) => setMultiOnly(e.target.checked)} className="accent-amber-600" />
+              רק מילים שנכתבות בכמה צורות
+            </label>
+          )}
         </div>
       ) : null}
       <p className="text-xs text-stone-400 mb-5 leading-relaxed">
@@ -178,6 +186,8 @@ function FreqRow({ item, rank, max, total, kind, scope }: { item: FreqItem; rank
               <span className="text-xl font-bold text-stone-800">{item.label}</span>
               {item.pos && <span className="text-[11px] rounded bg-stone-100 text-stone-500 px-1.5 py-0.5">{item.pos}</span>}
               {item.sub && <span className="text-xs text-stone-400 truncate max-w-full" dir="auto">{item.sub}</span>}
+              {!!item.variants && <span className="text-[11px] rounded bg-sky-50 text-sky-800 px-1.5 py-0.5">עוד {item.variants} {item.variants === 1 ? "צורת כתיב" : "צורות כתיב"}</span>}
+              {(item.pointings ?? 1) > 1 && <span className="text-[11px] rounded bg-violet-50 text-violet-800 px-1.5 py-0.5">{item.pointings} ניקודים</span>}
             </div>
             <div className="mt-1 h-1.5 rounded-full bg-stone-100 overflow-hidden">
               <div className="h-full rounded-full bg-amber-500" style={{ width: `${(item.count / max) * 100}%` }} />
@@ -222,6 +232,7 @@ function Occurrences({ item, kind, scope }: { item: FreqItem; kind: FreqKind; sc
 
   return (
     <div className="px-4 pb-3 border-t border-stone-100 pt-3 flex flex-col gap-3">
+      {kind === "form" && (!!item.variants || (item.pointings ?? 1) > 1) && <SpellingVariants form={item.key} />}
       <div>
         <p className="text-xs font-semibold text-amber-800 mb-0.5">הפעם הראשונה</p>
         <VerseWithWord v={item.first} />
