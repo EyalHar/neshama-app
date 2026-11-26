@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { toHebrewNumeral } from "@/lib/tanakh";
 import HeartIcon from "@/app/components/HeartIcon";
 import LetterSearch from "./LetterSearch";
+import EventsSearch from "./EventsSearch";
 import RootLetters from "./RootLetters";
 import WordAnalysis from "./WordAnalysis";
 import LeitwordSearch from "./LeitwordSearch";
@@ -40,7 +41,7 @@ type Result = {
   text: string; forms?: string[];
 };
 
-type Tab = "basic" | "substring" | "leitwords" | "root" | "analyze" | "rootLetters" | "etymology" | "mishkal" | "letters";
+type Tab = "basic" | "substring" | "leitwords" | "root" | "analyze" | "rootLetters" | "etymology" | "mishkal" | "letters" | "events";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "basic", label: "חיפוש בסיסי" },
@@ -52,6 +53,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "etymology", label: "קרובי מילה (אטימולוגיה)" },
   { id: "mishkal", label: "חיפוש לפי משקל" },
   { id: "letters", label: "אות ראשונה ואחרונה בפסוק" },
+  { id: "events", label: "חיפוש לפי אירוע (AI)" },
 ];
 
 type EtymGroup = { key: string; label: string; rootLabel: string | null; definition: string; total: number };
@@ -450,9 +452,10 @@ export default function AdvancedPage({ searchParams }: { searchParams: Promise<{
       </div>
 
       {tab === "letters" && <LetterSearch />}
+      {tab === "events" && <EventsSearch />}
 
-      {/* Scope filter — shared across the text/root tabs (the letter search has no scope) */}
-      <div className={`flex items-center gap-2 mb-6 flex-wrap ${tab === "letters" ? "hidden" : ""}`}>
+      {/* Scope filter — shared across the text/root tabs (the letter and event searches have no scope) */}
+      <div className={`flex items-center gap-2 mb-6 flex-wrap ${tab === "letters" || tab === "events" ? "hidden" : ""}`}>
         <span className="text-stone-500 text-sm">חפש ב:</span>
         {SCOPES.map((s) => (
           <button

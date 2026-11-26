@@ -97,7 +97,7 @@ export const TOOL_GROUPS: ToolGroup[] = [
     intro: "מי פגש את מי, איפה זה קרה ומה מסופר על כך",
     tools: [
       {
-        href: "/events",
+        href: "/advanced?tab=events",
         title: "אירועי התנ״ך",
         description: "הזן אירוע מהתנ״ך וקבל את כל המקורות בהם הוא מוזכר — מעמד מתן תורה, קריעת ים סוף ועוד",
         icon: "📜",
@@ -149,6 +149,12 @@ export const TOOL_GROUPS: ToolGroup[] = [
         title: "תפילות ושירות",
         description: "שירת הים, תפילת חנה, קינת דוד, תפילת יונה ועוד, וכל מזמורי תהלים לפי הכותרות שלהם, כל אחת במלואה",
         icon: "♪",
+      },
+      {
+        href: "/uplifting",
+        title: "חייך, הכול לטובה",
+        description: "פסוקים של שמחה, תקווה, אמונה והשראה, לפי מצב רוח, עם פסוק יומי",
+        icon: "😊",
       },
       {
         href: "/parallels",

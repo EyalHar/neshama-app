@@ -15,7 +15,7 @@ import { unfavoriteConfirmMessage, type VerseNoteItem } from "@/lib/notes";
 import { collect } from "@/lib/notebook";
 import type { DivisionKind, DivisionUnit, VerseRef } from "@/lib/divisions";
 import { silentLetterRanges } from "@/lib/silentLetters";
-import { inRef, type PassageMark, type PassageNikudMark, type PassageNote, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
+import { inRef, type PassageMark, type PassageMitzvahMark, type PassageNikudMark, type PassageNote, type PassageResponse, type PassageSection, type PassageVerse, type WeeklyReading } from "@/lib/passage";
 import type { Leitword } from "@/lib/leitwords";
 import CelebrationModal, { type CelebrationData } from "./CelebrationModal";
 import LeitwordChips from "./LeitwordChips";
@@ -32,6 +32,7 @@ const SHOW_SPECIAL_KEY = "tanakh-show-special-letters";
 const QAMATS_QATAN_KEY = "tanakh-show-qamats-qatan";
 const SILENT_KEY = "tanakh-gray-silent-letters";
 const SPECIAL_NIKUD_KEY = "tanakh-show-special-nikud";
+const MITZVOT_KEY = "tanakh-show-mitzvot";
 const KETIV_QERE_KEY = "tanakh-ketiv-qere";
 const KETIV_QERE_OPTIONS: { id: KetivQere; label: string; title: string }[] = [
   { id: "both", label: "שניהם", title: "הכתיב בסוגריים עגולים והקרי בסוגריים מרובעים" },
@@ -106,6 +107,7 @@ function TanakhReader() {
   const [sections, setSections] = useState<PassageSection[]>([]);
   const [specialLetters, setSpecialLetters] = useState<PassageMark[]>([]);
   const [nikudMarks, setNikudMarks] = useState<PassageNikudMark[]>([]);
+  const [mitzvot, setMitzvot] = useState<PassageMitzvahMark[]>([]);
   const [versionNotes, setVersionNotes] = useState<PassageNote[]>([]);
   const [leitwords, setLeitwords] = useState<Leitword[]>([]);
   const [activeLeitword, setActiveLeitword] = useState<string | null>(null); // `${scope}|${strongs}`
@@ -141,11 +143,12 @@ function TanakhReader() {
   const showQamatsQatan = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(QAMATS_QATAN_KEY) === "1", () => false);
   const graySilent = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SILENT_KEY) === "1", () => false);
   const showSpecialNikud = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(SPECIAL_NIKUD_KEY) === "1", () => false);
+  const showMitzvot = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(MITZVOT_KEY) === "1", () => false);
   const ketivQere = useSyncExternalStore(subscribePrefs, () => parseKetivQere(localStorage.getItem(KETIV_QERE_KEY)), () => "both" as const);
   const custom = useSyncExternalStore(subscribePrefs, () => parseCustom(localStorage.getItem(CUSTOM_KEY)), () => "ashkenazi" as const);
   const divisionPref = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(DIVISION_KEY) === "units", () => false);
   const showGematria = useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_KEY) === "1", () => false);
-  const activeSettings = [showSpecialLetters, showQamatsQatan, graySilent, showSpecialNikud, showGematria, ketivQere !== "both"].filter(Boolean).length;
+  const activeSettings = [showSpecialLetters, showQamatsQatan, graySilent, showSpecialNikud, showMitzvot, showGematria, ketivQere !== "both"].filter(Boolean).length;
   const gematriaMethods = parseGematriaMethods(
     useSyncExternalStore(subscribePrefs, () => localStorage.getItem(GEMATRIA_METHODS_KEY) ?? "", () => "")
   );
@@ -249,6 +252,7 @@ function TanakhReader() {
       setSections(data.sections ?? []);
       setSpecialLetters(data.specialLetters ?? []);
       setNikudMarks(data.nikudMarks ?? []);
+      setMitzvot(data.mitzvot ?? []);
       setVersionNotes(data.versionNotes ?? []);
       setLeitwords(data.leitwords ?? []);
       setVersesLoadedFor(loadedKey);
@@ -686,6 +690,7 @@ function TanakhReader() {
                 qamatsQatan={showQamatsQatan}
                 silent={graySilent ? silentLetterRanges(v.text) : undefined}
                 nikud={showSpecialNikud ? nikudMarks.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
+                mitzvot={showMitzvot ? mitzvot.filter((m) => m.chapter === v.chapter && m.verse === v.verse) : undefined}
               />
             </p>
             {session && (
@@ -913,6 +918,15 @@ function TanakhReader() {
                     className="accent-rose-600 w-3.5 h-3.5"
                   />
                   הדגש ניקוד מיוחד
+                </label>
+                <label className="flex items-center gap-2 text-xs text-stone-500 cursor-pointer select-none" title="המילים שמהן נלמדת כל אחת מתרי״ג המצוות לפי ספר החינוך: קו ירוק למצוות עשה, אדום למצוות לא תעשה; ריחוף מציג את המצווה. מקור: ספר החינוך, מהדורת ספריא המנוקדת (CC0)">
+                  <input
+                    type="checkbox"
+                    checked={showMitzvot}
+                    onChange={(e) => setPref(MITZVOT_KEY, e.target.checked ? "1" : "0")}
+                    className="accent-emerald-600 w-3.5 h-3.5"
+                  />
+                  מקור המצוות (<a href="https://www.sefaria.org/Sefer_HaChinukh?lang=he" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="underline decoration-dotted hover:text-emerald-700">ספר החינוך</a>)
                 </label>
                 <GematriaSettings
                   enabled={showGematria}

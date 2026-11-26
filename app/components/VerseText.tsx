@@ -20,6 +20,12 @@ const QAMATS_QATAN_CLASS = "text-sky-700";
 const SILENT_CLASS = "text-stone-400";
 const SILENT_TITLE = "אות שאינה נהגית";
 const NIKUD_CLASS = "text-rose-700 bg-rose-50 rounded-sm";
+// The words a mitzvah is learned from (Sefer HaChinukh): positive green, negative red, underlined so
+// they combine with the letter colors above
+const MITZVAH_CLASS = { aseh: "underline decoration-emerald-600 decoration-2 underline-offset-[7px]", lav: "underline decoration-red-500 decoration-2 underline-offset-[7px]" };
+export type VerseMitzvah = { start: number; end: number; n: number; name: string; type: "aseh" | "lav" };
+const MITZVAH_CREDIT = "מקור: ספר החינוך, מהדורת ספריא המנוקדת (CC0)";
+const mitzvahTitle = (m: VerseMitzvah) => `ספר החינוך, מצווה ${m.n}: ${m.name} (${m.type === "aseh" ? "מצוות עשה" : "מצוות לא תעשה"})`;
 
 function qamatsQatanRanges(text: string): Range[] {
   if (!text.includes(QAMATS_QATAN)) return [];
@@ -55,6 +61,7 @@ export default function VerseText({
   qamatsQatan = false,
   silent = [],
   nikud = [],
+  mitzvot = [],
 }: {
   text: string;
   marks?: SpecialLetterMark[];
@@ -64,16 +71,17 @@ export default function VerseText({
   qamatsQatan?: boolean;
   silent?: SilentRange[];
   nikud?: { start: number; end: number; label: string }[];
+  mitzvot?: VerseMitzvah[];
 }) {
   const qatan = qamatsQatan ? qamatsQatanRanges(text) : [];
-  if (marks.length === 0 && highlights.length === 0 && qatan.length === 0 && silent.length === 0 && nikud.length === 0 && notes.length === 0 && !words) return <>{text}</>;
+  if (marks.length === 0 && highlights.length === 0 && qatan.length === 0 && silent.length === 0 && nikud.length === 0 && mitzvot.length === 0 && notes.length === 0 && !words) return <>{text}</>;
 
   const wordRanges = words
     ? [...text.matchAll(WORD_RE)].filter((m) => /[א-ת]/.test(m[0])).map((m) => ({ start: m.index, end: m.index + m[0].length }))
     : [];
 
   const cuts = new Set([0, text.length]);
-  for (const r of [...marks, ...highlights, ...qatan, ...silent, ...nikud, ...wordRanges]) { cuts.add(r.start); cuts.add(r.end); }
+  for (const r of [...marks, ...highlights, ...qatan, ...silent, ...nikud, ...mitzvot, ...wordRanges]) { cuts.add(r.start); cuts.add(r.end); }
   for (const n of notes) cuts.add(n.at);
   const points = [...cuts].sort((a, b) => a - b);
 
@@ -96,12 +104,13 @@ export default function VerseText({
       const qq = qatan.some((q) => q.start <= start && end <= q.end);
       const quiet = silent.some((q) => q.start <= start && end <= q.end);
       const odd = nikud.find((q) => q.start <= start && end <= q.end);
-      if (!kind && !lit && !qq && !quiet && !odd) { parts.push(piece); continue; }
+      const mz = mitzvot.filter((q) => q.start <= start && end <= q.end);
+      if (!kind && !lit && !qq && !quiet && !odd && !mz.length) { parts.push(piece); continue; }
       parts.push(
         <span
           key={start}
-          className={[kind && SPECIAL_LETTER_CLASS[kind], lit && HIGHLIGHT_CLASS, qq && QAMATS_QATAN_CLASS, quiet && SILENT_CLASS, odd && NIKUD_CLASS].filter(Boolean).join(" ")}
-          title={kind ? LABEL[kind] : odd ? odd.label : qq ? "קמץ קטן" : quiet ? SILENT_TITLE : undefined}
+          className={[kind && SPECIAL_LETTER_CLASS[kind], lit && HIGHLIGHT_CLASS, qq && QAMATS_QATAN_CLASS, quiet && SILENT_CLASS, odd && NIKUD_CLASS, mz.length && MITZVAH_CLASS[mz[0].type]].filter(Boolean).join(" ")}
+          title={kind ? LABEL[kind] : odd ? odd.label : qq ? "קמץ קטן" : quiet ? SILENT_TITLE : mz.length ? [...mz.map(mitzvahTitle), MITZVAH_CREDIT].join("\n") : undefined}
         >
           {piece}
         </span>

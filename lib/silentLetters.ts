@@ -9,10 +9,16 @@
 // 1. "prefixAlef" — the alef that opens a word's stem after a prefix (ו ב כ ל מ ה ש) which took its
 //    vowel: וֵאלֹהֵי, לֵאלֹהִים, לֵאמֹר, לַאדֹנָי, בֵּאדַיִן. The prefix reads as if the alef were not there.
 //    Not when the alef carries a vowel or comes before a holam/shuruk vav (לְאֵל, לָאוֹר).
-// 2. "bare" — a bare letter inside a pointed word that is none of א ה ו י and is not followed by
+// 2. "alefYod" — a bare alef right before a yod, in two kinds (18 forms, 22 times in the Tanakh):
+//    - the yod carries its own vowel and opens the syllable: פְּתָאיִם (read ptayim), צְבָאיִם, פְּלָאיָה,
+//      וּבְרָאיָה, עֳפָאיִם, יְהוּדָאיִן; the alef looks as if it should be sounded between two vowels.
+//    - the yod is bare, a mater for the vowel written under the letter before the alef: קֹרִאים (korim),
+//      חֹטִאים, הֲרִאישׁוֹן, תִּמָּצֶאינָה, תִּשֶּׂאינָה, וַתָּבוֹאינָה, פֶלִאי; elsewhere such words are
+//      spelled with a sounded alef (קֹרְאִים), so here the reader expects one.
+// 3. "bare" — a bare letter inside a pointed word that is none of א ה ו י and is not followed by
 //    a וֹ / וּ (whose vowel it carries). In MAM this is only the second ש of יִשָּׂשכָר.
 
-export type SilentRule = "prefixAlef" | "bare";
+export type SilentRule = "prefixAlef" | "alefYod" | "bare";
 export type SilentRange = { start: number; end: number; rule: SilentRule };
 
 const isLetter = (ch: string) => ch >= "א" && ch <= "ת";
@@ -21,6 +27,7 @@ const SHEVA = "ְ";
 const TSERE = "ֵ";
 const PATACH = "ַ";
 const DAGESH = "ּ";
+const FULL_VOWEL = /[ֱ-ׇֻ]/; // hatafim, hiriq … qubuts, qamats qatan: not sheva or dagesh
 const PREFIX = "ובכלמהש";
 const SEPARATOR = /[\s־׀׃()[\]|]/;
 
@@ -49,6 +56,9 @@ function wordRanges(units: Unit[]): SilentRange[] {
       const firstOk = i === 1 || units[0].m.includes(SHEVA) || materVav(units[0]);
       const vowelOk = prev.m.includes(TSERE) || (prev.m.includes(PATACH) && next?.l === "ד" && units[i + 2]?.l === "נ");
       if (i <= 2 && prefixes && firstOk && vowelOk && !materVav(next)) rule = "prefixAlef";
+      // An alef before a yod that carries its own vowel (the yod opens the next syllable), or before a
+      // bare yod that holds the vowel written under the letter before the alef (קֹרִאים: korim)
+      else if (next?.l === "י" && (FULL_VOWEL.test(next.m) || bare(next))) rule = "alefYod";
     } else if (!"הוי".includes(u.l) && !materVav(next)) {
       rule = "bare";
     }

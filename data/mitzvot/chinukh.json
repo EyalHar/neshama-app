@@ -1,0 +1,8658 @@
+{
+ "source": "Sefer HaChinukh, Sefaria Vocalized Edition (CC0)",
+ "mitzvot": [
+  {
+   "n": 1,
+   "name": "מצות פריה ורביה",
+   "type": "aseh",
+   "rambam": 212,
+   "semag": null,
+   "ref": [
+    "Genesis",
+    1,
+    28
+   ],
+   "words": "ויברכ אתמ אלהימ ויאמר להמ אלהימ פרו ורבו",
+   "how": "cited"
+  },
+  {
+   "n": 2,
+   "name": "מצות מילה",
+   "type": "aseh",
+   "rambam": 215,
+   "semag": null,
+   "ref": [
+    "Genesis",
+    17,
+    10
+   ],
+   "words": "זאת בריתי אשר תשמרו ביני וביניכמ ובינ זרעכ אחריכ המול לכמ כל זכר",
+   "how": "cited"
+  },
+  {
+   "n": 3,
+   "name": "שלא לאכל גיד הנשה",
+   "type": "lav",
+   "rambam": 183,
+   "semag": null,
+   "ref": [
+    "Genesis",
+    32,
+    33
+   ],
+   "words": "על כנ לא יאכלו בני ישראל את גיד הנשה",
+   "how": "cited"
+  },
+  {
+   "n": 4,
+   "name": "מצות קדוש החדש",
+   "type": "aseh",
+   "rambam": 153,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    2
+   ],
+   "words": "החדש הזה לכמ ראש חדשימ",
+   "how": "cited"
+  },
+  {
+   "n": 5,
+   "name": "מצות שחיטת הפסח",
+   "type": "aseh",
+   "rambam": 55,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    6
+   ],
+   "words": "ושחטו אתו כל קהל עדת ישראל בינ הערבימ",
+   "how": "cited"
+  },
+  {
+   "n": 6,
+   "name": "מצות אכילת בשר הפסח",
+   "type": "aseh",
+   "rambam": 56,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    8
+   ],
+   "words": "ואכלו את הבשר בלילה הזה",
+   "how": "cited"
+  },
+  {
+   "n": 7,
+   "name": "שלא לאכל הפסח נא ומבשל",
+   "type": "lav",
+   "rambam": 125,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    9
+   ],
+   "words": "אל תאכלו ממנו נא ובשל מבשל במימ כי אמ צלי אש",
+   "how": "cited"
+  },
+  {
+   "n": 8,
+   "name": "שלא להותיר מבשר הפסח",
+   "type": "lav",
+   "rambam": 117,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    10
+   ],
+   "words": "ולא תותירו ממנו עד בקר",
+   "how": "cited"
+  },
+  {
+   "n": 9,
+   "name": "מצות השבתת החמץ",
+   "type": "aseh",
+   "rambam": 156,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    15
+   ],
+   "words": "אכ ביומ הראשונ תשביתו שאר מבתיכמ",
+   "how": "cited"
+  },
+  {
+   "n": 10,
+   "name": "מצות אכילת מצה",
+   "type": "aseh",
+   "rambam": 158,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    18
+   ],
+   "words": "בערב תאכלו מצת",
+   "how": "cited"
+  },
+  {
+   "n": 11,
+   "name": "שלא ימצא חמץ ברשותנו בפסח",
+   "type": "lav",
+   "rambam": 201,
+   "semag": {
+    "type": "lav",
+    "n": 78
+   },
+   "ref": [
+    "Exodus",
+    12,
+    19
+   ],
+   "words": "שבעת ימימ שאר לא ימצא בבתיכמ",
+   "how": "cited"
+  },
+  {
+   "n": 12,
+   "name": "שלא לאכל מכל דבר שיש בו חמץ",
+   "type": "lav",
+   "rambam": 198,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    20
+   ],
+   "words": "כל מחמצת לא תאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 13,
+   "name": "שלא נאכיל מן הפסח לישראל משמד",
+   "type": "lav",
+   "rambam": 128,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    43
+   ],
+   "words": "כל בנ נכר לא יאכל בו",
+   "how": "cited"
+  },
+  {
+   "n": 14,
+   "name": "שלא נאכיל מן הפסח לגר ותושב",
+   "type": "lav",
+   "rambam": 126,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    45
+   ],
+   "words": "תושב ושכיר לא יאכל בו",
+   "how": "cited"
+  },
+  {
+   "n": 15,
+   "name": "שלא להוציא מבשר הפסח חוצה",
+   "type": "lav",
+   "rambam": 123,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    46
+   ],
+   "words": "לא תוציא מנ הבית מנ הבשר חוצה",
+   "how": "cited"
+  },
+  {
+   "n": 16,
+   "name": "שלא לשבר עצם מן הפסח",
+   "type": "lav",
+   "rambam": 121,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    46
+   ],
+   "words": "ועצמ לא תשברו בו",
+   "how": "cited"
+  },
+  {
+   "n": 17,
+   "name": "שלא יאכל ערל מן הפסח",
+   "type": "lav",
+   "rambam": 127,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    48
+   ],
+   "words": "וכל ערל לא יאכל בו",
+   "how": "cited"
+  },
+  {
+   "n": 18,
+   "name": "מצות קדוש בכורות בארץ ישראל",
+   "type": "aseh",
+   "rambam": 79,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    13,
+    2
+   ],
+   "words": "קדש לי כל בכור פטר כל רחמ בבני ישראל באדמ ובבהמה לי הוא",
+   "how": "cited"
+  },
+  {
+   "n": 19,
+   "name": "שלא לאכל חמץ בפסח",
+   "type": "lav",
+   "rambam": 197,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    13,
+    3
+   ],
+   "words": "ולא יאכל חמצ",
+   "how": "cited"
+  },
+  {
+   "n": 20,
+   "name": "שלא יראה לנו חמץ בפסח",
+   "type": "lav",
+   "rambam": 200,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    13,
+    7
+   ],
+   "words": "ולא יראה לכ חמצ ולא יראה לכ שאר בכל גבלכ",
+   "how": "cited"
+  },
+  {
+   "n": 21,
+   "name": "מצות ספור יציאת מצרים",
+   "type": "aseh",
+   "rambam": 157,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    13,
+    8
+   ],
+   "words": "והגדת לבנכ",
+   "how": "cited"
+  },
+  {
+   "n": 22,
+   "name": "מצות פדיון פטר חמור",
+   "type": "aseh",
+   "rambam": 81,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    13,
+    13
+   ],
+   "words": "פטר חמר תפדה בשה",
+   "how": "cited"
+  },
+  {
+   "n": 23,
+   "name": "מצות עריפת פטר חמור",
+   "type": "aseh",
+   "rambam": 82,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    13,
+    13
+   ],
+   "words": "ואמ לא תפדה וערפתו",
+   "how": "cited"
+  },
+  {
+   "n": 24,
+   "name": "שלא נלך בשבת חוץ לתחום",
+   "type": "lav",
+   "rambam": 321,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    16,
+    29
+   ],
+   "words": "אל יצא איש ממקמו ביומ השביעי",
+   "how": "cited"
+  },
+  {
+   "n": 25,
+   "name": "מצות האמנה במציאות השם",
+   "type": "aseh",
+   "rambam": 1,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    2
+   ],
+   "words": "אנכי יהוה אלהיכ אשר הוצאתיכ מארצ מצרימ",
+   "how": "cited"
+  },
+  {
+   "n": 26,
+   "name": "שלא נאמין באלה בלתי ה לבדו",
+   "type": "lav",
+   "rambam": 1,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    3
+   ],
+   "words": "לא יהיה לכ אלהימ אחרימ על פני",
+   "how": "cited"
+  },
+  {
+   "n": 27,
+   "name": "שלא לעשות פסל",
+   "type": "lav",
+   "rambam": 2,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    4
+   ],
+   "words": "לא תעשה לכ פסל וכל תמונה",
+   "how": "cited"
+  },
+  {
+   "n": 28,
+   "name": "שלא להשתחות לעבודה זרה",
+   "type": "lav",
+   "rambam": 5,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    5
+   ],
+   "words": "לא תשתחוה להמ ולא תעבדמ",
+   "how": "cited"
+  },
+  {
+   "n": 29,
+   "name": "שלא לעבד עבודה זרה במה שדרכה להעבד",
+   "type": "lav",
+   "rambam": 6,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    5
+   ],
+   "words": "ולא תעבדמ",
+   "how": "cited"
+  },
+  {
+   "n": 30,
+   "name": "שלא לשבע לשוא",
+   "type": "lav",
+   "rambam": 62,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    7
+   ],
+   "words": "לא תשא את שמ יהוה אלהיכ לשוא",
+   "how": "cited"
+  },
+  {
+   "n": 31,
+   "name": "מצות קדוש שבת בדברים",
+   "type": "aseh",
+   "rambam": 155,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    8
+   ],
+   "words": "זכור את יומ השבת לקדשו",
+   "how": "cited"
+  },
+  {
+   "n": 32,
+   "name": "שלא לעשות מלאכה בשבת",
+   "type": "lav",
+   "rambam": 320,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    10
+   ],
+   "words": "לא תעשה כל מלאכה",
+   "how": "cited"
+  },
+  {
+   "n": 33,
+   "name": "מצות כבוד אב ואם",
+   "type": "aseh",
+   "rambam": 210,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    12
+   ],
+   "words": "כבד את אביכ ואת אמכ",
+   "how": "cited"
+  },
+  {
+   "n": 34,
+   "name": "שלא להרג נקי",
+   "type": "lav",
+   "rambam": 289,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    13
+   ],
+   "words": "לא תרצח",
+   "how": "cited"
+  },
+  {
+   "n": 35,
+   "name": "שלא לגלות ערות אשת איש",
+   "type": "lav",
+   "rambam": 347,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    13
+   ],
+   "words": "לא תנאפ",
+   "how": "cited"
+  },
+  {
+   "n": 36,
+   "name": "שלא לגנב נפש מישראל",
+   "type": "lav",
+   "rambam": 243,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    13
+   ],
+   "words": "לא תגנב",
+   "how": "cited"
+  },
+  {
+   "n": 37,
+   "name": "שלא להעיד בשקר",
+   "type": "lav",
+   "rambam": 285,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    13
+   ],
+   "words": "לא תענה ברעכ עד שקר",
+   "how": "cited"
+  },
+  {
+   "n": 38,
+   "name": "שלא לחמד",
+   "type": "lav",
+   "rambam": 265,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    14
+   ],
+   "words": "לא תחמד בית רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 39,
+   "name": "שלא לעשות צורת אדם אפלו לנוי",
+   "type": "lav",
+   "rambam": 4,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    20
+   ],
+   "words": "לא תעשונ אתי",
+   "how": "cited"
+  },
+  {
+   "n": 40,
+   "name": "שלא לבנות אבני גזית",
+   "type": "lav",
+   "rambam": 79,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    22
+   ],
+   "words": "לא תבנה אתהנ גזית",
+   "how": "cited"
+  },
+  {
+   "n": 41,
+   "name": "שלא לפסע על המזבח",
+   "type": "lav",
+   "rambam": 80,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    20,
+    23
+   ],
+   "words": "ולא תעלה במעלת על מזבחי אשר לא תגלה ערותכ עליו",
+   "how": "cited"
+  },
+  {
+   "n": 42,
+   "name": "מצות דין עבד עברי",
+   "type": "aseh",
+   "rambam": 232,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    2
+   ],
+   "words": "כי תקנה עבד עברי",
+   "how": "cited"
+  },
+  {
+   "n": 43,
+   "name": "מצות יעוד של אמה העבריה",
+   "type": "aseh",
+   "rambam": 233,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    8
+   ],
+   "words": "אמ רעה בעיני אדניה אשר לו",
+   "how": "cited"
+  },
+  {
+   "n": 44,
+   "name": "מצות פדיון אמה העבריה",
+   "type": "aseh",
+   "rambam": 234,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    8
+   ],
+   "words": "והפדה",
+   "how": "cited"
+  },
+  {
+   "n": 45,
+   "name": "שלא ימכר אמה עבריה הקונה אותה מיד האב",
+   "type": "lav",
+   "rambam": 261,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    8
+   ],
+   "words": "לעמ נכרי לא ימשל למכרה",
+   "how": "cited"
+  },
+  {
+   "n": 46,
+   "name": "שלא לגרע שאר כסות ועונה",
+   "type": "lav",
+   "rambam": 262,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    9
+   ],
+   "words": "כמשפט הבנות יעשה לה",
+   "how": "cited"
+  },
+  {
+   "n": 47,
+   "name": "מצות בית דין להרג בחנק המחיב",
+   "type": "aseh",
+   "rambam": 227,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    12
+   ],
+   "words": "מכה איש ומת מות יומת",
+   "how": "cited"
+  },
+  {
+   "n": 48,
+   "name": "שלא להכות אב ואם",
+   "type": "lav",
+   "rambam": 319,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    15
+   ],
+   "words": "ומכה אביו ואמו מות יומת",
+   "how": "cited"
+  },
+  {
+   "n": 49,
+   "name": "מצות דיני קנסות",
+   "type": "aseh",
+   "rambam": 236,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    18
+   ],
+   "words": "וכי יריבנ אנשימ",
+   "how": "cited"
+  },
+  {
+   "n": 50,
+   "name": "מצות בית דין להרג בסיף המחיב",
+   "type": "aseh",
+   "rambam": 226,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    20
+   ],
+   "words": "נקמ ינקמ",
+   "how": "cited"
+  },
+  {
+   "n": 51,
+   "name": "מצות בית דין לדון נזקי בהמה",
+   "type": "aseh",
+   "rambam": 237,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    28
+   ],
+   "words": "וכי יגח",
+   "how": "cited"
+  },
+  {
+   "n": 52,
+   "name": "שלא לאכל בשר שור הנסקל",
+   "type": "lav",
+   "rambam": 188,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    18
+   ],
+   "words": "ולא",
+   "how": "cited"
+  },
+  {
+   "n": 53,
+   "name": "מצות בית דין לדון בנזקי הבור",
+   "type": "aseh",
+   "rambam": 238,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    33
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 54,
+   "name": "מצות בית דין לדון גנב בתשלומין או במיתה",
+   "type": "aseh",
+   "rambam": 239,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    21,
+    37
+   ],
+   "words": "כי יגנב איש",
+   "how": "cited"
+  },
+  {
+   "n": 55,
+   "name": "מצות בית דין לדון בנזקי הבער",
+   "type": "aseh",
+   "rambam": 240,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    4
+   ],
+   "words": "כי יבער איש שדה",
+   "how": "cited"
+  },
+  {
+   "n": 56,
+   "name": "מצות בית דין לדון בנזקי האש",
+   "type": "aseh",
+   "rambam": 241,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    5
+   ],
+   "words": "כי תצא אש",
+   "how": "cited"
+  },
+  {
+   "n": 57,
+   "name": "מצות בית דין לדון בדין שומר חנם",
+   "type": "aseh",
+   "rambam": 242,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    6
+   ],
+   "words": "כי יתנ איש אל רעהו כספ או כלימ לשמר",
+   "how": "cited"
+  },
+  {
+   "n": 58,
+   "name": "מצות בית דין לדון בדין טוען ונטען",
+   "type": "aseh",
+   "rambam": 246,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    8
+   ],
+   "words": "על כל דבר פשע",
+   "how": "cited"
+  },
+  {
+   "n": 59,
+   "name": "מצות בית דין לדון בדין נושא שכר ושוכר",
+   "type": "aseh",
+   "rambam": 243,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    9
+   ],
+   "words": "כי יתנ איש אל רעהו חמור או שור או שה וכל בהמה לשמר",
+   "how": "cited"
+  },
+  {
+   "n": 60,
+   "name": "מצות בית דין לדון בדין השואל",
+   "type": "aseh",
+   "rambam": 244,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    13
+   ],
+   "words": "וכי ישאל איש מעמ רעהו",
+   "how": "cited"
+  },
+  {
+   "n": 61,
+   "name": "מצות בית דין לדון בדין מפתה",
+   "type": "aseh",
+   "rambam": 220,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    15
+   ],
+   "words": "וכי יפתה איש בתולה",
+   "how": "cited"
+  },
+  {
+   "n": 62,
+   "name": "שלא להחיות מכשפה",
+   "type": "lav",
+   "rambam": 310,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    17
+   ],
+   "words": "מכשפה לא תחיה",
+   "how": "cited"
+  },
+  {
+   "n": 63,
+   "name": "שלא להונות הגר בדברים",
+   "type": "lav",
+   "rambam": 252,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    33
+   ],
+   "words": "לא תונו",
+   "how": "cited"
+  },
+  {
+   "n": 64,
+   "name": "שלא להונות הגר בממון",
+   "type": "lav",
+   "rambam": 253,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    20
+   ],
+   "words": "ולא תלחצנו",
+   "how": "cited"
+  },
+  {
+   "n": 65,
+   "name": "שלא לענות יתום ואלמנה",
+   "type": "lav",
+   "rambam": 256,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    21
+   ],
+   "words": "כל אלמנה ויתומ לא תענונ",
+   "how": "cited"
+  },
+  {
+   "n": 66,
+   "name": "מצות הלואה לעני",
+   "type": "aseh",
+   "rambam": 197,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    24
+   ],
+   "words": "אמ כספ תלוה את עמי",
+   "how": "cited"
+  },
+  {
+   "n": 67,
+   "name": "שלא נתבע חוב מעני שאין לו במה לפרע",
+   "type": "lav",
+   "rambam": 234,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    24
+   ],
+   "words": "לא תהיה לו כנשה",
+   "how": "cited"
+  },
+  {
+   "n": 68,
+   "name": "שלא נשית יד בין לוה למלוה ברבית",
+   "type": "lav",
+   "rambam": 237,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    24
+   ],
+   "words": "לא תשימונ עליו נשכ",
+   "how": "cited"
+  },
+  {
+   "n": 69,
+   "name": "שלא לקלל הדין",
+   "type": "lav",
+   "rambam": 315,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    24,
+    16
+   ],
+   "words": "ונקב שמ יהוה מות יומת",
+   "how": "cited"
+  },
+  {
+   "n": 70,
+   "name": "לאו דברכת השם",
+   "type": "lav",
+   "rambam": 60,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    27
+   ],
+   "words": "אלהימ לא תקלל",
+   "how": "override",
+   "basis": "Rambam, Sefer HaMitzvot, Negative 60"
+  },
+  {
+   "n": 71,
+   "name": "שלא לקלל הנשיא",
+   "type": "lav",
+   "rambam": 316,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    27
+   ],
+   "words": "ונשיא בעמכ לא תאר",
+   "how": "cited"
+  },
+  {
+   "n": 72,
+   "name": "שלא להקדים חקי התבואות",
+   "type": "lav",
+   "rambam": 154,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    28
+   ],
+   "words": "מלאתכ ודמעכ לא תאחר",
+   "how": "cited"
+  },
+  {
+   "n": 73,
+   "name": "שלא לאכל טרפה",
+   "type": "lav",
+   "rambam": 181,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    30
+   ],
+   "words": "ובשר בשדה טרפה לא תאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 74,
+   "name": "שלא לשמע טענת בעל דין שלא בפני בעל דין חברו",
+   "type": "lav",
+   "rambam": 281,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    1
+   ],
+   "words": "לא תשא שמע שוא",
+   "how": "cited"
+  },
+  {
+   "n": 75,
+   "name": "שלא יעיד בעל עברה",
+   "type": "lav",
+   "rambam": 286,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    1
+   ],
+   "words": "אל תשת ידכ עמ רשע להית עד חמס",
+   "how": "cited"
+  },
+  {
+   "n": 76,
+   "name": "שלא לנטות אחרי רבים בדיני נפשות בשביל אחד",
+   "type": "lav",
+   "rambam": 282,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    2
+   ],
+   "words": "לא תהיה אחרי רבימ לרעת",
+   "how": "cited"
+  },
+  {
+   "n": 77,
+   "name": "שלא ילמד חובה מי שלמד זכות תחלה בדיני נפשות",
+   "type": "lav",
+   "rambam": 283,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    2
+   ],
+   "words": "ולא תענה על רב לנטת",
+   "how": "cited"
+  },
+  {
+   "n": 78,
+   "name": "מצות הטיה אחרי רבים",
+   "type": "aseh",
+   "rambam": 175,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    2
+   ],
+   "words": "אחרי רבימ להטת",
+   "how": "cited"
+  },
+  {
+   "n": 79,
+   "name": "שלא לרחם על עני בדין",
+   "type": "lav",
+   "rambam": 277,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    3
+   ],
+   "words": "ודל לא תהדר בריבו",
+   "how": "cited"
+  },
+  {
+   "n": 80,
+   "name": "מצות פרוק משא",
+   "type": "aseh",
+   "rambam": 202,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    5
+   ],
+   "words": "כי תראה חמור שנאכ",
+   "how": "cited"
+  },
+  {
+   "n": 81,
+   "name": "שלא להטות משפט רשע",
+   "type": "lav",
+   "rambam": 278,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    6
+   ],
+   "words": "לא תטה משפט אבינכ בריבו",
+   "how": "cited"
+  },
+  {
+   "n": 82,
+   "name": "שלא לחתך הדין באמד הדעת",
+   "type": "lav",
+   "rambam": 290,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    7
+   ],
+   "words": "ונקי וצדיק אל תהרג",
+   "how": "cited"
+  },
+  {
+   "n": 83,
+   "name": "שלא לקח שחד",
+   "type": "lav",
+   "rambam": 274,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    8
+   ],
+   "words": "ושחד לא תקח",
+   "how": "cited"
+  },
+  {
+   "n": 84,
+   "name": "מצות שמטת קרקעות",
+   "type": "aseh",
+   "rambam": 134,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    11
+   ],
+   "words": "והשביעת תשמטנה ונטשתה ואכלו אביני עמכ ויתרמ תאכל חית השדה כנ תעשה לכרמכ לזיתכ",
+   "how": "cited"
+  },
+  {
+   "n": 85,
+   "name": "מצות שביתה בשבת",
+   "type": "aseh",
+   "rambam": 154,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    12
+   ],
+   "words": "וביומ השביעי תשבת",
+   "how": "cited"
+  },
+  {
+   "n": 86,
+   "name": "שלא לשבע בעבודה זרה",
+   "type": "lav",
+   "rambam": 14,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    13
+   ],
+   "words": "ושמ אלהימ אחרימ לא תזכירו",
+   "how": "cited"
+  },
+  {
+   "n": 87,
+   "name": "שלא להדיח בני ישראל אחר עבודה זרה",
+   "type": "lav",
+   "rambam": 15,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    13
+   ],
+   "words": "לא ישמע על פיכ",
+   "how": "override",
+   "basis": "Rambam, Sefer HaMitzvot, Negative 15 (Mekhilta)"
+  },
+  {
+   "n": 88,
+   "name": "מצות חגיגה ברגלים",
+   "type": "aseh",
+   "rambam": 52,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    14
+   ],
+   "words": "שלש רגלימ תחג לי בשנה",
+   "how": "cited"
+  },
+  {
+   "n": 89,
+   "name": "שלא נשחט שה הפסח בארבעה עשר בניסן בעוד החמץ ברשותנו",
+   "type": "lav",
+   "rambam": 115,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    18
+   ],
+   "words": "לא תזבח על חמצ דמ זבחי",
+   "how": "cited"
+  },
+  {
+   "n": 90,
+   "name": "שלא להניח אמורי הפסח לפסל בלינה",
+   "type": "lav",
+   "rambam": 116,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    18
+   ],
+   "words": "ולא ילינ חלב חגי עד בקר",
+   "how": "cited"
+  },
+  {
+   "n": 91,
+   "name": "מצות הבאת בכורים",
+   "type": "aseh",
+   "rambam": 125,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    19
+   ],
+   "words": "ראשית בכורי אדמתכ תביא",
+   "how": "cited"
+  },
+  {
+   "n": 92,
+   "name": "שלא לבשל בשר בחלב",
+   "type": "lav",
+   "rambam": 186,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    19
+   ],
+   "words": "לא תבשל גדי בחלב אמו",
+   "how": "cited"
+  },
+  {
+   "n": 93,
+   "name": "שלא לכרת ברית לשבעה עממים וכן לכל עובד עבודה זרה",
+   "type": "lav",
+   "rambam": 48,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    32
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 94,
+   "name": "שלא להושיב עובד עבודה זרה בארצנו",
+   "type": "lav",
+   "rambam": 51,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    23,
+    33
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 95,
+   "name": "מצות בנין בית הבחירה",
+   "type": "aseh",
+   "rambam": 20,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    25,
+    8
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 96,
+   "name": "שלא להוציא בדי הארון ממנו",
+   "type": "lav",
+   "rambam": 86,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    25,
+    15
+   ],
+   "words": "בטבעת הארנ יהיו הבדימ לא יסרו ממנו",
+   "how": "cited"
+  },
+  {
+   "n": 97,
+   "name": "מצות סדור לחם הפנים ולבונה",
+   "type": "aseh",
+   "rambam": 27,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    25,
+    30
+   ],
+   "words": "ונתת על השלחנ לחמ פנימ לפני תמיד",
+   "how": "cited"
+  },
+  {
+   "n": 98,
+   "name": "מצות עריכת נרות במקדש",
+   "type": "aseh",
+   "rambam": 25,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    27,
+    21
+   ],
+   "words": "יערכ אתו אהרנ ובניו",
+   "how": "cited"
+  },
+  {
+   "n": 99,
+   "name": "מצות לבישת בגדי כהנים",
+   "type": "aseh",
+   "rambam": 33,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    28,
+    4
+   ],
+   "words": "ועשו בגדי קדש לאהרנ אחיכ ולבניו",
+   "how": "cited"
+  },
+  {
+   "n": 100,
+   "name": "שלא יזח החשן מעל האפוד",
+   "type": "lav",
+   "rambam": 87,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    28,
+    28
+   ],
+   "words": "ולא יזח החשנ מעל האפוד",
+   "how": "cited"
+  },
+  {
+   "n": 101,
+   "name": "שלא לקרע המעיל של כהנים",
+   "type": "lav",
+   "rambam": 88,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    28,
+    32
+   ],
+   "words": "לא יקרע",
+   "how": "cited"
+  },
+  {
+   "n": 102,
+   "name": "מצות אכילת בשר חטאת ואשם",
+   "type": "aseh",
+   "rambam": 89,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    29,
+    33
+   ],
+   "words": "ואכלו אתמ אשר כפר בהמ",
+   "how": "cited"
+  },
+  {
+   "n": 103,
+   "name": "מצות הקטרת קטרת",
+   "type": "aseh",
+   "rambam": 28,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    7
+   ],
+   "words": "והקטיר עליו אהרנ קטרת סמימ בבקר בבקר בהיטיבו",
+   "how": "cited"
+  },
+  {
+   "n": 104,
+   "name": "שלא להקטיר ולהקריב על מזבח הזהב",
+   "type": "lav",
+   "rambam": 82,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    9
+   ],
+   "words": "לא תעלו עליו קטרת זרה ועלה ומנחה ונסכ לא תסכו עליו",
+   "how": "cited"
+  },
+  {
+   "n": 105,
+   "name": "מצות נתינת מחצית השקל בשנה",
+   "type": "aseh",
+   "rambam": 171,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    13
+   ],
+   "words": "זה יתנו כל העבר על הפקדימ",
+   "how": "cited"
+  },
+  {
+   "n": 106,
+   "name": "מצות קדוש ידים ורגלים בשעת עבודה",
+   "type": "aseh",
+   "rambam": 24,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    19
+   ],
+   "words": "ורחצו אהרנ ובניו ממנו את ידיהמ ואת רגליהמ",
+   "how": "cited"
+  },
+  {
+   "n": 107,
+   "name": "מצות משיחת כהן גדול ומלכי בית דוד בשמן המשחה",
+   "type": "aseh",
+   "rambam": 35,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    25
+   ],
+   "words": "ועשית אתו שמנ משחת קדש",
+   "how": "cited"
+  },
+  {
+   "n": 108,
+   "name": "שלא יסוך זר בשמן המשחה",
+   "type": "lav",
+   "rambam": 84,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    32
+   ],
+   "words": "על בשר אדמ לא ייסכ",
+   "how": "cited"
+  },
+  {
+   "n": 109,
+   "name": "שלא לעשות במתכנת שמן המשחה",
+   "type": "lav",
+   "rambam": 83,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    32
+   ],
+   "words": "ובמתכנתו לא תעשו",
+   "how": "cited"
+  },
+  {
+   "n": 110,
+   "name": "שלא לעשות במתכנת הקטרת",
+   "type": "lav",
+   "rambam": 83,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    30,
+    37
+   ],
+   "words": "במתכנתה לא תעשו לכמ",
+   "how": "cited"
+  },
+  {
+   "n": 111,
+   "name": "שלא לאכל ולשתות תקרבת עבודה זרה",
+   "type": "lav",
+   "rambam": 194,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    34,
+    12
+   ],
+   "words": "השמר לכ פנ תכרת ברית ליושב הארצ",
+   "how": "cited"
+  },
+  {
+   "n": 112,
+   "name": "מצות שביתת הארץ בשנת השמטה",
+   "type": "aseh",
+   "rambam": 135,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    5
+   ],
+   "words": "שנת שבתונ יהיה לארצ",
+   "how": "cited"
+  },
+  {
+   "n": 113,
+   "name": "שלא לאכל בשר בחלב",
+   "type": "lav",
+   "rambam": 187,
+   "semag": {
+    "type": "lav",
+    "n": 141
+   },
+   "ref": [
+    "Exodus",
+    34,
+    26
+   ],
+   "words": "לא תבשל גדי בחלב אמו",
+   "how": "cited"
+  },
+  {
+   "n": 114,
+   "name": "שלא יעשו בית דין משפט מות בשבת",
+   "type": "lav",
+   "rambam": 322,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    35,
+    3
+   ],
+   "words": "לא תבערו אש בכל משבתיכמ ביומ השבת",
+   "how": "cited"
+  },
+  {
+   "n": 115,
+   "name": "מצות מעשה העלה",
+   "type": "aseh",
+   "rambam": 63,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    1,
+    3
+   ],
+   "words": "אמ עלה קרבנו",
+   "how": "cited"
+  },
+  {
+   "n": 116,
+   "name": "מצות קרבן מנחה",
+   "type": "aseh",
+   "rambam": 67,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    2,
+    1
+   ],
+   "words": "ונפש כי תקריב קרבנ מנחה",
+   "how": "cited"
+  },
+  {
+   "n": 117,
+   "name": "שלא להקריב שאר או דבש",
+   "type": "lav",
+   "rambam": 98,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    2,
+    11
+   ],
+   "words": "כי כל שאר וכל דבש לא תקטירו ממנו אשה",
+   "how": "cited"
+  },
+  {
+   "n": 118,
+   "name": "שלא להקריב קרבן בלא מלח",
+   "type": "lav",
+   "rambam": 99,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    2,
+    13
+   ],
+   "words": "ולא תשבית מלח ברית אלהיכ מעל מנחתכ",
+   "how": "cited"
+  },
+  {
+   "n": 119,
+   "name": "מצות מליחת הקרבן",
+   "type": "aseh",
+   "rambam": 62,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    2,
+    13
+   ],
+   "words": "על כל קרבנכ תקריב מלח",
+   "how": "cited"
+  },
+  {
+   "n": 120,
+   "name": "מצות קרבן בית דין אם טעו בהוראה",
+   "type": "aseh",
+   "rambam": 68,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    4,
+    13
+   ],
+   "words": "ואמ כל עדת ישראל ישגו ונעלמ דבר",
+   "how": "cited"
+  },
+  {
+   "n": 121,
+   "name": "מצות קרבן חטאת ליחיד ששגג במצות לא תעשה שחיבין עליה כרת",
+   "type": "aseh",
+   "rambam": 69,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    4,
+    27
+   ],
+   "words": "ואמ נפש אחת תחטא בשגגה מעמ הארצ",
+   "how": "cited"
+  },
+  {
+   "n": 122,
+   "name": "מצות עדות",
+   "type": "aseh",
+   "rambam": 178,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    1
+   ],
+   "words": "והוא עד או ראה או ידע אמ לוא יגיד ונשא עונו",
+   "how": "cited"
+  },
+  {
+   "n": 123,
+   "name": "מצות קרבן עולה ויורד",
+   "type": "aseh",
+   "rambam": 72,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    1
+   ],
+   "words": "ונפש כי תחטא ושמעה קול אלה",
+   "how": "cited"
+  },
+  {
+   "n": 124,
+   "name": "שלא להבדיל בחטאת העוף",
+   "type": "lav",
+   "rambam": 112,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    8
+   ],
+   "words": "ומלק את ראשו ממול ערפו ולא יבדיל",
+   "how": "cited"
+  },
+  {
+   "n": 125,
+   "name": "שלא לתן שמן זית במנחת חוטא",
+   "type": "lav",
+   "rambam": 102,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    11
+   ],
+   "words": "לא ישימ עליה שמנ",
+   "how": "cited"
+  },
+  {
+   "n": 126,
+   "name": "שלא לתת לבונה במנחת חוטא",
+   "type": "lav",
+   "rambam": 103,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    11
+   ],
+   "words": "ולא יתנ עליה לבנה",
+   "how": "cited"
+  },
+  {
+   "n": 127,
+   "name": "מצות תוספת חמש לאוכל מן ההקדש או מועל בו",
+   "type": "aseh",
+   "rambam": 118,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    15
+   ],
+   "words": "נפש כי תמעל מעל",
+   "how": "cited"
+  },
+  {
+   "n": 128,
+   "name": "מצות קרבן אשם תלוי",
+   "type": "aseh",
+   "rambam": 70,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    17
+   ],
+   "words": "ואמ נפש כי תחטא ועשתה אחת מכל מצות יהוה אשר לא תעשינה ולא ידע ואשמ ונשא עונו",
+   "how": "cited"
+  },
+  {
+   "n": 129,
+   "name": "מצות קרבן אשם ודאי",
+   "type": "aseh",
+   "rambam": 71,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    21
+   ],
+   "words": "נפש כי תחטא ומעלה מעל ביהוה",
+   "how": "override",
+   "basis": "Sefer HaChinukh 129, later in the mitzvah"
+  },
+  {
+   "n": 130,
+   "name": "מצות השבת גזל",
+   "type": "aseh",
+   "rambam": 194,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    5,
+    23
+   ],
+   "words": "והשיב את הגזלה אשר גזל",
+   "how": "cited"
+  },
+  {
+   "n": 131,
+   "name": "מצות הרמת הדשן",
+   "type": "aseh",
+   "rambam": 30,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    3
+   ],
+   "words": "ולבש הכהנ מדו בד",
+   "how": "cited"
+  },
+  {
+   "n": 132,
+   "name": "מצות הדלקת אש על המזבח בכל יום",
+   "type": "aseh",
+   "rambam": 29,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    6
+   ],
+   "words": "אש תמיד תוקד על המזבח",
+   "how": "cited"
+  },
+  {
+   "n": 133,
+   "name": "שלא לכבות אש מעל המזבח",
+   "type": "lav",
+   "rambam": 81,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    6
+   ],
+   "words": "אש תמיד תוקד על המזבח לא תכבה",
+   "how": "cited"
+  },
+  {
+   "n": 134,
+   "name": "מצות אכילת שירי מנחות",
+   "type": "aseh",
+   "rambam": 88,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    9
+   ],
+   "words": "והנותרת ממנה יאכלו אהרנ ובניו מצות תאכל",
+   "how": "cited"
+  },
+  {
+   "n": 135,
+   "name": "שלא לעשות שירי מנחות חמץ",
+   "type": "lav",
+   "rambam": 124,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    10
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 136,
+   "name": "מצות קרבן מנחה של כהן גדול בכל יום",
+   "type": "aseh",
+   "rambam": 40,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    13
+   ],
+   "words": "זה קרבנ אהרנ ובניו אשר יקריבו",
+   "how": "cited"
+  },
+  {
+   "n": 137,
+   "name": "שלא לאכל מנחת כהן",
+   "type": "lav",
+   "rambam": 138,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    16
+   ],
+   "words": "וכל מנחת כהנ כליל תהיה לא תאכל",
+   "how": "cited"
+  },
+  {
+   "n": 138,
+   "name": "מצות מעשה החטאת",
+   "type": "aseh",
+   "rambam": 64,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    18
+   ],
+   "words": "זאת תורת החטאת",
+   "how": "cited"
+  },
+  {
+   "n": 139,
+   "name": "שלא לאכל מבשר חטאות הנעשין בפנים",
+   "type": "lav",
+   "rambam": 139,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    6,
+    23
+   ],
+   "words": "וכל חטאת אשר יובא מדמה אל אהל מועד לכפר בקדש לא תאכל באש תשרפ",
+   "how": "cited"
+  },
+  {
+   "n": 140,
+   "name": "מצות מעשה האשם",
+   "type": "aseh",
+   "rambam": 65,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    1
+   ],
+   "words": "וזאת תורת האשמ",
+   "how": "cited"
+  },
+  {
+   "n": 141,
+   "name": "מצות מעשה זבח השלמים",
+   "type": "aseh",
+   "rambam": 66,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    3,
+    1
+   ],
+   "words": "ואמ זבח שלמימ קרבנו",
+   "how": "cited"
+  },
+  {
+   "n": 142,
+   "name": "שלא להותיר מבשר קרבן התודה",
+   "type": "lav",
+   "rambam": 120,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    15
+   ],
+   "words": "קרבנו",
+   "how": "cited"
+  },
+  {
+   "n": 143,
+   "name": "מצות שרפת נותר הקדשים",
+   "type": "aseh",
+   "rambam": 91,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    17
+   ],
+   "words": "והנותר מבשר הזבח ביומ השלישי באש ישרפ",
+   "how": "cited"
+  },
+  {
+   "n": 144,
+   "name": "שלא לאכל פגול",
+   "type": "lav",
+   "rambam": 132,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    18
+   ],
+   "words": "ואמ האכל יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 145,
+   "name": "שלא לאכל בשר קדשים שנטמא",
+   "type": "lav",
+   "rambam": 130,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    19
+   ],
+   "words": "והבשר אשר יגע בכל טמא לא יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 146,
+   "name": "מצות שרפת בשר קדש שנטמא",
+   "type": "aseh",
+   "rambam": 90,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    19
+   ],
+   "words": "והבשר אשר יגע בכל טמא לא יאכל באש ישרפ",
+   "how": "cited"
+  },
+  {
+   "n": 147,
+   "name": "שלא נאכל חלב",
+   "type": "lav",
+   "rambam": 185,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    23
+   ],
+   "words": "כל חלב שור וכשב ועז לא תאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 148,
+   "name": "שלא נאכל דם בהמה חיה ועוף",
+   "type": "lav",
+   "rambam": 184,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    7,
+    26
+   ],
+   "words": "וכל דמ לא תאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 149,
+   "name": "שלא יכנסו הכהנים למקדש מגדלי שער",
+   "type": "lav",
+   "rambam": 163,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    10,
+    6
+   ],
+   "words": "ראשיכמ אל תפרעו",
+   "how": "cited"
+  },
+  {
+   "n": 150,
+   "name": "שלא יכנסו הכהנים למקדש קרועי בגדים",
+   "type": "lav",
+   "rambam": 164,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    10,
+    6
+   ],
+   "words": "ובגדיכמ לא תפרמו",
+   "how": "cited"
+  },
+  {
+   "n": 151,
+   "name": "שלא יצאו הכהנים מן המקדש בשעת עבודה",
+   "type": "lav",
+   "rambam": 165,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    10,
+    7
+   ],
+   "words": "ומפתח אהל מועד לא תצאו פנ תמתו",
+   "how": "cited"
+  },
+  {
+   "n": 152,
+   "name": "שלא להכנס שתויי יין במקדש וכן שלא יורה שתוי",
+   "type": "lav",
+   "rambam": 73,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    10,
+    9
+   ],
+   "words": "יינ ושכר אל תשת",
+   "how": "cited"
+  },
+  {
+   "n": 153,
+   "name": "מצות בדיקת סימני בהמה וחיה",
+   "type": "aseh",
+   "rambam": 149,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    2
+   ],
+   "words": "זאת החיה אשר תאכלו מכל הבהמה אשר על הארצ",
+   "how": "cited"
+  },
+  {
+   "n": 154,
+   "name": "שלא לאכל בהמה וחיה טמאה",
+   "type": "lav",
+   "rambam": 172,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    4
+   ],
+   "words": "את זה לא תאכלו ממעלי הגרה וממפרסי הפרסה את הגמל",
+   "how": "cited"
+  },
+  {
+   "n": 155,
+   "name": "מצות בדיקת סימני דגים",
+   "type": "aseh",
+   "rambam": 152,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    9
+   ],
+   "words": "את זה תאכלו מכל אשר במימ",
+   "how": "cited"
+  },
+  {
+   "n": 156,
+   "name": "שלא לאכל דג טמא",
+   "type": "lav",
+   "rambam": 173,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    11
+   ],
+   "words": "מבשרמ לא תאכלו ואת נבלתמ תשקצו",
+   "how": "cited"
+  },
+  {
+   "n": 157,
+   "name": "שלא לאכל עוף טמא",
+   "type": "lav",
+   "rambam": 174,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    13
+   ],
+   "words": "ואת אלה תשקצו מנ העופ לא יאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 158,
+   "name": "מצות בדיקת סימני חגבים",
+   "type": "aseh",
+   "rambam": 151,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    21
+   ],
+   "words": "אשר לו",
+   "how": "cited"
+  },
+  {
+   "n": 159,
+   "name": "מצות טמאת שמנה שרצים",
+   "type": "aseh",
+   "rambam": 97,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    29
+   ],
+   "words": "וזה לכמ הטמא בשרצ השרצ על הארצ החלד והעכבר והצב",
+   "how": "cited"
+  },
+  {
+   "n": 160,
+   "name": "מצות ענין טמאת אכלין",
+   "type": "aseh",
+   "rambam": 98,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    34
+   ],
+   "words": "מכל האכל אשר יאכל אשר יבוא עליו מימ",
+   "how": "cited"
+  },
+  {
+   "n": 161,
+   "name": "מצות ענין טמאת נבלה",
+   "type": "aseh",
+   "rambam": 96,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    39
+   ],
+   "words": "וכי ימות מנ הבהמה אשר היא לכמ לאכלה",
+   "how": "cited"
+  },
+  {
+   "n": 162,
+   "name": "שלא לאכל שרץ הארץ",
+   "type": "lav",
+   "rambam": 176,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    41
+   ],
+   "words": "וכל השרצ השרצ על הארצ שקצ הוא לא יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 163,
+   "name": "שלא לאכל מיני שרצים דקים הנולדים בזרעים ובפרות",
+   "type": "lav",
+   "rambam": 178,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    42
+   ],
+   "words": "לכל השרצ השרצ על הארצ לא תאכלומ",
+   "how": "cited"
+  },
+  {
+   "n": 164,
+   "name": "שלא לאכל משרץ המים",
+   "type": "lav",
+   "rambam": 179,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    43
+   ],
+   "words": "אל תשקצו את נפשתיכמ בכל השרצ השרצ ולא תטמאו בהמ ונטמתמ במ",
+   "how": "cited"
+  },
+  {
+   "n": 165,
+   "name": "שלא לאכל מן השרצים המתהוים מן העפוש",
+   "type": "lav",
+   "rambam": 177,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    44
+   ],
+   "words": "ולא תטמאו את נפשתיכמ בכל השרצ הרמש על הארצ",
+   "how": "cited"
+  },
+  {
+   "n": 166,
+   "name": "מצות ענין טמאת יולדת",
+   "type": "aseh",
+   "rambam": 100,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    12,
+    2
+   ],
+   "words": "אשה כי תזריע וילדה זכר וטמאה שבעת ימימ",
+   "how": "cited"
+  },
+  {
+   "n": 167,
+   "name": "שלא יאכל טמא מן הקדשים",
+   "type": "lav",
+   "rambam": 129,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    12,
+    4
+   ],
+   "words": "בכל קדש לא תגע",
+   "how": "cited"
+  },
+  {
+   "n": 168,
+   "name": "מצות קרבן יולדת",
+   "type": "aseh",
+   "rambam": 76,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    12,
+    6
+   ],
+   "words": "ובמלאת ימי טהרה לבנ או לבת תביא",
+   "how": "cited"
+  },
+  {
+   "n": 169,
+   "name": "מצות ענין טמאת מצרע",
+   "type": "aseh",
+   "rambam": 101,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    13,
+    2
+   ],
+   "words": "אדמ כי יהיה בעור בשרו",
+   "how": "cited"
+  },
+  {
+   "n": 170,
+   "name": "שלא לגלח שער הנתק",
+   "type": "lav",
+   "rambam": 307,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    13,
+    33
+   ],
+   "words": "ואת הנתק לא יגלח",
+   "how": "cited"
+  },
+  {
+   "n": 171,
+   "name": "הנהגת המצרע וכל מטמאי אדם בפריעה ופרימה",
+   "type": "aseh",
+   "rambam": 112,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    13,
+    45
+   ],
+   "words": "בגדיו יהיו פרמימ וראשו יהיה פרוע",
+   "how": "cited"
+  },
+  {
+   "n": 172,
+   "name": "מצות ענין נגעי בגדים",
+   "type": "aseh",
+   "rambam": 102,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    13,
+    47
+   ],
+   "words": "והבגד כי יהיה בו נגע",
+   "how": "chapter"
+  },
+  {
+   "n": 173,
+   "name": "מצות הטהרה מן הצרעת שתהיה במינים ידועים",
+   "type": "aseh",
+   "rambam": 110,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    14,
+    2
+   ],
+   "words": "זאת תהיה תורת המצרע",
+   "how": "search"
+  },
+  {
+   "n": 174,
+   "name": "מצות תגלחת מצרע ביום השביעי",
+   "type": "aseh",
+   "rambam": 111,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    14,
+    9
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 175,
+   "name": "מצות טבילה לטמאים",
+   "type": "aseh",
+   "rambam": 109,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    14,
+    9
+   ],
+   "words": "ורחצ את בשרו",
+   "how": "cited"
+  },
+  {
+   "n": 176,
+   "name": "מצות קרבן מצרע כשיתרפא מצרעתו",
+   "type": "aseh",
+   "rambam": 77,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    14,
+    10
+   ],
+   "words": "וביומ השמיני יקח שני כבשימ תמיממ וכבשה אחת",
+   "how": "cited"
+  },
+  {
+   "n": 177,
+   "name": "מצות ענין טמאת בית שיהיה בו נגע",
+   "type": "aseh",
+   "rambam": 103,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    14,
+    35
+   ],
+   "words": "ובא אשר לו הבית",
+   "how": "cited"
+  },
+  {
+   "n": 178,
+   "name": "מצות ענין טמאת זב להיות טמא ומטמא",
+   "type": "aseh",
+   "rambam": 104,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    15,
+    2
+   ],
+   "words": "איש איש כי יהיה זב מבשרו",
+   "how": "cited"
+  },
+  {
+   "n": 179,
+   "name": "מצות קרבן זב כשיתרפא מזובו",
+   "type": "aseh",
+   "rambam": 74,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    15,
+    13
+   ],
+   "words": "וכי יטהר הזב מזובו",
+   "how": "search"
+  },
+  {
+   "n": 180,
+   "name": "מצות ענין טמאת שכבת זרע שהוא טמא ומטמא",
+   "type": "aseh",
+   "rambam": 105,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    15,
+    16
+   ],
+   "words": "ואיש כי תצא ממנו שכבת זרע",
+   "how": "cited"
+  },
+  {
+   "n": 181,
+   "name": "מצות ענין טמאת נדה שטמאה ומטמאה",
+   "type": "aseh",
+   "rambam": 99,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    15,
+    19
+   ],
+   "words": "וכל הנגע בה יטמא עד הערב",
+   "how": "cited"
+  },
+  {
+   "n": 182,
+   "name": "מצות ענין טמאת זבה שטמאה ומטמאה",
+   "type": "aseh",
+   "rambam": 106,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    15,
+    25
+   ],
+   "words": "ואשה כי יזוב זוב דמה ימימ רבימ",
+   "how": "cited"
+  },
+  {
+   "n": 183,
+   "name": "מצות קרבן זבה כשתתרפא מזובה",
+   "type": "aseh",
+   "rambam": 75,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    15,
+    28
+   ],
+   "words": "ואמ טהרה מזובה",
+   "how": "cited"
+  },
+  {
+   "n": 184,
+   "name": "שלא יכנסו הכהנים בכל עת במקדש וכל שכן זרים",
+   "type": "lav",
+   "rambam": 68,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    16,
+    2
+   ],
+   "words": "ואל יבא בכל עת",
+   "how": "cited"
+  },
+  {
+   "n": 185,
+   "name": "מצות עבודת יום הכפורים",
+   "type": "aseh",
+   "rambam": 49,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    16,
+    3
+   ],
+   "words": "בזאת יבא אהרנ אל הקדש",
+   "how": "cited"
+  },
+  {
+   "n": 186,
+   "name": "שלא לשחט קדשים חוץ לעזרה",
+   "type": "lav",
+   "rambam": 90,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    17,
+    3
+   ],
+   "words": "אשר ישחט שור או כשב או עז",
+   "how": "cited"
+  },
+  {
+   "n": 187,
+   "name": "מצות כסוי הדם",
+   "type": "aseh",
+   "rambam": 147,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    17,
+    13
+   ],
+   "words": "אשר יצוד ציד חיה או עופ אשר יאכל ושפכ את דמו וכסהו בעפר",
+   "how": "cited"
+  },
+  {
+   "n": 188,
+   "name": "שלא להתעדן באחת מכל העריות",
+   "type": "lav",
+   "rambam": 353,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    6
+   ],
+   "words": "איש איש אל כל שאר בשרו לא תקרבו לגלות ערוה",
+   "how": "cited"
+  },
+  {
+   "n": 189,
+   "name": "שלא לגלות ערות אב",
+   "type": "lav",
+   "rambam": 351,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    7
+   ],
+   "words": "ערות אביכ",
+   "how": "cited"
+  },
+  {
+   "n": 190,
+   "name": "שלא לגלות ערות אם",
+   "type": "lav",
+   "rambam": 330,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    7
+   ],
+   "words": "אמכ הוא לא תגלה ערותה",
+   "how": "cited"
+  },
+  {
+   "n": 191,
+   "name": "שלא לגלות ערות אשת אב ואף על פי שאינה אמו",
+   "type": "lav",
+   "rambam": 331,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    8
+   ],
+   "words": "ערות אשת אביכ לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 192,
+   "name": "שלא לגלות ערות אחותו בכל צד שהיא אחותו",
+   "type": "lav",
+   "rambam": 332,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    9
+   ],
+   "words": "ערות אחותכ בת אביכ או בת אמכ מולדת בית או מולדת חוצ",
+   "how": "cited"
+  },
+  {
+   "n": 193,
+   "name": "שלא לגלות ערות בת הבן",
+   "type": "lav",
+   "rambam": 334,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    10
+   ],
+   "words": "ערות בת בנכ",
+   "how": "cited"
+  },
+  {
+   "n": 194,
+   "name": "שלא לגלות ערות בת הבת",
+   "type": "lav",
+   "rambam": 335,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    10
+   ],
+   "words": "או בת בתכ לא תגלה ערותנ כי ערותכ הנה",
+   "how": "cited"
+  },
+  {
+   "n": 195,
+   "name": "שלא לגלות ערות הבת",
+   "type": "lav",
+   "rambam": 336,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    17
+   ],
+   "words": "שארה הנה",
+   "how": "override",
+   "basis": "Sefer HaChinukh 195: learned from שארה הנה (Lev 18:17)"
+  },
+  {
+   "n": 196,
+   "name": "שלא לגלות ערות אחותו מן האב והיא בת אשת אביו",
+   "type": "lav",
+   "rambam": 333,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    11
+   ],
+   "words": "ערות בת אשת אביכ",
+   "how": "cited"
+  },
+  {
+   "n": 197,
+   "name": "שלא לגלות ערות אחות אב",
+   "type": "lav",
+   "rambam": 340,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    12
+   ],
+   "words": "ערות אחות אביכ לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 198,
+   "name": "ערות אחות אמך לא תגלה",
+   "type": "lav",
+   "rambam": 341,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    13
+   ],
+   "words": "ערות אחות אמכ לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 199,
+   "name": "ערות אחי אביך לא תגלה",
+   "type": "lav",
+   "rambam": 352,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    14
+   ],
+   "words": "ערות אחי אביכ לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 200,
+   "name": "ערות אשת אחי אביך לא תגלה",
+   "type": "lav",
+   "rambam": 342,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    14
+   ],
+   "words": "אל אשתו לא תקרב דדתכ הוא",
+   "how": "cited"
+  },
+  {
+   "n": 201,
+   "name": "ערות כלתך לא תגלה",
+   "type": "lav",
+   "rambam": 343,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    15
+   ],
+   "words": "ערות כלתכ לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 202,
+   "name": "ערות אשת אחיך לא תגלה",
+   "type": "lav",
+   "rambam": 344,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    16
+   ],
+   "words": "ערות אשת אחיכ לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 203,
+   "name": "ערות אשה ובתה לא תגלה",
+   "type": "lav",
+   "rambam": 337,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    17
+   ],
+   "words": "ערות אשה ובתה לא תגלה",
+   "how": "cited"
+  },
+  {
+   "n": 204,
+   "name": "ערות אשה ובת בנה",
+   "type": "lav",
+   "rambam": 338,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    17
+   ],
+   "words": "את בת בנה",
+   "how": "cited"
+  },
+  {
+   "n": 205,
+   "name": "שלא לגלות ערות אשה ובת בתה",
+   "type": "lav",
+   "rambam": 339,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    17
+   ],
+   "words": "ואת בת בתה לא תקח",
+   "how": "cited"
+  },
+  {
+   "n": 206,
+   "name": "ערות אשה ואחותה",
+   "type": "lav",
+   "rambam": 345,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    18
+   ],
+   "words": "ואשה אל אחתה לא תקח לצרר לגלות ערותה עליה בחייה",
+   "how": "cited"
+  },
+  {
+   "n": 207,
+   "name": "שלא לבוא על אשה נדה",
+   "type": "lav",
+   "rambam": 346,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    19
+   ],
+   "words": "ואל אשה בנדת טמאתה לא תקרב",
+   "how": "cited"
+  },
+  {
+   "n": 208,
+   "name": "שלא נתן מזרענו למלך",
+   "type": "lav",
+   "rambam": 7,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    21
+   ],
+   "words": "ומזרעכ לא תתנ להעביר למלכ",
+   "how": "cited"
+  },
+  {
+   "n": 209,
+   "name": "שלא לבוא על הזכרים",
+   "type": "lav",
+   "rambam": 350,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    22
+   ],
+   "words": "ואת זכר לא תשכב משכבי אשה תועבה הוא",
+   "how": "cited"
+  },
+  {
+   "n": 210,
+   "name": "שלא לשכב עם בהמה",
+   "type": "lav",
+   "rambam": 348,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    23
+   ],
+   "words": "ובכל בהמה לא תתנ שכבתכ",
+   "how": "cited"
+  },
+  {
+   "n": 211,
+   "name": "שלא תשכבנה הנשים עם הבהמות",
+   "type": "lav",
+   "rambam": 349,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    18,
+    23
+   ],
+   "words": "ואשה לא תעמד לפני בהמה לרבעה",
+   "how": "cited"
+  },
+  {
+   "n": 212,
+   "name": "מצות יראת אב ואם",
+   "type": "aseh",
+   "rambam": 211,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    3
+   ],
+   "words": "איש אמו ואביו תיראו",
+   "how": "cited"
+  },
+  {
+   "n": 213,
+   "name": "שלא לפנות אחר עבודת אלילים לא במחשבה ולא בדבור ולא בהבטה",
+   "type": "lav",
+   "rambam": 10,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    4
+   ],
+   "words": "אל תפנו אל האלילמ",
+   "how": "cited"
+  },
+  {
+   "n": 214,
+   "name": "שלא לעשות עבודת אלילים לא לעצמו ולא לזולתו",
+   "type": "lav",
+   "rambam": 3,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    4
+   ],
+   "words": "ואלהי מסכה לא תעשו לכמ",
+   "how": "cited"
+  },
+  {
+   "n": 215,
+   "name": "שלא לאכל נותר",
+   "type": "lav",
+   "rambam": 131,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    29,
+    33
+   ],
+   "words": "לא יאכל כי קדש המ",
+   "how": "cited"
+  },
+  {
+   "n": 216,
+   "name": "מצות פאה",
+   "type": "aseh",
+   "rambam": 120,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    10
+   ],
+   "words": "לעני ולגר תעזב אתמ",
+   "how": "cited"
+  },
+  {
+   "n": 217,
+   "name": "שלא לכלות הפאה בשדה",
+   "type": "lav",
+   "rambam": 210,
+   "semag": {
+    "type": "lav",
+    "n": 284
+   },
+   "ref": [
+    "Leviticus",
+    23,
+    22
+   ],
+   "words": "לא תכלה פאת שדכ בקצרכ",
+   "how": "cited"
+  },
+  {
+   "n": 218,
+   "name": "מצות לקט",
+   "type": "aseh",
+   "rambam": 121,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    10
+   ],
+   "words": "לעני ולגר תעזב אתמ",
+   "how": "cited"
+  },
+  {
+   "n": 219,
+   "name": "שלא לקחת שבלים הנופלים בשעת הקציר",
+   "type": "lav",
+   "rambam": 211,
+   "semag": {
+    "type": "lav",
+    "n": 285
+   },
+   "ref": [
+    "Leviticus",
+    19,
+    9
+   ],
+   "words": "ולקט קצירכ לא תלקט",
+   "how": "cited"
+  },
+  {
+   "n": 220,
+   "name": "מצות הנחת פאת הכרם",
+   "type": "aseh",
+   "rambam": 123,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    10
+   ],
+   "words": "לעני ולגר תעזב אתמ",
+   "how": "cited"
+  },
+  {
+   "n": 221,
+   "name": "שלא לכלות פאת הכרם",
+   "type": "lav",
+   "rambam": 212,
+   "semag": {
+    "type": "lav",
+    "n": 287
+   },
+   "ref": [
+    "Leviticus",
+    19,
+    10
+   ],
+   "words": "וכרמכ לא תעולל",
+   "how": "cited"
+  },
+  {
+   "n": 222,
+   "name": "מצות הנחת פרט הכרם",
+   "type": "aseh",
+   "rambam": 124,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    10
+   ],
+   "words": "לעני ולגר תעזב אתמ",
+   "how": "cited"
+  },
+  {
+   "n": 223,
+   "name": "שלא ללקט פרט הכרם",
+   "type": "lav",
+   "rambam": 213,
+   "semag": {
+    "type": "lav",
+    "n": 286
+   },
+   "ref": [
+    "Leviticus",
+    19,
+    10
+   ],
+   "words": "ופרט כרמכ לא תלקט",
+   "how": "cited"
+  },
+  {
+   "n": 224,
+   "name": "שלא לגנב שום ממון",
+   "type": "lav",
+   "rambam": 244,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    11
+   ],
+   "words": "לא תגנבו",
+   "how": "cited"
+  },
+  {
+   "n": 225,
+   "name": "שלא נכחש על ממון שיש לאחר בידינו",
+   "type": "lav",
+   "rambam": 248,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    11
+   ],
+   "words": "ולא תכחשו",
+   "how": "cited"
+  },
+  {
+   "n": 226,
+   "name": "שלא לשבע על כפירת ממון",
+   "type": "lav",
+   "rambam": 249,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    11
+   ],
+   "words": "ולא תשקרו",
+   "how": "cited"
+  },
+  {
+   "n": 227,
+   "name": "שלא לשבע לשקר",
+   "type": "lav",
+   "rambam": 61,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    12
+   ],
+   "words": "ולא תשבעו בשמי לשקר",
+   "how": "cited"
+  },
+  {
+   "n": 228,
+   "name": "שלא לעשק",
+   "type": "lav",
+   "rambam": 247,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    13
+   ],
+   "words": "לא תעשק את רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 229,
+   "name": "שלא לגזל",
+   "type": "lav",
+   "rambam": 245,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    13
+   ],
+   "words": "ולא תגזל",
+   "how": "cited"
+  },
+  {
+   "n": 230,
+   "name": "שלא לאחר שכר שכיר",
+   "type": "lav",
+   "rambam": 238,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    13
+   ],
+   "words": "לא תלינ פעלת שכיר אתכ עד בקר",
+   "how": "cited"
+  },
+  {
+   "n": 231,
+   "name": "שלא לקלל אחד מישראל בין איש בין אשה",
+   "type": "lav",
+   "rambam": 317,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    14
+   ],
+   "words": "לא תקלל חרש",
+   "how": "cited"
+  },
+  {
+   "n": 232,
+   "name": "שלא להכשיל תם בדרך",
+   "type": "lav",
+   "rambam": 299,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    14
+   ],
+   "words": "ולפני עור לא תתנ מכשל",
+   "how": "cited"
+  },
+  {
+   "n": 233,
+   "name": "שלא לעול המשפט",
+   "type": "lav",
+   "rambam": 273,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    15
+   ],
+   "words": "לא תעשו עול במשפט",
+   "how": "cited"
+  },
+  {
+   "n": 234,
+   "name": "שלא לכבד גדול בדין",
+   "type": "lav",
+   "rambam": 275,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    15
+   ],
+   "words": "ולא תהדר פני גדול",
+   "how": "cited"
+  },
+  {
+   "n": 235,
+   "name": "מצוה שישפט בצדק",
+   "type": "aseh",
+   "rambam": 177,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    15
+   ],
+   "words": "בצדק תשפט עמיתכ",
+   "how": "cited"
+  },
+  {
+   "n": 236,
+   "name": "שלא לרגל",
+   "type": "lav",
+   "rambam": 301,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    16
+   ],
+   "words": "לא תלכ רכיל",
+   "how": "cited"
+  },
+  {
+   "n": 237,
+   "name": "שלא לעמד על דם רעים",
+   "type": "lav",
+   "rambam": 297,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    16
+   ],
+   "words": "לא תעמד על דמ רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 238,
+   "name": "שלא לשנא אחים",
+   "type": "lav",
+   "rambam": 302,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    17
+   ],
+   "words": "לא תשנא את אחיכ בלבבכ",
+   "how": "cited"
+  },
+  {
+   "n": 239,
+   "name": "מצות תוכחה לישראל שאינו נוהג כשורה",
+   "type": "aseh",
+   "rambam": 205,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    17
+   ],
+   "words": "הוכח תוכיח את עמיתכ ולא תשא עליו חטא",
+   "how": "cited"
+  },
+  {
+   "n": 240,
+   "name": "שלא להלבין פני אדם מישראל",
+   "type": "lav",
+   "rambam": 303,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    17
+   ],
+   "words": "הוכח תוכיח את עמיתכ ולא תשא עליו חטא",
+   "how": "cited"
+  },
+  {
+   "n": 241,
+   "name": "שלא לנקם",
+   "type": "lav",
+   "rambam": 304,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    18
+   ],
+   "words": "לא תקמ",
+   "how": "cited"
+  },
+  {
+   "n": 242,
+   "name": "שלא לנטר",
+   "type": "lav",
+   "rambam": 305,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    18
+   ],
+   "words": "ולא תטר",
+   "how": "cited"
+  },
+  {
+   "n": 243,
+   "name": "מצות אהבת ישראל",
+   "type": "aseh",
+   "rambam": 206,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    18
+   ],
+   "words": "ואהבת לרעכ כמוכ",
+   "how": "cited"
+  },
+  {
+   "n": 244,
+   "name": "שלא להרביע בהמה מין עם שאינו מינו",
+   "type": "lav",
+   "rambam": 217,
+   "semag": {
+    "type": "lav",
+    "n": 281
+   },
+   "ref": [
+    "Leviticus",
+    19,
+    19
+   ],
+   "words": "בהמתכ לא תרביע כלאימ",
+   "how": "cited"
+  },
+  {
+   "n": 245,
+   "name": "שלא לזרע כלאי זרעים ולא נרכיב אילן בשום מקום בארץ",
+   "type": "lav",
+   "rambam": 215,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    19
+   ],
+   "words": "שדכ לא תזרע כלאימ",
+   "how": "cited"
+  },
+  {
+   "n": 246,
+   "name": "שלא לאכל ערלה",
+   "type": "lav",
+   "rambam": 192,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    23
+   ],
+   "words": "שלש שנימ יהיה לכמ ערלימ לא יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 247,
+   "name": "מצות נטע רבעי",
+   "type": "aseh",
+   "rambam": 119,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    23
+   ],
+   "words": "ונטעתמ כל עצ מאכל",
+   "how": "cited"
+  },
+  {
+   "n": 248,
+   "name": "שלא לאכל ולשתות כדרך זולל וסובא",
+   "type": "lav",
+   "rambam": 195,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    26
+   ],
+   "words": "לא תאכלו על הדמ",
+   "how": "cited"
+  },
+  {
+   "n": 249,
+   "name": "שלא לנחש",
+   "type": "lav",
+   "rambam": 33,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    26
+   ],
+   "words": "לא תנחשו",
+   "how": "cited"
+  },
+  {
+   "n": 250,
+   "name": "שלא לעונן",
+   "type": "lav",
+   "rambam": 32,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    26
+   ],
+   "words": "ולא תעוננו",
+   "how": "cited"
+  },
+  {
+   "n": 251,
+   "name": "שלא להקיף פאת הראש",
+   "type": "lav",
+   "rambam": 43,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    27
+   ],
+   "words": "לא תקפו פאת ראשכמ",
+   "how": "cited"
+  },
+  {
+   "n": 252,
+   "name": "שלא להשחית פאת זקן",
+   "type": "lav",
+   "rambam": 44,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    27
+   ],
+   "words": "ולא תשחית את פאת זקנכ",
+   "how": "cited"
+  },
+  {
+   "n": 253,
+   "name": "שלא נכתב בבשרנו כתבת קעקע",
+   "type": "lav",
+   "rambam": 41,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    28
+   ],
+   "words": "וכתבת קעקע לא תתנו",
+   "how": "cited"
+  },
+  {
+   "n": 254,
+   "name": "מצות היראה מן המקדש",
+   "type": "aseh",
+   "rambam": 21,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    30
+   ],
+   "words": "ומקדשי תיראו",
+   "how": "cited"
+  },
+  {
+   "n": 255,
+   "name": "שלא לעשות מעשה אוב",
+   "type": "lav",
+   "rambam": 8,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    31
+   ],
+   "words": "אל תפנו אל האבת",
+   "how": "cited"
+  },
+  {
+   "n": 256,
+   "name": "שלא לעשות מעשה ידעוני",
+   "type": "lav",
+   "rambam": 9,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    31
+   ],
+   "words": "אל תפנו אל האבת ואל הידענימ",
+   "how": "cited"
+  },
+  {
+   "n": 257,
+   "name": "מצות כבוד חכמים",
+   "type": "aseh",
+   "rambam": 209,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    32
+   ],
+   "words": "מפני שיבה תקומ",
+   "how": "cited"
+  },
+  {
+   "n": 258,
+   "name": "שלא להונות במדות וכל המדות בכלל",
+   "type": "lav",
+   "rambam": 271,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    35
+   ],
+   "words": "לא תעשו עול במשפט במדה במשקל ובמשורה",
+   "how": "cited"
+  },
+  {
+   "n": 259,
+   "name": "מצות צדוק המאזנים והמשקלים והמדות",
+   "type": "aseh",
+   "rambam": 208,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    19,
+    36
+   ],
+   "words": "מאזני צדק אבני צדק איפת צדק והינ צדק יהיה לכמ",
+   "how": "cited"
+  },
+  {
+   "n": 260,
+   "name": "שלא לקלל אב ואם",
+   "type": "lav",
+   "rambam": 318,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    20,
+    9
+   ],
+   "words": "איש איש אשר יקלל את אביו ואת אמו",
+   "how": "cited"
+  },
+  {
+   "n": 261,
+   "name": "מצוה שישרפו מי שיתחיב שרפה",
+   "type": "aseh",
+   "rambam": 228,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    20,
+    14
+   ],
+   "words": "ואיש אשר יקח את אשה ואת אמה זמה הוא באש ישרפו אתו ואתהנ",
+   "how": "cited"
+  },
+  {
+   "n": 262,
+   "name": "שלא ללכת בחקת הגוים",
+   "type": "lav",
+   "rambam": 30,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    20,
+    23
+   ],
+   "words": "ולא תלכו בחקת הגוי אשר אני משלח מפניכמ",
+   "how": "cited"
+  },
+  {
+   "n": 263,
+   "name": "שלא יטמא כהן הדיוט במת זולת בקרובים המבארים בכתוב",
+   "type": "lav",
+   "rambam": 166,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    1
+   ],
+   "words": "לא יטמא בעמיו",
+   "how": "cited"
+  },
+  {
+   "n": 264,
+   "name": "מצות ענין טמאת הכהנים לקרוביהם ובכללה שיתאבלו כל אחד מישראל על ששה מקרוביהם הידועים",
+   "type": "aseh",
+   "rambam": 37,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    3
+   ],
+   "words": "לה יטמא",
+   "how": "cited"
+  },
+  {
+   "n": 265,
+   "name": "שלא ישמש כהן טבול יום עד שיעריב שמשו",
+   "type": "lav",
+   "rambam": 76,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    11,
+    32
+   ],
+   "words": "במימ יובא וטמא עד הערב וטהר",
+   "how": "cited"
+  },
+  {
+   "n": 266,
+   "name": "שלא ישא כהן אשה זונה",
+   "type": "lav",
+   "rambam": 158,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    7
+   ],
+   "words": "אשה זנה וחללה לא יקחו",
+   "how": "cited"
+  },
+  {
+   "n": 267,
+   "name": "שלא ישא כהן אשה חללה",
+   "type": "lav",
+   "rambam": 159,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    7
+   ],
+   "words": "אשה זנה וחללה לא יקחו",
+   "how": "cited"
+  },
+  {
+   "n": 268,
+   "name": "שלא ישא כהן גרושה",
+   "type": "lav",
+   "rambam": 160,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    7
+   ],
+   "words": "ואשה גרושה מאישה לא יקחו",
+   "how": "cited"
+  },
+  {
+   "n": 269,
+   "name": "מצות קדוש זרע אהרן",
+   "type": "aseh",
+   "rambam": 32,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    8
+   ],
+   "words": "וקדשתו",
+   "how": "cited"
+  },
+  {
+   "n": 270,
+   "name": "שלא יכנס כהן גדול באהל המת",
+   "type": "lav",
+   "rambam": 167,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    11
+   ],
+   "words": "ועל כל נפשת מת לא יבא",
+   "how": "cited"
+  },
+  {
+   "n": 271,
+   "name": "שלא יטמא כהן גדול בשום טמאה במת",
+   "type": "lav",
+   "rambam": 168,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    11
+   ],
+   "words": "לאביו ולאמו לא יטמא",
+   "how": "cited"
+  },
+  {
+   "n": 272,
+   "name": "מצות כהן גדול לשא נערה בתולה",
+   "type": "aseh",
+   "rambam": 38,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    13
+   ],
+   "words": "והוא אשה בבתוליה יקח",
+   "how": "cited"
+  },
+  {
+   "n": 273,
+   "name": "שלא ישא כהן גדול אלמנה",
+   "type": "lav",
+   "rambam": 161,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    14
+   ],
+   "words": "אלמנה וגרושה וחללה זנה את אלה לא יקח",
+   "how": "cited"
+  },
+  {
+   "n": 274,
+   "name": "שלא יבעל כהן גדול אלמנה",
+   "type": "lav",
+   "rambam": 162,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    15
+   ],
+   "words": "ולא יחלל זרעו בעמיו",
+   "how": "cited"
+  },
+  {
+   "n": 275,
+   "name": "שלא יעבד כהן בעל מום במקדש",
+   "type": "lav",
+   "rambam": 70,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    17
+   ],
+   "words": "איש מזרעכ לדרתמ אשר יהיה בו מומ לא יקרב להקריב לחמ אלהיו",
+   "how": "cited"
+  },
+  {
+   "n": 276,
+   "name": "שלא יעבד כהן בעל מום עובר",
+   "type": "lav",
+   "rambam": 71,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    21
+   ],
+   "words": "כל איש אשר בו מומ מזרע אהרנ הכהנ לא יגש",
+   "how": "cited"
+  },
+  {
+   "n": 277,
+   "name": "שלא יכנס בעל מום בהיכל כלו",
+   "type": "lav",
+   "rambam": 69,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    21,
+    23
+   ],
+   "words": "אכ אל הפרכת לא יבא ואל המזבח לא יגש",
+   "how": "cited"
+  },
+  {
+   "n": 278,
+   "name": "שלא יעבד כהן טמא",
+   "type": "lav",
+   "rambam": 75,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    2
+   ],
+   "words": "וינזרו מקדשי בני ישראל ולא יחללו את שמ קדשי",
+   "how": "cited"
+  },
+  {
+   "n": 279,
+   "name": "שלא יאכל כהן טמא תרומה",
+   "type": "lav",
+   "rambam": 136,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    4
+   ],
+   "words": "איש איש מזרע אהרנ",
+   "how": "cited"
+  },
+  {
+   "n": 280,
+   "name": "שלא יאכל שום זר תרומה",
+   "type": "lav",
+   "rambam": 133,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    10
+   ],
+   "words": "וכל זר לא יאכל קדש",
+   "how": "cited"
+  },
+  {
+   "n": 281,
+   "name": "שלא יאכל תושב כהן ושכיר תרומה",
+   "type": "lav",
+   "rambam": 134,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    10
+   ],
+   "words": "תושב כהנ ושכיר לא יאכל קדש",
+   "how": "cited"
+  },
+  {
+   "n": 282,
+   "name": "שלא יאכל ערל תרומה",
+   "type": "lav",
+   "rambam": 135,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    45
+   ],
+   "words": "תושב ושכיר",
+   "how": "cited"
+  },
+  {
+   "n": 283,
+   "name": "שלא תאכל חללה מן הקדש",
+   "type": "lav",
+   "rambam": 137,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    12
+   ],
+   "words": "ובת כהנ כי תהיה לאיש זר הוא בתרומת הקדשימ לא תאכל",
+   "how": "cited"
+  },
+  {
+   "n": 284,
+   "name": "שלא לאכל טבל",
+   "type": "lav",
+   "rambam": 153,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    15
+   ],
+   "words": "ולא יחללו את קדשי בני ישראל את אשר ירימו",
+   "how": "cited"
+  },
+  {
+   "n": 285,
+   "name": "שלא נקדיש בעלי מומין למזבח",
+   "type": "lav",
+   "rambam": 91,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    20
+   ],
+   "words": "כל אשר בו מומ לא תקריבו",
+   "how": "cited"
+  },
+  {
+   "n": 286,
+   "name": "מצות הקרבן להיות תמים",
+   "type": "aseh",
+   "rambam": 61,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    21
+   ],
+   "words": "תמימ יהיה לרצונ",
+   "how": "cited"
+  },
+  {
+   "n": 287,
+   "name": "שלא נתן מום בקדשים",
+   "type": "lav",
+   "rambam": 97,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    21
+   ],
+   "words": "כל מומ לא יהיה בו",
+   "how": "cited"
+  },
+  {
+   "n": 288,
+   "name": "שלא נזרק דם בעל מום על המזבח",
+   "type": "lav",
+   "rambam": 93,
+   "semag": {
+    "type": "lav",
+    "n": 313
+   },
+   "ref": [
+    "Leviticus",
+    22,
+    22
+   ],
+   "words": "עורת או שבור או חרוצ או יבלת או גרב או ילפת לא תקריבו אלה",
+   "how": "cited"
+  },
+  {
+   "n": 289,
+   "name": "שלא נשחט בעל מום לשם קרבן",
+   "type": "lav",
+   "rambam": 92,
+   "semag": {
+    "type": "lav",
+    "n": 311
+   },
+   "ref": [
+    "Leviticus",
+    22,
+    22
+   ],
+   "words": "לא תקריבו אלה",
+   "how": "cited"
+  },
+  {
+   "n": 290,
+   "name": "שלא נקטיר אמורי בעלי מומין",
+   "type": "lav",
+   "rambam": 94,
+   "semag": {
+    "type": "lav",
+    "n": 313
+   },
+   "ref": [
+    "Leviticus",
+    22,
+    22
+   ],
+   "words": "ואשה לא תתנו מהמ על המזבח",
+   "how": "cited"
+  },
+  {
+   "n": 291,
+   "name": "שלא לסרס אחד מכל המינים",
+   "type": "lav",
+   "rambam": 361,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    24
+   ],
+   "words": "ובארצכמ לא תעשו",
+   "how": "cited"
+  },
+  {
+   "n": 292,
+   "name": "שלא להקריב קרבן בעל מום מיד הנכרי",
+   "type": "lav",
+   "rambam": 96,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    25
+   ],
+   "words": "ומיד בנ נכר לא תקריבו את לחמ אלהיכמ מכל אלה",
+   "how": "cited"
+  },
+  {
+   "n": 293,
+   "name": "מצות הקרבן שיהיה משמנה ימים ולמעלה",
+   "type": "aseh",
+   "rambam": 60,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    27
+   ],
+   "words": "שור או כשב או עז כי יולד והיה שבעת ימימ תחת אמו ומיומ השמיני והלאה ירצה",
+   "how": "cited"
+  },
+  {
+   "n": 294,
+   "name": "שלא לשחט בהמה ובנה ביום אחד",
+   "type": "lav",
+   "rambam": 101,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    28
+   ],
+   "words": "אתו ואת בנו לא תשחטו ביומ אחד",
+   "how": "cited"
+  },
+  {
+   "n": 295,
+   "name": "שלא לעשות דבר שיתחלל בו שם שמים בין בני אדם",
+   "type": "lav",
+   "rambam": 63,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    32
+   ],
+   "words": "ולא תחללו את שמ קדשי",
+   "how": "cited"
+  },
+  {
+   "n": 296,
+   "name": "מצות קדוש השם",
+   "type": "aseh",
+   "rambam": 9,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    22,
+    32
+   ],
+   "words": "ונקדשתי בתוכ בני ישראל",
+   "how": "cited"
+  },
+  {
+   "n": 297,
+   "name": "מצות שביתה ביום ראשון של פסח",
+   "type": "aseh",
+   "rambam": 159,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    7
+   ],
+   "words": "ביומ הראשונ מקרא קדש",
+   "how": "cited"
+  },
+  {
+   "n": 298,
+   "name": "שלא לעשות מלאכה ביום ראשון של פסח",
+   "type": "lav",
+   "rambam": 323,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    12,
+    16
+   ],
+   "words": "כל מלאכה לא יעשה בהמ",
+   "how": "cited"
+  },
+  {
+   "n": 299,
+   "name": "מצות קרבן מוסף כל שבעת ימי הפסח",
+   "type": "aseh",
+   "rambam": 43,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    8
+   ],
+   "words": "והקרבתמ אשה",
+   "how": "cited"
+  },
+  {
+   "n": 300,
+   "name": "מצות שביתה בשביעי של פסח",
+   "type": "aseh",
+   "rambam": 160,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    8
+   ],
+   "words": "ביומ השביעי מקרא קדש",
+   "how": "cited"
+  },
+  {
+   "n": 301,
+   "name": "שלא לעשות מלאכה ביום שביעי של פסח",
+   "type": "lav",
+   "rambam": 324,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    8
+   ],
+   "words": "ביומ השביעי מקרא קדש כל מלאכת עבדה לא תעשו",
+   "how": "cited"
+  },
+  {
+   "n": 302,
+   "name": "מצות קרבן העמר של שעורים",
+   "type": "aseh",
+   "rambam": 44,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    10
+   ],
+   "words": "כי תבאו אל הארצ",
+   "how": "cited"
+  },
+  {
+   "n": 303,
+   "name": "שלא לאכל מתבואה חדשה קדם כלות ששה עשר בניסן",
+   "type": "lav",
+   "rambam": 189,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    14
+   ],
+   "words": "ולחמ וקלי וכרמל לא תאכלו עד עצמ היומ הזה",
+   "how": "cited"
+  },
+  {
+   "n": 304,
+   "name": "שלא לאכל קלי מתבואה חדשה עד היום ההוא",
+   "type": "lav",
+   "rambam": 190,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    14
+   ],
+   "words": "וקלי",
+   "how": "cited"
+  },
+  {
+   "n": 305,
+   "name": "שלא לאכל כרמל מתבואה חדשה עד היום ההוא",
+   "type": "lav",
+   "rambam": 191,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    14
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 306,
+   "name": "מצות ספירת העמר",
+   "type": "aseh",
+   "rambam": 161,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    15
+   ],
+   "words": "וספרתמ לכמ ממחרת השבת מיומ הביאכמ את עמר התנופה",
+   "how": "cited"
+  },
+  {
+   "n": 307,
+   "name": "מצות קרבן מנחה חדשה מן החטים ביום עצרת",
+   "type": "aseh",
+   "rambam": 46,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    17
+   ],
+   "words": "ממושבתיכמ תביאו לחמ תנופה שתימ שני עשרנימ",
+   "how": "chapter"
+  },
+  {
+   "n": 308,
+   "name": "מצות שביתה ממלאכה ביום עצרת",
+   "type": "aseh",
+   "rambam": 162,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    21
+   ],
+   "words": "וקראתמ בעצמ היומ הזה מקרא קדש",
+   "how": "cited"
+  },
+  {
+   "n": 309,
+   "name": "שלא לעשות מלאכה ביום חג שבועות",
+   "type": "lav",
+   "rambam": 325,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    15
+   ],
+   "words": "וספרתמ לכמ ממחרת השבת",
+   "how": "cited"
+  },
+  {
+   "n": 310,
+   "name": "מצות שביתה ביום ראש השנה",
+   "type": "aseh",
+   "rambam": 163,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    24
+   ],
+   "words": "בחדש השביעי באחד לחדש יהיה לכמ שבתונ",
+   "how": "cited"
+  },
+  {
+   "n": 311,
+   "name": "שלא לעשות מלאכה ביום ראשון בתשרי",
+   "type": "lav",
+   "rambam": 326,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    24
+   ],
+   "words": "בחדש השביעי באחד לחדש",
+   "how": "cited"
+  },
+  {
+   "n": 312,
+   "name": "מצות קרבן מוסף ביום ראש השנה",
+   "type": "aseh",
+   "rambam": 47,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    24
+   ],
+   "words": "בחדש השביעי באחד לחדש",
+   "how": "cited"
+  },
+  {
+   "n": 313,
+   "name": "מצות תענית ביום עשירי בתשרי",
+   "type": "aseh",
+   "rambam": 164,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    27
+   ],
+   "words": "אכ בעשור לחדש",
+   "how": "cited"
+  },
+  {
+   "n": 314,
+   "name": "מצות קרבן מוסף של יום הכפורים",
+   "type": "aseh",
+   "rambam": 48,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    27
+   ],
+   "words": "אכ בעשור לחדש",
+   "how": "cited"
+  },
+  {
+   "n": 315,
+   "name": "שלא לעשות מלאכה בעשרה בתשרי",
+   "type": "lav",
+   "rambam": 329,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    31
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 316,
+   "name": "שלא לאכל ולשתות ביום הכפורים",
+   "type": "lav",
+   "rambam": 196,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    29
+   ],
+   "words": "כי כל הנפש אשר לא תענה בעצמ היומ הזה ונכרתה",
+   "how": "cited"
+  },
+  {
+   "n": 317,
+   "name": "מצות שביתה ממלאכה ביום הכפורים",
+   "type": "aseh",
+   "rambam": 165,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    32
+   ],
+   "words": "שבת שבתונ הוא לכמ",
+   "how": "cited"
+  },
+  {
+   "n": 318,
+   "name": "מצות שביתה ממלאכה ביום ראשון של חג הסכות",
+   "type": "aseh",
+   "rambam": 166,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    35
+   ],
+   "words": "ביומ הראשונ מקרא קדש",
+   "how": "cited"
+  },
+  {
+   "n": 319,
+   "name": "שלא לעשות מלאכה ביום ראשון של חג הסכות",
+   "type": "lav",
+   "rambam": 328,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    34
+   ],
+   "words": "דבר אל בני ישראל לאמר בחמשה עשר יומ לחדש השביעי",
+   "how": "cited"
+  },
+  {
+   "n": 320,
+   "name": "מצות קרבן מוסף בכל יום משבעת ימי הסכות",
+   "type": "aseh",
+   "rambam": 50,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    36
+   ],
+   "words": "שבעת ימימ תקריבו אשה",
+   "how": "cited"
+  },
+  {
+   "n": 321,
+   "name": "מצות שביתה ממלאכה ביום שמיני של סכות",
+   "type": "aseh",
+   "rambam": 167,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    36
+   ],
+   "words": "ביומ השמיני מקרא קדש יהיה לכמ",
+   "how": "cited"
+  },
+  {
+   "n": 322,
+   "name": "מצות קרבן מוסף ביום שמיני של סכות שהוא נקרא שמיני עצרת",
+   "type": "aseh",
+   "rambam": 51,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    36
+   ],
+   "words": "והקרבתמ אשה",
+   "how": "cited"
+  },
+  {
+   "n": 323,
+   "name": "שלא לעשות מלאכה ביום שמיני עצרת",
+   "type": "lav",
+   "rambam": 328,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    36
+   ],
+   "words": "ביומ השמיני מקרא קדש",
+   "how": "cited"
+  },
+  {
+   "n": 324,
+   "name": "מצות נטילת לולב",
+   "type": "aseh",
+   "rambam": 169,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    40
+   ],
+   "words": "ולקחתמ לכמ ביומ הראשונ פרי עצ הדר כפת תמרימ וענפ עצ עבת וערבי נחל",
+   "how": "cited"
+  },
+  {
+   "n": 325,
+   "name": "מצות ישיבת סכה",
+   "type": "aseh",
+   "rambam": 168,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    23,
+    42
+   ],
+   "words": "בסכת תשבו שבעת ימימ",
+   "how": "cited"
+  },
+  {
+   "n": 326,
+   "name": "שלא נעבד האדמה בשנה השביעית",
+   "type": "lav",
+   "rambam": 220,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    4
+   ],
+   "words": "ובשנה השביעת",
+   "how": "cited"
+  },
+  {
+   "n": 327,
+   "name": "שלא נעשה עבודה גם באילנות",
+   "type": "lav",
+   "rambam": 221,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    4
+   ],
+   "words": "וכרמכ לא תזמר",
+   "how": "cited"
+  },
+  {
+   "n": 328,
+   "name": "שלא נקצר ספיחים בשנה השביעית",
+   "type": "lav",
+   "rambam": 222,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    5
+   ],
+   "words": "את ספיח קצירכ לא תקצור",
+   "how": "cited"
+  },
+  {
+   "n": 329,
+   "name": "שלא נאסף פרות האילן בשביעית כדרך שאוספין אותן בכל שנה",
+   "type": "lav",
+   "rambam": 223,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    5
+   ],
+   "words": "ואת ענבי נזירכ לא תבצר",
+   "how": "cited"
+  },
+  {
+   "n": 330,
+   "name": "מצות ספירת שבע שבתות שנים",
+   "type": "aseh",
+   "rambam": 140,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    8
+   ],
+   "words": "וספרת לכ שבע שבתת שנימ שבע שנימ שבע פעמימ",
+   "how": "cited"
+  },
+  {
+   "n": 331,
+   "name": "מצות תקיעת שופר ביום הכפורים של יובל",
+   "type": "aseh",
+   "rambam": 137,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    9
+   ],
+   "words": "והעברת שופר תרועה",
+   "how": "cited"
+  },
+  {
+   "n": 332,
+   "name": "מצות קדוש שנת היובל",
+   "type": "aseh",
+   "rambam": 136,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    10
+   ],
+   "words": "וקדשתמ את שנת החמשימ שנה",
+   "how": "cited"
+  },
+  {
+   "n": 333,
+   "name": "שלא נעבד הארץ בשנת היובל",
+   "type": "lav",
+   "rambam": 224,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    11
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 334,
+   "name": "שלא נקצר ספיחי תבואות של שנת היובל",
+   "type": "lav",
+   "rambam": 225,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    11
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 335,
+   "name": "שלא לאסף פרות האילנות בשנת היובל כדרך שאוספים אותן בשאר השנים",
+   "type": "lav",
+   "rambam": 226,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    11
+   ],
+   "words": "ולא תבצרו את נזריה",
+   "how": "cited"
+  },
+  {
+   "n": 336,
+   "name": "מצות עשית דין בין לוקח ומוכר",
+   "type": "aseh",
+   "rambam": 245,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    14
+   ],
+   "words": "או קנה מיד עמיתכ",
+   "how": "override",
+   "basis": "Sefer HaChinukh 336, later in the mitzvah; Rambam, Positive 245"
+  },
+  {
+   "n": 337,
+   "name": "שלא להונות במקח וממכר",
+   "type": "lav",
+   "rambam": 250,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    14
+   ],
+   "words": "וכי תמכרו ממכר לעמיתכ או קנה מיד עמיתכ אל תונו איש את אחיו",
+   "how": "cited"
+  },
+  {
+   "n": 338,
+   "name": "שלא להונות אחד מישראל בדברים",
+   "type": "lav",
+   "rambam": 251,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    17
+   ],
+   "words": "ולא תונו איש את עמיתו",
+   "how": "cited"
+  },
+  {
+   "n": 339,
+   "name": "שלא נמכר שדה בארץ ישראל לצמיתות",
+   "type": "lav",
+   "rambam": 227,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    23
+   ],
+   "words": "והארצ לא תמכר לצמתת",
+   "how": "cited"
+  },
+  {
+   "n": 340,
+   "name": "מצות השבת קרקע לבעליהן ביובל",
+   "type": "aseh",
+   "rambam": 138,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    24
+   ],
+   "words": "ובכל ארצ אחזתכמ גאלה תתנו לארצ",
+   "how": "cited"
+  },
+  {
+   "n": 341,
+   "name": "מצות פדיון בתי ערי חומה עד השלמת שנה",
+   "type": "aseh",
+   "rambam": 139,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    29
+   ],
+   "words": "ואיש כי ימכר בית מושב עיר חומה",
+   "how": "cited"
+  },
+  {
+   "n": 342,
+   "name": "שלא לשנות מגרשי הלוים",
+   "type": "lav",
+   "rambam": 228,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    34
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 343,
+   "name": "שלא להלוות ברבית לישראל",
+   "type": "lav",
+   "rambam": 235,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    37
+   ],
+   "words": "את כספכ לא תתנ לו בנשכ ובמרבית לא תתנ אכלכ",
+   "how": "cited"
+  },
+  {
+   "n": 344,
+   "name": "שלא נעבד בעבד עברי עבדת בזיון כמו עבדת כנעני",
+   "type": "lav",
+   "rambam": 257,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    39
+   ],
+   "words": "לא תעבד בו עבדת עבד",
+   "how": "cited"
+  },
+  {
+   "n": 345,
+   "name": "שלא נמכר עבד עברי על אבן המקח",
+   "type": "lav",
+   "rambam": 258,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    42
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 346,
+   "name": "שלא לעבד בעבד עברי בעבדת פרך",
+   "type": "lav",
+   "rambam": 259,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    43
+   ],
+   "words": "לא תרדה בו בפרכ",
+   "how": "cited"
+  },
+  {
+   "n": 347,
+   "name": "מצות עבודה בעבד כנעני לעולם",
+   "type": "aseh",
+   "rambam": 235,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    46
+   ],
+   "words": "לעלמ בהמ תעבדו",
+   "how": "cited"
+  },
+  {
+   "n": 348,
+   "name": "שלא להניח לגוי לעבד בעבד עברי הנמכר לו",
+   "type": "lav",
+   "rambam": 260,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    25,
+    53
+   ],
+   "words": "לא ירדנו בפרכ לעיניכ",
+   "how": "cited"
+  },
+  {
+   "n": 349,
+   "name": "שלא נשתחוה על אבן משכית אפלו לשם",
+   "type": "lav",
+   "rambam": 12,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    26,
+    1
+   ],
+   "words": "ואבנ משכית לא תתנו בארצכמ להשתחות עליה",
+   "how": "cited"
+  },
+  {
+   "n": 350,
+   "name": "מצות מעריך אדם שיתן דמים הקצובים בתורה",
+   "type": "aseh",
+   "rambam": 114,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    2
+   ],
+   "words": "איש כי יפלא נדר בערככ נפשת",
+   "how": "cited"
+  },
+  {
+   "n": 351,
+   "name": "שלא נמיר הקדשים",
+   "type": "lav",
+   "rambam": 106,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    10
+   ],
+   "words": "לא יחליפנו ולא ימיר אתו",
+   "how": "cited"
+  },
+  {
+   "n": 352,
+   "name": "מצות הממיר בהמת קרבן בבהמה אחרת שתהיינה שתיהן קדש",
+   "type": "aseh",
+   "rambam": 87,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    10
+   ],
+   "words": "והיה הוא ותמורתו יהיה קדש",
+   "how": "cited"
+  },
+  {
+   "n": 353,
+   "name": "מצות מעריך בהמה שיתן כפי שיעריכנה הכהן",
+   "type": "aseh",
+   "rambam": 115,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    11
+   ],
+   "words": "והעמיד את הבהמה לפני הכהנ",
+   "how": "cited"
+  },
+  {
+   "n": 354,
+   "name": "מצות מעריך בתים שיתן כערך שיעריכנה הכהן ותוספת חמש",
+   "type": "aseh",
+   "rambam": 116,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    14
+   ],
+   "words": "ואיש כי יקדש את ביתו קדש",
+   "how": "cited"
+  },
+  {
+   "n": 355,
+   "name": "מצות מעריך שדה שיתן כערך הקצוב בפרשה",
+   "type": "aseh",
+   "rambam": 117,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    16
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 356,
+   "name": "שלא לשנות הקדשים מקרבן לקרבן",
+   "type": "lav",
+   "rambam": 107,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    26
+   ],
+   "words": "לא יקדיש איש אתו",
+   "how": "cited"
+  },
+  {
+   "n": 357,
+   "name": "מצות דין מחרים מנכסיו שהוא לכהנים",
+   "type": "aseh",
+   "rambam": 145,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    28
+   ],
+   "words": "אכ כל חרמ אשר יחרמ איש",
+   "how": "cited"
+  },
+  {
+   "n": 358,
+   "name": "שלא ימכר קרקע שהחרימו אותה בעלים אלא תנתן לכהנים",
+   "type": "lav",
+   "rambam": 110,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    14
+   ],
+   "words": "כל חרמ בישראל לכ יהיה",
+   "how": "cited"
+  },
+  {
+   "n": 359,
+   "name": "שלא יגאל שדה החרם",
+   "type": "lav",
+   "rambam": 111,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    28
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 360,
+   "name": "מצות מעשר בהמה טהורה בכל שנה",
+   "type": "aseh",
+   "rambam": 78,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    32
+   ],
+   "words": "וכל מעשר בקר וצאנ כל אשר יעבר תחת השבט העשירי יהיה קדש",
+   "how": "cited"
+  },
+  {
+   "n": 361,
+   "name": "שלא למכר מעשר בהמה אלא יאכל בירושלים",
+   "type": "lav",
+   "rambam": 109,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    27,
+    33
+   ],
+   "words": "לא יגאל",
+   "how": "cited"
+  },
+  {
+   "n": 362,
+   "name": "מצות שלוח טמאים חוץ למחנה שכינה",
+   "type": "aseh",
+   "rambam": 31,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    5,
+    2
+   ],
+   "words": "צו את בני ישראל וישלחו מנ המחנה כל צרוע וכל זב וכל טמא לנפש",
+   "how": "cited"
+  },
+  {
+   "n": 363,
+   "name": "שלא יכנס טמא בכל המקדש",
+   "type": "lav",
+   "rambam": 77,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    5,
+    3
+   ],
+   "words": "ולא יטמאו את מחניהמ",
+   "how": "cited"
+  },
+  {
+   "n": 364,
+   "name": "מצות ודוי על החטא",
+   "type": "aseh",
+   "rambam": 73,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    5,
+    6
+   ],
+   "words": "דבר אל בני ישראל איש או אשה כי יעשו מכל חטאת האדמ למעל מעל",
+   "how": "cited"
+  },
+  {
+   "n": 365,
+   "name": "מצות סוטה שיביאנה הבעל אל הכהן ויעשה לה כמשפט הכתוב",
+   "type": "aseh",
+   "rambam": 223,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    5,
+    12
+   ],
+   "words": "איש איש כי תשטה אשתו",
+   "how": "cited"
+  },
+  {
+   "n": 366,
+   "name": "שלא נתן שמן בקרבן סוטה",
+   "type": "lav",
+   "rambam": 104,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    5,
+    15
+   ],
+   "words": "והביא את קרבנה",
+   "how": "cited"
+  },
+  {
+   "n": 367,
+   "name": "שלא לשים לבונה בקרבן סוטה",
+   "type": "lav",
+   "rambam": 105,
+   "semag": {
+    "type": "lav",
+    "n": 88
+   },
+   "ref": [
+    "Numbers",
+    5,
+    15
+   ],
+   "words": "ולא יתנ עליו לבנה",
+   "how": "cited"
+  },
+  {
+   "n": 368,
+   "name": "שלא ישתה הנזיר יין או כל מיני שכר",
+   "type": "lav",
+   "rambam": 202,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    3
+   ],
+   "words": "מיינ ושכר יזיר",
+   "how": "cited"
+  },
+  {
+   "n": 369,
+   "name": "שלא יאכל הנזיר ענבים לחים",
+   "type": "lav",
+   "rambam": 203,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    3
+   ],
+   "words": "וענבימ לחימ",
+   "how": "cited"
+  },
+  {
+   "n": 370,
+   "name": "שלא יאכל הנזיר צמוקים",
+   "type": "lav",
+   "rambam": 204,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    3
+   ],
+   "words": "וענבימ לחימ ויבשימ לא יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 371,
+   "name": "שלא יאכל הנזיר גרעיני הענבים",
+   "type": "lav",
+   "rambam": 205,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    4
+   ],
+   "words": "מחרצנימ ועד זג לא יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 372,
+   "name": "שלא יאכל הנזיר קלפת הענבים",
+   "type": "lav",
+   "rambam": 206,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    4
+   ],
+   "words": "ועד זג לא יאכל",
+   "how": "cited"
+  },
+  {
+   "n": 373,
+   "name": "שלא יגלח הנזיר שערו",
+   "type": "lav",
+   "rambam": 209,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    5
+   ],
+   "words": "תער לא יעבר על ראשו",
+   "how": "cited"
+  },
+  {
+   "n": 374,
+   "name": "מצות גדול שער נזיר",
+   "type": "aseh",
+   "rambam": 92,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    5
+   ],
+   "words": "גדל פרע שער ראשו",
+   "how": "cited"
+  },
+  {
+   "n": 375,
+   "name": "שלא יכנס הנזיר לאהל המת",
+   "type": "lav",
+   "rambam": 208,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    6
+   ],
+   "words": "על נפש מת לא יבא",
+   "how": "cited"
+  },
+  {
+   "n": 376,
+   "name": "שלא יטמא הנזיר במת ובשאר טמאות",
+   "type": "lav",
+   "rambam": 207,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    7
+   ],
+   "words": "לאביו ולאמו",
+   "how": "cited"
+  },
+  {
+   "n": 377,
+   "name": "מצות גלוח הנזיר והבאת קרבנותיו",
+   "type": "aseh",
+   "rambam": 93,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    9
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 378,
+   "name": "מצות ברכת כהנים בכל יום",
+   "type": "aseh",
+   "rambam": 26,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    6,
+    23
+   ],
+   "words": "כה תברכו את בני ישראל אמור להמ",
+   "how": "cited"
+  },
+  {
+   "n": 379,
+   "name": "מצות משא הארון בכתף",
+   "type": "aseh",
+   "rambam": 34,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    7,
+    9
+   ],
+   "words": "כי עבדת הקדש עלהמ בכתפ ישאו",
+   "how": "cited"
+  },
+  {
+   "n": 380,
+   "name": "מצות פסח שני בארבעה עשר באיר",
+   "type": "aseh",
+   "rambam": 57,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    9,
+    11
+   ],
+   "words": "בחדש השני בארבעה עשר יומ בינ הערבימ יעשו אתו",
+   "how": "cited"
+  },
+  {
+   "n": 381,
+   "name": "מצות פסח שני שיאכל על מצות ומרורים",
+   "type": "aseh",
+   "rambam": 58,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    9,
+    11
+   ],
+   "words": "על מצות ומררימ יאכלהו",
+   "how": "cited"
+  },
+  {
+   "n": 382,
+   "name": "שלא להותיר כלום מבשר הפסח שני למחרתו",
+   "type": "lav",
+   "rambam": 119,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    9,
+    12
+   ],
+   "words": "לא ישאירו ממנו עד בקר",
+   "how": "cited"
+  },
+  {
+   "n": 383,
+   "name": "שלא לשבר עצם מעצמות פסח שני",
+   "type": "lav",
+   "rambam": 121,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    9,
+    12
+   ],
+   "words": "ועצמ לא ישברו בו",
+   "how": "cited"
+  },
+  {
+   "n": 384,
+   "name": "מצות תקיעת חצוצרות במקדש ובמלחמה",
+   "type": "aseh",
+   "rambam": 59,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    10,
+    9
+   ],
+   "words": "וכי תבאו מלחמה",
+   "how": "cited"
+  },
+  {
+   "n": 385,
+   "name": "מצות חלה",
+   "type": "aseh",
+   "rambam": 133,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    15,
+    20
+   ],
+   "words": "ראשית ערסתכמ חלה תרימו תרומה",
+   "how": "cited"
+  },
+  {
+   "n": 386,
+   "name": "מצות ציצית",
+   "type": "aseh",
+   "rambam": 14,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    15,
+    38
+   ],
+   "words": "ועשו להמ ציצת",
+   "how": "cited"
+  },
+  {
+   "n": 387,
+   "name": "שלא לתור אחר מחשבת הלב וראית העינים",
+   "type": "lav",
+   "rambam": 47,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    15,
+    39
+   ],
+   "words": "ולא תתורו אחרי לבבכמ ואחרי עיניכמ אשר אתמ זנימ אחריהמ",
+   "how": "cited"
+  },
+  {
+   "n": 388,
+   "name": "מצות שמירת המקדש",
+   "type": "aseh",
+   "rambam": 22,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    4
+   ],
+   "words": "ושמרו את משמרת אהל מועד",
+   "how": "cited"
+  },
+  {
+   "n": 389,
+   "name": "שלא יתעסקו הכהנים בעבודת הלוים ולא הלוים בעבודת כהנים",
+   "type": "lav",
+   "rambam": 72,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    4,
+    19
+   ],
+   "words": "איש איש על עבדתו ואל משאו",
+   "how": "cited"
+  },
+  {
+   "n": 390,
+   "name": "שלא יעבד זר במקדש",
+   "type": "lav",
+   "rambam": 74,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    4
+   ],
+   "words": "וזר לא יקרב אליכמ",
+   "how": "cited"
+  },
+  {
+   "n": 391,
+   "name": "שלא לבטל שמירת המקדש",
+   "type": "lav",
+   "rambam": 67,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    5
+   ],
+   "words": "ושמרתמ את משמרת הקדש",
+   "how": "cited"
+  },
+  {
+   "n": 392,
+   "name": "מצות פדיון בכור אדם",
+   "type": "aseh",
+   "rambam": 80,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    15
+   ],
+   "words": "אכ פדה תפדה את בכור האדמ",
+   "how": "cited"
+  },
+  {
+   "n": 393,
+   "name": "שלא לפדות בכור בהמה טהורה",
+   "type": "lav",
+   "rambam": 108,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    17
+   ],
+   "words": "אכ בכור שור או בכור כשב או בכור עז לא תפדה קדש המ",
+   "how": "cited"
+  },
+  {
+   "n": 394,
+   "name": "מצות עבודת הלוים במקדש",
+   "type": "aseh",
+   "rambam": 23,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    23
+   ],
+   "words": "ועבד הלוי הוא",
+   "how": "cited"
+  },
+  {
+   "n": 395,
+   "name": "מצות מעשר ראשון",
+   "type": "aseh",
+   "rambam": 127,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    24
+   ],
+   "words": "כי את מעשר בני ישראל אשר ירימו",
+   "how": "cited"
+  },
+  {
+   "n": 396,
+   "name": "מצות הלוים לתת מעשר מן המעשר",
+   "type": "aseh",
+   "rambam": 129,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    18,
+    26
+   ],
+   "words": "ואל הלוימ תדבר",
+   "how": "cited"
+  },
+  {
+   "n": 397,
+   "name": "מצות פרה אדמה",
+   "type": "aseh",
+   "rambam": 113,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    19,
+    2
+   ],
+   "words": "דבר אל בני ישראל ויקחו אליכ פרה אדמה",
+   "how": "cited"
+  },
+  {
+   "n": 398,
+   "name": "מצות טמאה של מת",
+   "type": "aseh",
+   "rambam": 107,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    19,
+    14
+   ],
+   "words": "זאת התורה אדמ כי ימות באהל כל הבא אל האהל וכל אשר באהל יטמא שבעת ימימ",
+   "how": "cited"
+  },
+  {
+   "n": 399,
+   "name": "מצות מי נדה שמטמאין אדם טהור ומטהרין אדם טמא מטמאת מת בלבד",
+   "type": "aseh",
+   "rambam": 108,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    19,
+    19
+   ],
+   "words": "והזה הטהר על הטמא",
+   "how": "cited"
+  },
+  {
+   "n": 400,
+   "name": "מצות דיני נחלות",
+   "type": "aseh",
+   "rambam": 248,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    27,
+    8
+   ],
+   "words": "איש כי ימות ובנ אינ לו והעברתמ את נחלתו לבתו",
+   "how": "cited"
+  },
+  {
+   "n": 401,
+   "name": "מצות תמידין בכל יום",
+   "type": "aseh",
+   "rambam": 39,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    28,
+    2
+   ],
+   "words": "צו את בני ישראל ואמרת אלהמ את קרבני לחמי",
+   "how": "cited"
+  },
+  {
+   "n": 402,
+   "name": "מצות קרבן מוסף של שבת",
+   "type": "aseh",
+   "rambam": 41,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    28,
+    9
+   ],
+   "words": "וביומ השבת שני כבשימ",
+   "how": "cited"
+  },
+  {
+   "n": 403,
+   "name": "מצות קרבן מוסף בכל חדש וחדש",
+   "type": "aseh",
+   "rambam": 42,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    28,
+    11
+   ],
+   "words": "ובראשי חדשיכמ תקריבו עלה",
+   "how": "cited"
+  },
+  {
+   "n": 404,
+   "name": "מצות קרבן מוסף ביום חג השבועות",
+   "type": "aseh",
+   "rambam": 45,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    28,
+    26
+   ],
+   "words": "וביומ הבכורימ בהקריבכמ מנחה חדשה",
+   "how": "cited"
+  },
+  {
+   "n": 405,
+   "name": "מצות שופר בראש השנה",
+   "type": "aseh",
+   "rambam": 170,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    29,
+    1
+   ],
+   "words": "יומ תרועה יהיה לכמ",
+   "how": "cited"
+  },
+  {
+   "n": 406,
+   "name": "מצות דין הפרת נדרים",
+   "type": "aseh",
+   "rambam": 95,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    30,
+    3
+   ],
+   "words": "איש כי ידר נדר",
+   "how": "cited"
+  },
+  {
+   "n": 407,
+   "name": "שלא נחל דברנו בנדרים",
+   "type": "lav",
+   "rambam": 157,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    30,
+    3
+   ],
+   "words": "לא יחל דברו",
+   "how": "cited"
+  },
+  {
+   "n": 408,
+   "name": "מצות ישראל לתת ערים ללוים לשבת בהן והן קולטות",
+   "type": "aseh",
+   "rambam": 183,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    35,
+    2
+   ],
+   "words": "צו את בני ישראל ונתנו ללוימ מנחלת אחזתמ ערימ לשבת",
+   "how": "cited"
+  },
+  {
+   "n": 409,
+   "name": "שלא להרג מחיב קדם שיעמד בדין",
+   "type": "lav",
+   "rambam": 292,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    35,
+    12
+   ],
+   "words": "ולא ימות הרצח עד עמדו",
+   "how": "cited"
+  },
+  {
+   "n": 410,
+   "name": "מצות בית דין לשלח מכה נפש בשגגה מעירו לערי מקלט ועל הרוצח בעצמו ללכת שם",
+   "type": "aseh",
+   "rambam": 225,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    35,
+    25
+   ],
+   "words": "והשיבו אתו העדה אל עיר מקלטו",
+   "how": "cited"
+  },
+  {
+   "n": 411,
+   "name": "שלא יורה העד בדין שהעיד בו בדיני נפשות",
+   "type": "lav",
+   "rambam": 291,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    35,
+    30
+   ],
+   "words": "ועד אחד לא יענה בנפש למות",
+   "how": "cited"
+  },
+  {
+   "n": 412,
+   "name": "שלא לקח כפר להציל ממות הרוצח",
+   "type": "lav",
+   "rambam": 295,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    35,
+    31
+   ],
+   "words": "ולא תקחו כפר לנפש רצח אשר הוא רשע למות",
+   "how": "cited"
+  },
+  {
+   "n": 413,
+   "name": "שלא נקח כפר ממחיב גלות לפטרו מן הגלות",
+   "type": "lav",
+   "rambam": 296,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    35,
+    32
+   ],
+   "words": "ולא תקחו כפר לנוס אל עיר מקלטו לשוב לשבת בארצ",
+   "how": "cited"
+  },
+  {
+   "n": 414,
+   "name": "שלא למנות דין שאינו יודע בדיני התורה",
+   "type": "lav",
+   "rambam": 284,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    1,
+    17
+   ],
+   "words": "לא תכירו פנימ במשפט",
+   "how": "cited"
+  },
+  {
+   "n": 415,
+   "name": "שלא יירא הדין בדין",
+   "type": "lav",
+   "rambam": 276,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    1,
+    17
+   ],
+   "words": "לא תגורו מפני איש",
+   "how": "cited"
+  },
+  {
+   "n": 416,
+   "name": "שלא להתאוות ממון חברו",
+   "type": "lav",
+   "rambam": 266,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    5,
+    18
+   ],
+   "words": "ולא תתאוה בית רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 417,
+   "name": "מצות אחדות השם",
+   "type": "aseh",
+   "rambam": 2,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    4
+   ],
+   "words": "שמע ישראל יהוה אלהינו יהוה אחד",
+   "how": "cited"
+  },
+  {
+   "n": 418,
+   "name": "מצות אהבת השם",
+   "type": "aseh",
+   "rambam": 3,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    5
+   ],
+   "words": "ואהבת את יהוה אלהיכ",
+   "how": "cited"
+  },
+  {
+   "n": 419,
+   "name": "מצות תלמוד תורה",
+   "type": "aseh",
+   "rambam": 11,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    7
+   ],
+   "words": "ושננתמ לבניכ",
+   "how": "cited"
+  },
+  {
+   "n": 420,
+   "name": "מצות קריאת שמע שחרית וערבית",
+   "type": "aseh",
+   "rambam": 10,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    4
+   ],
+   "words": "שמע ישראל יהוה אלהינו יהוה אחד",
+   "how": "cited"
+  },
+  {
+   "n": 421,
+   "name": "מצות תפלין של יד",
+   "type": "aseh",
+   "rambam": 13,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    8
+   ],
+   "words": "וקשרתמ לאות על ידכ",
+   "how": "cited"
+  },
+  {
+   "n": 422,
+   "name": "מצות תפלין של ראש",
+   "type": "aseh",
+   "rambam": 12,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    8
+   ],
+   "words": "והיו לטטפת בינ עיניכ",
+   "how": "cited"
+  },
+  {
+   "n": 423,
+   "name": "לקבע מזוזה בפתחים",
+   "type": "aseh",
+   "rambam": 15,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    9
+   ],
+   "words": "וכתבתמ על מזזות ביתכ ובשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 424,
+   "name": "שלא לנסות נביא אמת יותר מדאי",
+   "type": "lav",
+   "rambam": 64,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    6,
+    16
+   ],
+   "words": "לא תנסו את יהוה אלהיכמ כאשר נסיתמ במסה",
+   "how": "cited"
+  },
+  {
+   "n": 425,
+   "name": "מצות הריגת שבעה עממין",
+   "type": "aseh",
+   "rambam": 187,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    7,
+    2
+   ],
+   "words": "החרמ תחרימ אתמ",
+   "how": "cited"
+  },
+  {
+   "n": 426,
+   "name": "שלא לחן ולרחם על עובדי עבודה זרה",
+   "type": "lav",
+   "rambam": 50,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    7,
+    2
+   ],
+   "words": "ולא תחנמ",
+   "how": "cited"
+  },
+  {
+   "n": 427,
+   "name": "לא להתחתן בעובדי עבודה זרה",
+   "type": "lav",
+   "rambam": 52,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    7,
+    3
+   ],
+   "words": "ולא תתחתנ במ",
+   "how": "cited"
+  },
+  {
+   "n": 428,
+   "name": "שלא להנות מצפוי עבודה זרה ומשמשיה",
+   "type": "lav",
+   "rambam": 22,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    7,
+    25
+   ],
+   "words": "לא תחמד כספ וזהב עליהמ ולקחת לכ",
+   "how": "cited"
+  },
+  {
+   "n": 429,
+   "name": "שלא להנות מתקרבת עבודה זרה",
+   "type": "lav",
+   "rambam": 25,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    7,
+    26
+   ],
+   "words": "ולא תביא תועבה אל ביתכ",
+   "how": "cited"
+  },
+  {
+   "n": 430,
+   "name": "לברך את השם אחר אכילת המזון",
+   "type": "aseh",
+   "rambam": 19,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    8,
+    10
+   ],
+   "words": "ואכלת ושבעת וברכת את יהוה אלהיכ",
+   "how": "override",
+   "basis": "Rambam, Sefer HaMitzvot, Positive 19"
+  },
+  {
+   "n": 431,
+   "name": "מצות אהבת הגרים",
+   "type": "aseh",
+   "rambam": 207,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    10,
+    19
+   ],
+   "words": "ואהבתמ את הגר",
+   "how": "cited"
+  },
+  {
+   "n": 432,
+   "name": "מצות יראת השם",
+   "type": "aseh",
+   "rambam": 4,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    10,
+    20
+   ],
+   "words": "את יהוה אלהיכ תירא",
+   "how": "cited"
+  },
+  {
+   "n": 433,
+   "name": "מצות תפלה",
+   "type": "aseh",
+   "rambam": 5,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    10,
+    20
+   ],
+   "words": "אתו תעבד",
+   "how": "cited"
+  },
+  {
+   "n": 434,
+   "name": "להדבק בחכמי התורה",
+   "type": "aseh",
+   "rambam": 6,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    10,
+    20
+   ],
+   "words": "ובו תדבק",
+   "how": "cited"
+  },
+  {
+   "n": 435,
+   "name": "להשבע בשמו יתברך באמת",
+   "type": "aseh",
+   "rambam": 7,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    10,
+    20
+   ],
+   "words": "ובשמו תשבע",
+   "how": "cited"
+  },
+  {
+   "n": 436,
+   "name": "לאבד עבודה זרה ומשמשיה",
+   "type": "aseh",
+   "rambam": 185,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    2
+   ],
+   "words": "אבד תאבדונ את כל המקמות",
+   "how": "cited"
+  },
+  {
+   "n": 437,
+   "name": "שלא לאבד דברים שנקרא שמו יתברך עליהם",
+   "type": "lav",
+   "rambam": 65,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    4
+   ],
+   "words": "לא תעשונ כנ",
+   "how": "cited"
+  },
+  {
+   "n": 438,
+   "name": "שיביא כל נדריו ברגל ראשון",
+   "type": "aseh",
+   "rambam": 83,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    5
+   ],
+   "words": "ובאת שמה",
+   "how": "cited"
+  },
+  {
+   "n": 439,
+   "name": "שלא להקריב קרבן חוץ לעזרה",
+   "type": "lav",
+   "rambam": 89,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    13
+   ],
+   "words": "השמר לכ פנ תעלה עלתיכ בכל מקומ",
+   "how": "cited"
+  },
+  {
+   "n": 440,
+   "name": "מצוה להקריב כל הקרבנות בבית הבחירה",
+   "type": "aseh",
+   "rambam": 84,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    14
+   ],
+   "words": "כי אמ במקומ אשר יבחר יהוה",
+   "how": "cited"
+  },
+  {
+   "n": 441,
+   "name": "לפדות קדשים שנפל בהם מום",
+   "type": "aseh",
+   "rambam": 86,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    15
+   ],
+   "words": "רק בכל אות נפשכ תזבח ואכלת בשר",
+   "how": "cited"
+  },
+  {
+   "n": 442,
+   "name": "שלא לאכל מעשר שני של דגן חוץ לירושלים",
+   "type": "lav",
+   "rambam": 141,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ מעשר דגנכ",
+   "how": "cited"
+  },
+  {
+   "n": 443,
+   "name": "שלא לאכל מעשר שני של תירוש חוץ לירושלים",
+   "type": "lav",
+   "rambam": 142,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 444,
+   "name": "שלא לאכל מעשר שני של יצהר חוץ לירושלים",
+   "type": "lav",
+   "rambam": 143,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 445,
+   "name": "שלא לאכל בכור תמים חוץ לירושלים",
+   "type": "lav",
+   "rambam": 144,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 446,
+   "name": "שלא לאכל קדשי הקדשים חוץ לעזרה",
+   "type": "lav",
+   "rambam": 145,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 447,
+   "name": "שלא לאכל בשר העולה",
+   "type": "lav",
+   "rambam": 146,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 448,
+   "name": "שלא לאכל קדשים קלים קדם זריקת דמים",
+   "type": "lav",
+   "rambam": 147,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל בשעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 449,
+   "name": "שלא יאכל כהן בכורים קדם הנחתם בעזרה",
+   "type": "lav",
+   "rambam": 149,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    17
+   ],
+   "words": "לא תוכל לאכל",
+   "how": "cited"
+  },
+  {
+   "n": 450,
+   "name": "שלא לעזב הלוי מלתן לו מתנותיו",
+   "type": "lav",
+   "rambam": 229,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    19
+   ],
+   "words": "השמר לכ פנ תעזב את הלוי כל ימיכ על אדמתכ",
+   "how": "cited"
+  },
+  {
+   "n": 451,
+   "name": "מצות שחיטה",
+   "type": "aseh",
+   "rambam": 146,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    21
+   ],
+   "words": "וזבחת מבקרכ ומצאנכ אשר",
+   "how": "cited"
+  },
+  {
+   "n": 452,
+   "name": "שלא לאכל אבר מן החי",
+   "type": "lav",
+   "rambam": 182,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    23
+   ],
+   "words": "ולא תאכל הנפש עמ הבשר",
+   "how": "cited"
+  },
+  {
+   "n": 453,
+   "name": "להביא קדשים בבית הבחירה",
+   "type": "aseh",
+   "rambam": 85,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    12,
+    26
+   ],
+   "words": "רק קדשיכ אשר יהיו לכ ונדריכ תשא ובאת",
+   "how": "cited"
+  },
+  {
+   "n": 454,
+   "name": "שלא להוסיף על המצות ופרושן",
+   "type": "lav",
+   "rambam": 313,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    1
+   ],
+   "words": "לא תספ עליו",
+   "how": "cited"
+  },
+  {
+   "n": 455,
+   "name": "שלא לגרע ממצות התורה",
+   "type": "lav",
+   "rambam": 314,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    1
+   ],
+   "words": "ולא תגרע ממנו",
+   "how": "cited"
+  },
+  {
+   "n": 456,
+   "name": "שלא לשמע ממתנבא בשם עבודה זרה",
+   "type": "lav",
+   "rambam": 28,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    4
+   ],
+   "words": "לא תשמע אל דברי הנביא ההוא",
+   "how": "cited"
+  },
+  {
+   "n": 457,
+   "name": "שלא לאהב המסית",
+   "type": "lav",
+   "rambam": 17,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    9
+   ],
+   "words": "לא תאבה לו",
+   "how": "cited"
+  },
+  {
+   "n": 458,
+   "name": "שלא לעזב שנאתו על המסית",
+   "type": "lav",
+   "rambam": 18,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    9
+   ],
+   "words": "ולא תשמע אליו",
+   "how": "cited"
+  },
+  {
+   "n": 459,
+   "name": "שלא להציל המסית",
+   "type": "lav",
+   "rambam": 19,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    9
+   ],
+   "words": "ולא תחוס עינכ עליו",
+   "how": "cited"
+  },
+  {
+   "n": 460,
+   "name": "שלא ללמד זכות למסית",
+   "type": "lav",
+   "rambam": 20,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    9
+   ],
+   "words": "ולא תחמל",
+   "how": "cited"
+  },
+  {
+   "n": 461,
+   "name": "שלא למנע מללמד על המסית חובה",
+   "type": "lav",
+   "rambam": 21,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    9
+   ],
+   "words": "ולא תכסה עליו",
+   "how": "cited"
+  },
+  {
+   "n": 462,
+   "name": "שלא להסית אחד מישראל לעבד עבודה זרה",
+   "type": "lav",
+   "rambam": 16,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    12
+   ],
+   "words": "ולא יוספו לעשות כדבר הרע הזה בקרבכ",
+   "how": "cited"
+  },
+  {
+   "n": 463,
+   "name": "מצות חקירת העדים היטב",
+   "type": "aseh",
+   "rambam": 179,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    15
+   ],
+   "words": "ודרשת וחקרת ושאלת היטב והנה אמת נכונ הדבר",
+   "how": "cited"
+  },
+  {
+   "n": 464,
+   "name": "שרפת עיר הנדחת ולהרג אנשיה",
+   "type": "aseh",
+   "rambam": 186,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    17
+   ],
+   "words": "ושרפת באש את העיר ואת כל שללה",
+   "how": "cited"
+  },
+  {
+   "n": 465,
+   "name": "שלא לבנות עיר הנדחת",
+   "type": "lav",
+   "rambam": 23,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    17
+   ],
+   "words": "והיתה תל עולמ לא תבנה עוד",
+   "how": "cited"
+  },
+  {
+   "n": 466,
+   "name": "שלא להנות בממון עיר הנדחת",
+   "type": "lav",
+   "rambam": 24,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    13,
+    18
+   ],
+   "words": "ולא ידבק בידכ מאומה מנ החרמ",
+   "how": "cited"
+  },
+  {
+   "n": 467,
+   "name": "שלא להתגודד כמו עובדי עבודה זרה",
+   "type": "lav",
+   "rambam": 45,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    1
+   ],
+   "words": "לא תתגדדו",
+   "how": "cited"
+  },
+  {
+   "n": 468,
+   "name": "שלא לקרח על מת",
+   "type": "lav",
+   "rambam": 171,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    1
+   ],
+   "words": "ולא תשימו קרחה בינ עיניכמ למת",
+   "how": "cited"
+  },
+  {
+   "n": 469,
+   "name": "שלא לאכל פסולי המקדשין",
+   "type": "lav",
+   "rambam": 140,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    3
+   ],
+   "words": "לא תאכל כל תועבה",
+   "how": "cited"
+  },
+  {
+   "n": 470,
+   "name": "לבדק בסימני העוף",
+   "type": "aseh",
+   "rambam": 150,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    11
+   ],
+   "words": "כל צפור טהרה תאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 471,
+   "name": "שלא לאכל שרץ העוף",
+   "type": "lav",
+   "rambam": 175,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    19
+   ],
+   "words": "וכל שרצ העופ טמא הוא לכמ לא יאכלו",
+   "how": "cited"
+  },
+  {
+   "n": 472,
+   "name": "שלא לאכל מבשר בהמה חיה ועוף שמתו מאליהן",
+   "type": "lav",
+   "rambam": 180,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    21
+   ],
+   "words": "לא תאכלו כל נבלה לגר אשר בשעריכ תתננה ואכלה או מכר לנכרי",
+   "how": "cited"
+  },
+  {
+   "n": 473,
+   "name": "מצות מעשר שני",
+   "type": "aseh",
+   "rambam": 128,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    22
+   ],
+   "words": "עשר תעשר את כל תבואת זרעכ",
+   "how": "cited"
+  },
+  {
+   "n": 474,
+   "name": "להפריש מעשר עני",
+   "type": "aseh",
+   "rambam": 130,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    14,
+    28
+   ],
+   "words": "מקצה שלש שנימ תוציא את כל מעשר תבואתכ",
+   "how": "cited"
+  },
+  {
+   "n": 475,
+   "name": "שלא לתבע חוב שעברה עליו שביעית",
+   "type": "lav",
+   "rambam": 230,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    2
+   ],
+   "words": "לא יגש את רעהו ואת אחיו",
+   "how": "cited"
+  },
+  {
+   "n": 476,
+   "name": "מצוה לנגש את הנכרי",
+   "type": "aseh",
+   "rambam": 142,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    3
+   ],
+   "words": "את הנכרי תגש",
+   "how": "cited"
+  },
+  {
+   "n": 477,
+   "name": "שישמיט כל הלואותיו בשביעית",
+   "type": "aseh",
+   "rambam": 141,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    3
+   ],
+   "words": "ואשר יהיה לכ את אחיכ תשמט ידכ",
+   "how": "cited"
+  },
+  {
+   "n": 478,
+   "name": "שלא יאמץ את לבבו על העני",
+   "type": "lav",
+   "rambam": 232,
+   "semag": {
+    "type": "lav",
+    "n": 289
+   },
+   "ref": [
+    "Deuteronomy",
+    15,
+    7
+   ],
+   "words": "לא תאמצ את לבבכ ולא תקפצ את ידכ מאחיכ האביונ",
+   "how": "cited"
+  },
+  {
+   "n": 479,
+   "name": "מצות צדקה",
+   "type": "aseh",
+   "rambam": 195,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    8
+   ],
+   "words": "פתח תפתח את ידכ לו",
+   "how": "cited"
+  },
+  {
+   "n": 480,
+   "name": "שלא נמנע מלהלוות קדם שמטה",
+   "type": "lav",
+   "rambam": 231,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    9
+   ],
+   "words": "השמר לכ פנ יהיה דבר עמ לבבכ בליעל לאמר קרבה שנת השבע",
+   "how": "cited"
+  },
+  {
+   "n": 481,
+   "name": "שלא לשלח עבד עברי ריקם",
+   "type": "lav",
+   "rambam": 233,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    13
+   ],
+   "words": "וכי תשלחנו חפשי מעמכ לא תשלחנו ריקמ",
+   "how": "cited"
+  },
+  {
+   "n": 482,
+   "name": "להעניק לו בצאתו לחפשי",
+   "type": "aseh",
+   "rambam": 196,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    14
+   ],
+   "words": "העניק תעניק לו מצאנכ ומגרנכ ומיקבכ אשר ברככ יהוה אלהיכ תתנ לו",
+   "how": "cited"
+  },
+  {
+   "n": 483,
+   "name": "שלא לעבד בקדשים",
+   "type": "lav",
+   "rambam": 113,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    19
+   ],
+   "words": "לא תעבד בבכר שורכ",
+   "how": "cited"
+  },
+  {
+   "n": 484,
+   "name": "שלא לגזז הצמר בקדשים",
+   "type": "lav",
+   "rambam": 114,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    15,
+    19
+   ],
+   "words": "ולא תגז בכור צאנכ",
+   "how": "cited"
+  },
+  {
+   "n": 485,
+   "name": "שלא לאכל חמץ אחר חצות",
+   "type": "lav",
+   "rambam": 199,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    3
+   ],
+   "words": "לא תאכל עליו חמצ",
+   "how": "cited"
+  },
+  {
+   "n": 486,
+   "name": "שלא להותיר מקרבן חגיגה עד יום שלישי",
+   "type": "lav",
+   "rambam": 118,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    4
+   ],
+   "words": "ולא ילינ מנ הבשר אשר תזבח בערב ביומ הראשונ לבקר",
+   "how": "cited"
+  },
+  {
+   "n": 487,
+   "name": "שלא להקריב קרבן פסח בבמת יחיד",
+   "type": "lav",
+   "rambam": null,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    5
+   ],
+   "words": "לא תוכל לזבח את הפסח באחד שעריכ",
+   "how": "cited"
+  },
+  {
+   "n": 488,
+   "name": "מצוה לשמח ברגלים",
+   "type": "aseh",
+   "rambam": 54,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    14
+   ],
+   "words": "ושמחת בחגכ",
+   "how": "cited"
+  },
+  {
+   "n": 489,
+   "name": "להראות ברגלים בבית הבחירה",
+   "type": "aseh",
+   "rambam": 53,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    16
+   ],
+   "words": "שלוש פעמימ בשנה יראה כל זכורכ את פני יהוה אלהיכ",
+   "how": "cited"
+  },
+  {
+   "n": 490,
+   "name": "שלא נעלה לרגל בלא קרבן",
+   "type": "lav",
+   "rambam": 156,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    16
+   ],
+   "words": "ולא יראה את פני יהוה ריקמ",
+   "how": "cited"
+  },
+  {
+   "n": 491,
+   "name": "למנות שופטים ושוטרים",
+   "type": "aseh",
+   "rambam": 176,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    11,
+    16
+   ],
+   "words": "אספה לי שבעימ איש",
+   "how": "cited"
+  },
+  {
+   "n": 492,
+   "name": "שלא לטעת אילן במקדש",
+   "type": "lav",
+   "rambam": 13,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    21
+   ],
+   "words": "לא תטע לכ אשרה כל עצ אצל מזבח יהוה אלהיכ",
+   "how": "cited"
+  },
+  {
+   "n": 493,
+   "name": "שלא להקים מצבה",
+   "type": "lav",
+   "rambam": 11,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    16,
+    22
+   ],
+   "words": "ולא תקימ לכ מצבה אשר שנא יהוה אלהיכ",
+   "how": "cited"
+  },
+  {
+   "n": 494,
+   "name": "שלא להקריב קרבן בעל מום עובר",
+   "type": "lav",
+   "rambam": 95,
+   "semag": {
+    "type": "lav",
+    "n": 313
+   },
+   "ref": [
+    "Deuteronomy",
+    17,
+    1
+   ],
+   "words": "לא תזבח",
+   "how": "cited"
+  },
+  {
+   "n": 495,
+   "name": "לשמע בקול בית דין בכל זמן",
+   "type": "aseh",
+   "rambam": 174,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    10
+   ],
+   "words": "ועשית על פי הדבר אשר יגידו לכ",
+   "how": "cited"
+  },
+  {
+   "n": 496,
+   "name": "שלא לסור מדבריהם",
+   "type": "lav",
+   "rambam": 312,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    11
+   ],
+   "words": "לא תסור מנ הדבר אשר יגידו לכ ימינ ושמאל",
+   "how": "cited"
+  },
+  {
+   "n": 497,
+   "name": "למנות מלך מישראל",
+   "type": "aseh",
+   "rambam": 173,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    15
+   ],
+   "words": "שומ תשימ עליכ מלכ",
+   "how": "cited"
+  },
+  {
+   "n": 498,
+   "name": "שלא להקים עלינו מלך נכרי",
+   "type": "lav",
+   "rambam": 362,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    15
+   ],
+   "words": "לא תוכל לתת עליכ איש נכרי אשר לא אחיכ הוא",
+   "how": "cited"
+  },
+  {
+   "n": 499,
+   "name": "שלא ירבה המלך סוסים",
+   "type": "lav",
+   "rambam": 363,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    16
+   ],
+   "words": "לא ירבה לו סוסימ",
+   "how": "cited"
+  },
+  {
+   "n": 500,
+   "name": "שלא לשכן בארץ מצרים לעולם",
+   "type": "lav",
+   "rambam": 46,
+   "semag": {
+    "type": "lav",
+    "n": 227
+   },
+   "ref": [
+    "Deuteronomy",
+    28,
+    68
+   ],
+   "words": "בדרכ אשר אמרתי לכ לא תסיפ עוד",
+   "how": "cited"
+  },
+  {
+   "n": 501,
+   "name": "שלא ירבה לו המלך נשים",
+   "type": "lav",
+   "rambam": 364,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    17
+   ],
+   "words": "ולא ירבה לו נשימ",
+   "how": "cited"
+  },
+  {
+   "n": 502,
+   "name": "שלא ירבה לו המלך כסף וזהב",
+   "type": "lav",
+   "rambam": 365,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    17
+   ],
+   "words": "וכספ וזהב לא ירבה לו",
+   "how": "cited"
+  },
+  {
+   "n": 503,
+   "name": "שיכתב המלך ספר תורה שני לעצמו",
+   "type": "aseh",
+   "rambam": 18,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    17,
+    18
+   ],
+   "words": "וכתב לו את משנה התורה הזאת",
+   "how": "cited"
+  },
+  {
+   "n": 504,
+   "name": "שלא ינחל שבט לוי בארץ ישראל",
+   "type": "lav",
+   "rambam": 169,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    1
+   ],
+   "words": "לא יהיה לכהנימ הלוימ כל שבט לוי חלק ונחלה",
+   "how": "cited"
+  },
+  {
+   "n": 505,
+   "name": "שלא יקח שבט לוי חלק בבזה",
+   "type": "lav",
+   "rambam": 170,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    1
+   ],
+   "words": "לא יהיה לכהנימ",
+   "how": "cited"
+  },
+  {
+   "n": 506,
+   "name": "לתת זרוע ולחיים וקבה לכהן",
+   "type": "aseh",
+   "rambam": 143,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    3
+   ],
+   "words": "וזה יהיה משפט הכהנימ",
+   "how": "cited"
+  },
+  {
+   "n": 507,
+   "name": "להפריש תרומה גדולה לכהן",
+   "type": "aseh",
+   "rambam": 126,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    4
+   ],
+   "words": "ראשית דגנכ תירשכ ויצהרכ",
+   "how": "cited"
+  },
+  {
+   "n": 508,
+   "name": "לתת לכהן ראשית הגז",
+   "type": "aseh",
+   "rambam": 144,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    4
+   ],
+   "words": "וראשית גז צאנכ תתנ לו",
+   "how": "cited"
+  },
+  {
+   "n": 509,
+   "name": "להיות הכהנים והלוים עובדים במקדש למשמרות",
+   "type": "aseh",
+   "rambam": 36,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    6
+   ],
+   "words": "וכי יבא הלוי",
+   "how": "cited"
+  },
+  {
+   "n": 510,
+   "name": "שלא לקסם",
+   "type": "lav",
+   "rambam": 31,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    10
+   ],
+   "words": "לא ימצא בכ",
+   "how": "cited"
+  },
+  {
+   "n": 511,
+   "name": "שלא לכשף",
+   "type": "lav",
+   "rambam": 34,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    10
+   ],
+   "words": "לא ימצא בכ",
+   "how": "cited"
+  },
+  {
+   "n": 512,
+   "name": "שלא לחבר חבר",
+   "type": "lav",
+   "rambam": 35,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    10
+   ],
+   "words": "לא ימצא בכ",
+   "how": "cited"
+  },
+  {
+   "n": 513,
+   "name": "שלא לשאל בבעל אוב",
+   "type": "lav",
+   "rambam": 36,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    10
+   ],
+   "words": "לא ימצא בכ",
+   "how": "cited"
+  },
+  {
+   "n": 514,
+   "name": "שלא לשאל בידעוני",
+   "type": "lav",
+   "rambam": 37,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    11
+   ],
+   "words": "ושאל אוב וידעני",
+   "how": "override",
+   "basis": "Rambam, Sefer HaMitzvot, Negative 37 (לא ימצא בך … וידעוני)"
+  },
+  {
+   "n": 515,
+   "name": "שלא לדרש אל המתים",
+   "type": "lav",
+   "rambam": 38,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    10
+   ],
+   "words": "לא ימצא בכ",
+   "how": "cited"
+  },
+  {
+   "n": 516,
+   "name": "מצוה לשמע אל נביא האמת",
+   "type": "aseh",
+   "rambam": 172,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    15
+   ],
+   "words": "נביא מקרבכ מאחיכ כמני יקימ לכ יהוה אלהיכ אליו תשמעונ",
+   "how": "cited"
+  },
+  {
+   "n": 517,
+   "name": "שלא להנבא בשקר",
+   "type": "lav",
+   "rambam": 27,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    20
+   ],
+   "words": "אכ הנביא אשר יזיד לדבר דבר בשמי את אשר לא צויתיו לדבר",
+   "how": "cited"
+  },
+  {
+   "n": 518,
+   "name": "שלא להתנבא בשם עבודה זרה",
+   "type": "lav",
+   "rambam": 26,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    20
+   ],
+   "words": "ואשר ידבר בשמ אלהימ אחרימ ומת הנביא ההוא",
+   "how": "cited"
+  },
+  {
+   "n": 519,
+   "name": "שלא נירא מהריגת נביא השקר",
+   "type": "lav",
+   "rambam": 29,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    18,
+    22
+   ],
+   "words": "לא תגור ממנו",
+   "how": "cited"
+  },
+  {
+   "n": 520,
+   "name": "מצוה להכין שש ערי מקלט",
+   "type": "aseh",
+   "rambam": 182,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    19,
+    3
+   ],
+   "words": "תכינ לכ הדרכ ושלשת את גבול ארצכ",
+   "how": "cited"
+  },
+  {
+   "n": 521,
+   "name": "שלא לחוס על הרוצח וחובל",
+   "type": "lav",
+   "rambam": 279,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    19,
+    21
+   ],
+   "words": "ולא תחוס עינכ נפש בנפש",
+   "how": "cited"
+  },
+  {
+   "n": 522,
+   "name": "שלא להסיג גבול",
+   "type": "lav",
+   "rambam": 246,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    19,
+    14
+   ],
+   "words": "לא תסיג גבול רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 523,
+   "name": "שלא יקום דבר העדות בעד אחד",
+   "type": "lav",
+   "rambam": 288,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    19,
+    15
+   ],
+   "words": "לא יקומ עד אחד באיש לכל עונ ולכל חטאת",
+   "how": "cited"
+  },
+  {
+   "n": 524,
+   "name": "לעשות לעד זומם כאשר זמם",
+   "type": "aseh",
+   "rambam": 180,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    1
+   ],
+   "words": "והצדיקו את הצדיק",
+   "how": "cited"
+  },
+  {
+   "n": 525,
+   "name": "שלא לערץ ולפחד במלחמה",
+   "type": "lav",
+   "rambam": 58,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    7,
+    21
+   ],
+   "words": "לא תערצ מפניהמ",
+   "how": "cited"
+  },
+  {
+   "n": 526,
+   "name": "מצוה למשח כהן למלחמה",
+   "type": "aseh",
+   "rambam": 191,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    20,
+    5
+   ],
+   "words": "מי האיש",
+   "how": "cited"
+  },
+  {
+   "n": 527,
+   "name": "לשלח שלום לערים שצרים עליהן",
+   "type": "aseh",
+   "rambam": 190,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    20,
+    10
+   ],
+   "words": "וקראת אליה לשלומ",
+   "how": "override",
+   "basis": "the verse that commands calling for peace (Rambam, Positive 190, cites the next verses)"
+  },
+  {
+   "n": 528,
+   "name": "שלא להחיות נשמה משבעה עממין",
+   "type": "lav",
+   "rambam": 49,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    20,
+    16
+   ],
+   "words": "לא תחיה כל נשמה",
+   "how": "cited"
+  },
+  {
+   "n": 529,
+   "name": "שלא להשחית אילני מאכל",
+   "type": "lav",
+   "rambam": 57,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    20,
+    19
+   ],
+   "words": "לא תשחית את עצה",
+   "how": "cited"
+  },
+  {
+   "n": 530,
+   "name": "לערף את העגלה בנחל",
+   "type": "aseh",
+   "rambam": 181,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    1
+   ],
+   "words": "כי ימצא חלל",
+   "how": "cited"
+  },
+  {
+   "n": 531,
+   "name": "שלא לעבד ולזרע באותו קרקע",
+   "type": "lav",
+   "rambam": 309,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    4
+   ],
+   "words": "אשר לא יעבד בו ולא יזרע",
+   "how": "cited"
+  },
+  {
+   "n": 532,
+   "name": "לדון דין יפת תאר ככתוב בתורה",
+   "type": "aseh",
+   "rambam": 221,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    11
+   ],
+   "words": "וראית בשביה אשת יפת תאר",
+   "how": "cited"
+  },
+  {
+   "n": 533,
+   "name": "שלא למכר יפת תאר",
+   "type": "lav",
+   "rambam": 263,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    14
+   ],
+   "words": "והיה אמ לא חפצת בה ושלחתה לנפשה ומכר לא תמכרנה בכספ",
+   "how": "cited"
+  },
+  {
+   "n": 534,
+   "name": "שלא להעבידה אחר שבעלה",
+   "type": "lav",
+   "rambam": 264,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    14
+   ],
+   "words": "לא תתעמר בה תחת אשר עניתה",
+   "how": "cited"
+  },
+  {
+   "n": 535,
+   "name": "לתלות המחיב לתלות",
+   "type": "aseh",
+   "rambam": 230,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    22
+   ],
+   "words": "ותלית אתו על עצ",
+   "how": "cited"
+  },
+  {
+   "n": 536,
+   "name": "שלא להלין התלוי",
+   "type": "lav",
+   "rambam": 66,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    23
+   ],
+   "words": "לא תלינ נבלתו על העצ",
+   "how": "cited"
+  },
+  {
+   "n": 537,
+   "name": "לקברו בו ביום וכן כל המתים",
+   "type": "aseh",
+   "rambam": 231,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    21,
+    23
+   ],
+   "words": "כי קבור תקברנו ביומ ההוא",
+   "how": "cited"
+  },
+  {
+   "n": 538,
+   "name": "להשיב אבדה לישראל",
+   "type": "aseh",
+   "rambam": 204,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    1
+   ],
+   "words": "השב תשיבמ לאחיכ",
+   "how": "cited"
+  },
+  {
+   "n": 539,
+   "name": "שלא להעלים עיניו ממנה",
+   "type": "lav",
+   "rambam": 269,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    3
+   ],
+   "words": "לא תוכל להתעלמ",
+   "how": "cited"
+  },
+  {
+   "n": 540,
+   "name": "שלא להניח בהמת חברו נופלת תחת משאה",
+   "type": "lav",
+   "rambam": 270,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    4
+   ],
+   "words": "לא תראה את חמור אחיכ",
+   "how": "cited"
+  },
+  {
+   "n": 541,
+   "name": "לטען המשא שנפל עם חברו",
+   "type": "aseh",
+   "rambam": 203,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    4
+   ],
+   "words": "הקמ תקימ עמו",
+   "how": "cited"
+  },
+  {
+   "n": 542,
+   "name": "שלא תלבש אשה עדי איש",
+   "type": "lav",
+   "rambam": 39,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    5
+   ],
+   "words": "לא יהיה כלי גבר על אשה",
+   "how": "cited"
+  },
+  {
+   "n": 543,
+   "name": "שלא ילבש איש מלבושי אשה",
+   "type": "lav",
+   "rambam": 40,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    5
+   ],
+   "words": "ולא ילבש גבר שמלת אשה",
+   "how": "cited"
+  },
+  {
+   "n": 544,
+   "name": "שלא לקח אם על בנים",
+   "type": "lav",
+   "rambam": 306,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    6
+   ],
+   "words": "לא תקח האמ על הבנימ",
+   "how": "cited"
+  },
+  {
+   "n": 545,
+   "name": "לשלח האם אם לקחה על הבנים",
+   "type": "aseh",
+   "rambam": 148,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    7
+   ],
+   "words": "שלח תשלח את האמ ואת הבנימ תקח לכ",
+   "how": "cited"
+  },
+  {
+   "n": 546,
+   "name": "מצות מעקה",
+   "type": "aseh",
+   "rambam": 184,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    8
+   ],
+   "words": "ועשית מעקה לגגכ",
+   "how": "cited"
+  },
+  {
+   "n": 547,
+   "name": "שלא להניח מכשול",
+   "type": "lav",
+   "rambam": 298,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    8
+   ],
+   "words": "ולא תשימ דמימ בביתכ",
+   "how": "cited"
+  },
+  {
+   "n": 548,
+   "name": "שלא לזרע כלאים בכרם",
+   "type": "lav",
+   "rambam": 216,
+   "semag": {
+    "type": "lav",
+    "n": 280
+   },
+   "ref": [
+    "Deuteronomy",
+    22,
+    9
+   ],
+   "words": "לא תזרע כרמכ כלאימ",
+   "how": "cited"
+  },
+  {
+   "n": 549,
+   "name": "שלא לאכל כלאי הכרם",
+   "type": "lav",
+   "rambam": 193,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    9
+   ],
+   "words": "פנ תקדש המלאה הזרע אשר תזרע ותבואת הכרמ",
+   "how": "cited"
+  },
+  {
+   "n": 550,
+   "name": "שלא לעשות מלאכה בשני מיני בהמות",
+   "type": "lav",
+   "rambam": 218,
+   "semag": {
+    "type": "lav",
+    "n": 282
+   },
+   "ref": [
+    "Deuteronomy",
+    22,
+    10
+   ],
+   "words": "לא תחרש בשור ובחמר יחדו",
+   "how": "cited"
+  },
+  {
+   "n": 551,
+   "name": "שלא ללבש שעטנז",
+   "type": "lav",
+   "rambam": 42,
+   "semag": {
+    "type": "lav",
+    "n": 283
+   },
+   "ref": [
+    "Deuteronomy",
+    22,
+    11
+   ],
+   "words": "לא תלבש שעטנז צמר ופשתימ יחדו",
+   "how": "cited"
+  },
+  {
+   "n": 552,
+   "name": "לשא אשה בכתבה וקדושין",
+   "type": "aseh",
+   "rambam": 213,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    13
+   ],
+   "words": "כי יקח איש אשה ובא אליה",
+   "how": "cited"
+  },
+  {
+   "n": 553,
+   "name": "מצוה שתשב אשת מוציא שם רע תחתיו לעולם",
+   "type": "aseh",
+   "rambam": 219,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    19
+   ],
+   "words": "ולו תהיה לאשה",
+   "how": "cited"
+  },
+  {
+   "n": 554,
+   "name": "שלא יגרשנה כל ימיו",
+   "type": "lav",
+   "rambam": 359,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    19
+   ],
+   "words": "לא יוכל לשלחה כל ימיו",
+   "how": "cited"
+  },
+  {
+   "n": 555,
+   "name": "מצוה על בית דין לסקל המחיב",
+   "type": "aseh",
+   "rambam": 229,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    24
+   ],
+   "words": "וסקלתמ אתמ באבנימ",
+   "how": "cited"
+  },
+  {
+   "n": 556,
+   "name": "שלא לענש האנוס בחטא",
+   "type": "lav",
+   "rambam": 294,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    26
+   ],
+   "words": null,
+   "how": "search"
+  },
+  {
+   "n": 557,
+   "name": "מצוה על האונס שישא אנוסתו",
+   "type": "aseh",
+   "rambam": 218,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    29
+   ],
+   "words": "ונתנ האיש השכב עמה לאבי",
+   "how": "cited"
+  },
+  {
+   "n": 558,
+   "name": "שלא יגרשנה כל ימיו",
+   "type": "lav",
+   "rambam": 358,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    22,
+    29
+   ],
+   "words": "תחת אשר ענה לא יוכל שלחה כל ימיו",
+   "how": "cited"
+  },
+  {
+   "n": 559,
+   "name": "שלא ישא סריס בת ישראל",
+   "type": "lav",
+   "rambam": 360,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    2
+   ],
+   "words": "לא יבא פצוע",
+   "how": "cited"
+  },
+  {
+   "n": 560,
+   "name": "שלא ישא ממזר בת ישראל",
+   "type": "lav",
+   "rambam": 354,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    3
+   ],
+   "words": "לא יבא ממזר בקהל יהוה",
+   "how": "cited"
+  },
+  {
+   "n": 561,
+   "name": "שלא יבוא עמני ומאבי בקהל השם",
+   "type": "lav",
+   "rambam": 53,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    4
+   ],
+   "words": "לא יבא עמוני ומואבי בקהל יהוה",
+   "how": "chapter"
+  },
+  {
+   "n": 562,
+   "name": "שלא לדרש שלמם במלחמה",
+   "type": "lav",
+   "rambam": 56,
+   "semag": {
+    "type": "lav",
+    "n": 228
+   },
+   "ref": [
+    "Deuteronomy",
+    23,
+    7
+   ],
+   "words": "לא תדרש שלממ וטבתמ",
+   "how": "cited"
+  },
+  {
+   "n": 563,
+   "name": "שלא להרחיק אדומי דור שלישי מלבוא בקהל",
+   "type": "lav",
+   "rambam": 54,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    8
+   ],
+   "words": "לא תתעב אדמי כי אחיכ הוא",
+   "how": "cited"
+  },
+  {
+   "n": 564,
+   "name": "שלא להרחיק מצרי דור שלישי",
+   "type": "lav",
+   "rambam": 55,
+   "semag": {
+    "type": "lav",
+    "n": 116
+   },
+   "ref": [
+    "Deuteronomy",
+    23,
+    8
+   ],
+   "words": "לא תתעב מצרי כי גר היית בארצו",
+   "how": "cited"
+  },
+  {
+   "n": 565,
+   "name": "שלא יכנס טמא להר הבית",
+   "type": "lav",
+   "rambam": 78,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    11
+   ],
+   "words": "כי יהיה בכ איש אשר לא יהיה טהור מקרה לילה",
+   "how": "cited"
+  },
+  {
+   "n": 566,
+   "name": "מצוה להתקין מקום להפנות בו",
+   "type": "aseh",
+   "rambam": 192,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    13
+   ],
+   "words": "ויד תהיה לכ מחוצ למחנה",
+   "how": "cited"
+  },
+  {
+   "n": 567,
+   "name": "מצוה להתקין יתד לחפר בו",
+   "type": "aseh",
+   "rambam": 193,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    14
+   ],
+   "words": "ויתד תהיה לכ על אזנכ",
+   "how": "cited"
+  },
+  {
+   "n": 568,
+   "name": "שלא להסגיר עבד שברח אל אדוניו",
+   "type": "lav",
+   "rambam": 254,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    16
+   ],
+   "words": "לא תסגיר עבד אל אדניו",
+   "how": "cited"
+  },
+  {
+   "n": 569,
+   "name": "שלא להונות עבד הבורח אלינו מחוצה לארץ",
+   "type": "lav",
+   "rambam": 255,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    17
+   ],
+   "words": "עמכ ישב בקרבכ במקומ אשר יבחר",
+   "how": "cited"
+  },
+  {
+   "n": 570,
+   "name": "שלא לבעל אשה בלא כתבה וקדושין",
+   "type": "lav",
+   "rambam": 355,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    18
+   ],
+   "words": "לא תהיה קדשה מבנות ישראל",
+   "how": "cited"
+  },
+  {
+   "n": 571,
+   "name": "שלא להקריב אתנן זונה ומחיר כלב",
+   "type": "lav",
+   "rambam": 100,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    19
+   ],
+   "words": "לא תביא אתננ זונה ומחיר כלב בית יהוה אלהיכ",
+   "how": "cited"
+  },
+  {
+   "n": 572,
+   "name": "שלא יתן הלוה רבית לישראל",
+   "type": "lav",
+   "rambam": 236,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    20
+   ],
+   "words": "לא תשיכ לאחיכ נשכ כספ נשכ אכל נשכ כל דבר",
+   "how": "cited"
+  },
+  {
+   "n": 573,
+   "name": "להלוות לנכרי ברבית",
+   "type": "aseh",
+   "rambam": 198,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    21
+   ],
+   "words": "לנכרי תשיכ",
+   "how": "cited"
+  },
+  {
+   "n": 574,
+   "name": "שלא לאחר נדריו יותר משלשה רגלים",
+   "type": "lav",
+   "rambam": 155,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    22
+   ],
+   "words": "כי תדר נדר",
+   "how": "cited"
+  },
+  {
+   "n": 575,
+   "name": "לקים מוצא שפתיו כמו שנדר",
+   "type": "aseh",
+   "rambam": 94,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    24
+   ],
+   "words": "מוצא שפתיכ תשמר",
+   "how": "cited"
+  },
+  {
+   "n": 576,
+   "name": "מצוה להניח השכיר לאכל מהמחבר שעושה בו",
+   "type": "aseh",
+   "rambam": 201,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    25
+   ],
+   "words": "כי תבא בכרמ רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 577,
+   "name": "שלא יקח הפועל בידו יותר על אכילתו",
+   "type": "lav",
+   "rambam": 268,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    25
+   ],
+   "words": "ואכלת ענבימ כנפשכ שבעכ ואל כליכ לא תתנ",
+   "how": "cited"
+  },
+  {
+   "n": 578,
+   "name": "שלא יאכל הפועל בשעת מלאכה",
+   "type": "lav",
+   "rambam": 267,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    23,
+    26
+   ],
+   "words": "וחרמש לא תניפ על קמת רעכ",
+   "how": "cited"
+  },
+  {
+   "n": 579,
+   "name": "הרוצה לגרש את אשתו שיגרשנה בגט",
+   "type": "aseh",
+   "rambam": 222,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    1
+   ],
+   "words": "וכתב לה ספר כריתת ונתנ בידה ושלחה מביתו",
+   "how": "cited"
+  },
+  {
+   "n": 580,
+   "name": "שלא יחזיר גרושתו משנשאת",
+   "type": "lav",
+   "rambam": 356,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    4
+   ],
+   "words": "לא יוכל בעלה הראשונ אשר שלחה לשוב לקחתה",
+   "how": "cited"
+  },
+  {
+   "n": 581,
+   "name": "שלא יצא החתן מביתו כל השנה אפלו לצרכי צבור",
+   "type": "lav",
+   "rambam": 311,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    5
+   ],
+   "words": "ולא יעבר עליו לכל דבר",
+   "how": "cited"
+  },
+  {
+   "n": 582,
+   "name": "מצוה שישמח החתן עם אשתו שנה אחת",
+   "type": "aseh",
+   "rambam": 214,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    5
+   ],
+   "words": "נקי יהיה לביתו שנה אחת ושמח את אשתו אשר לקח",
+   "how": "cited"
+  },
+  {
+   "n": 583,
+   "name": "שלא ימשכן בחובו כלים שעושים בהם אכל נפש",
+   "type": "lav",
+   "rambam": 242,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    6
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 584,
+   "name": "שלא לתלש סימני צרעת",
+   "type": "lav",
+   "rambam": 308,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    8
+   ],
+   "words": "השמר בנגע הצרעת",
+   "how": "cited"
+  },
+  {
+   "n": 585,
+   "name": "שלא למשכן בעל חוב בזרוע",
+   "type": "lav",
+   "rambam": 239,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    10
+   ],
+   "words": "לא תבא אל ביתו לעבט עבטו",
+   "how": "cited"
+  },
+  {
+   "n": 586,
+   "name": "שלא למנע המשכון מבעליו העני",
+   "type": "lav",
+   "rambam": 240,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    12
+   ],
+   "words": "לא תשכב בעבטו",
+   "how": "cited"
+  },
+  {
+   "n": 587,
+   "name": "להחזיר המשכון לבעלים בעת שצריך לו",
+   "type": "aseh",
+   "rambam": 199,
+   "semag": null,
+   "ref": [
+    "Exodus",
+    22,
+    25
+   ],
+   "words": null,
+   "how": "link"
+  },
+  {
+   "n": 588,
+   "name": "לתת שכר שכיר ביומו",
+   "type": "aseh",
+   "rambam": 200,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    15
+   ],
+   "words": "ביומו תתנ שכרו",
+   "how": "cited"
+  },
+  {
+   "n": 589,
+   "name": "שלא יעיד קרוב זה אל זה",
+   "type": "lav",
+   "rambam": 287,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    16
+   ],
+   "words": "לא יומתו אבות על בנימ ובנימ לא יומתו על אבות",
+   "how": "cited"
+  },
+  {
+   "n": 590,
+   "name": "שלא להטות משפט גר ויתום",
+   "type": "lav",
+   "rambam": 280,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    17
+   ],
+   "words": "לא תטה משפט גר יתומ",
+   "how": "cited"
+  },
+  {
+   "n": 591,
+   "name": "שלא למשכן בגד אלמנה",
+   "type": "lav",
+   "rambam": 241,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    17
+   ],
+   "words": "ולא תחבל בגד אלמנה",
+   "how": "cited"
+  },
+  {
+   "n": 592,
+   "name": "להניח לעניים השכחה",
+   "type": "aseh",
+   "rambam": 122,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    24,
+    19
+   ],
+   "words": "ושכחת עמר בשדה",
+   "how": "cited"
+  },
+  {
+   "n": 593,
+   "name": "שלא ישוב לקחת השכחה",
+   "type": "lav",
+   "rambam": 214,
+   "semag": {
+    "type": "lav",
+    "n": 288
+   },
+   "ref": [
+    "Deuteronomy",
+    24,
+    19
+   ],
+   "words": "ושכחת עמר בשדה לא תשוב לקחתו",
+   "how": "cited"
+  },
+  {
+   "n": 594,
+   "name": "מצוה להלקות לרשע",
+   "type": "aseh",
+   "rambam": 224,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    2
+   ],
+   "words": "והפילו השפט והכהו לפניו כדי רשעתו",
+   "how": "cited"
+  },
+  {
+   "n": 595,
+   "name": "שלא להוסיף להכותו",
+   "type": "lav",
+   "rambam": 300,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    3
+   ],
+   "words": "לא יסיפ",
+   "how": "cited"
+  },
+  {
+   "n": 596,
+   "name": "שלא לחסם בהמה בשעת מלאכתה",
+   "type": "lav",
+   "rambam": 219,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    4
+   ],
+   "words": "לא תחסמ שור בדישו",
+   "how": "cited"
+  },
+  {
+   "n": 597,
+   "name": "שלא תנשא היבמה לאחר עד שתחלץ",
+   "type": "lav",
+   "rambam": 357,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    5
+   ],
+   "words": "לא תהיה אשת המת החוצה לאיש זר יבמה יבא עליה",
+   "how": "cited"
+  },
+  {
+   "n": 598,
+   "name": "מצות יבום",
+   "type": "aseh",
+   "rambam": 216,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    5
+   ],
+   "words": "יבמה יבא עליה",
+   "how": "cited"
+  },
+  {
+   "n": 599,
+   "name": "מצות חליצה",
+   "type": "aseh",
+   "rambam": 217,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    9
+   ],
+   "words": "וחלצה נעלו מעל רגלו",
+   "how": "cited"
+  },
+  {
+   "n": 600,
+   "name": "מצוה להציל הנרדף בנפשו של רודף",
+   "type": "aseh",
+   "rambam": 247,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    12
+   ],
+   "words": "וקצתה את כפה לא תחוס עינכ",
+   "how": "cited"
+  },
+  {
+   "n": 601,
+   "name": "שלא לחוס על הרודף",
+   "type": "lav",
+   "rambam": 293,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    12
+   ],
+   "words": "וקצתה את כפה לא תחוס עינכ",
+   "how": "cited"
+  },
+  {
+   "n": 602,
+   "name": "שלא להשהות משקלות ומדות חסרות",
+   "type": "lav",
+   "rambam": 272,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    13
+   ],
+   "words": "לא יהיה לכ בכיסכ אבנ ואבנ גדולה וקטנה",
+   "how": "cited"
+  },
+  {
+   "n": 603,
+   "name": "לזכר מה שעשה לנו עמלק",
+   "type": "aseh",
+   "rambam": 189,
+   "semag": null,
+   "ref": [
+    "Numbers",
+    24,
+    20
+   ],
+   "words": "ראשית גוימ עמלק",
+   "how": "cited"
+  },
+  {
+   "n": 604,
+   "name": "למחות זרעו מן העולם",
+   "type": "aseh",
+   "rambam": 188,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    25,
+    19
+   ],
+   "words": "תמחה את זכר עמלק",
+   "how": "cited"
+  },
+  {
+   "n": 605,
+   "name": "שלא לשכח מה שעשה לנו",
+   "type": "lav",
+   "rambam": 59,
+   "semag": {
+    "type": "lav",
+    "n": 226
+   },
+   "ref": [
+    "Deuteronomy",
+    25,
+    19
+   ],
+   "words": "לא תשכח",
+   "how": "cited"
+  },
+  {
+   "n": 606,
+   "name": "מצות קריאה על הבכורים",
+   "type": "aseh",
+   "rambam": 132,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    26,
+    5
+   ],
+   "words": "וענית ואמרת לפני יהוה אלהיכ",
+   "how": "cited"
+  },
+  {
+   "n": 607,
+   "name": "מצות ודוי מעשר",
+   "type": "aseh",
+   "rambam": 131,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    26,
+    13
+   ],
+   "words": "ואמרת לפני יהוה אלהיכ בערתי הקדש מנ הבית",
+   "how": "cited"
+  },
+  {
+   "n": 608,
+   "name": "שלא לאכל מעשר שני באנינות",
+   "type": "lav",
+   "rambam": 151,
+   "semag": null,
+   "ref": [
+    "Leviticus",
+    10,
+    19
+   ],
+   "words": "ואכלתי חטאת היומ",
+   "how": "cited"
+  },
+  {
+   "n": 609,
+   "name": "שלא לאכל מעשר שני בטמאה",
+   "type": "lav",
+   "rambam": 150,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    26,
+    14
+   ],
+   "words": "ולא בערתי ממנו בטמא",
+   "how": "cited"
+  },
+  {
+   "n": 610,
+   "name": "שלא להוציא דמי מעשר שני אלא באכילה ושתיה",
+   "type": "lav",
+   "rambam": 152,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    26,
+    14
+   ],
+   "words": "ולא נתתי ממנו למת שמעתי בקול יהוה אלהי",
+   "how": "cited"
+  },
+  {
+   "n": 611,
+   "name": "מצוה ללכת ולהדמות בדרכי השם יתברך",
+   "type": "aseh",
+   "rambam": 8,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    28,
+    9
+   ],
+   "words": "והלכת בדרכיו",
+   "how": "cited"
+  },
+  {
+   "n": 612,
+   "name": "להקהיל כל ישראל בחג הסכות",
+   "type": "aseh",
+   "rambam": 16,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    31,
+    12
+   ],
+   "words": "הקהל את העמ האנשימ והנשימ והטפ",
+   "how": "cited"
+  },
+  {
+   "n": 613,
+   "name": "לכתב כל אחד ספר תורה לעצמו",
+   "type": "aseh",
+   "rambam": 17,
+   "semag": null,
+   "ref": [
+    "Deuteronomy",
+    31,
+    19
+   ],
+   "words": "ועתה כתבו לכמ את השירה הזאת ולמדה את בני ישראל",
+   "how": "cited"
+  }
+ ]
+}
